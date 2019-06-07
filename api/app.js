@@ -18,21 +18,10 @@ mongoose.connect(config.mongoUrl);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {
-  console.log("Connected correctly to server");
+  console.log("Connected to db server");
 });
 
 let routes = require('./routes/index');
-/* let accounts = require('./routes/accounts');
-let assets = require('./routes/assets');
-let holdings = require('./routes/holdings');
-let offers = require('./routes/offers');
-let offerHistory = require('./routes/offerHistory');
-let payoffHistory = require('./routes/payoffHistory');
-let transferHistory = require('./routes/transferHistory');
-let blocks = require('./routes/blocks');
-let blockchains = require('./routes/blockchains');
-let transactions = require('./routes/transactions');
-let fcm = require('./routes/fcm'); */
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -56,17 +45,6 @@ app.use(function(req, res, next) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-/* app.use('/accounts', accounts);
-app.use('/assets', assets);
-app.use('/holdings', holdings);
-app.use('/offers', offers);
-app.use('/offerHistory', offerHistory);
-app.use('/payoffs', payoffHistory);
-app.use('/transfers', transferHistory);
-app.use('/blockchains', blockchains);
-app.use('/blocks', blocks);
-app.use('/transactions', transactions);
-app.use('/fcm', fcm); */
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

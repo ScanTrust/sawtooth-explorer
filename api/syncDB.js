@@ -59,5 +59,4 @@ function syncDB (callback) {
   syncChainData(() => syncState(callback))
 }
 
-
 module.exports = { syncDB, transformBlockDataBeforeDB }
