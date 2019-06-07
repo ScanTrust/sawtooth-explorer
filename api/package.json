@@ -1,0 +1,24 @@
+{
+  "name": "sawtooth-explorer-backend",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "atob": "^2.1.2",
+    "cookie-parser": "~1.4.3",
+    "debug": "~2.6.9",
+    "express": "~4.16.0",
+    "http-errors": "~1.6.2",
+    "mongoose": "^5.3.1",
+    "mongoose-long": "^0.2.1",
+    "morgan": "~1.9.0",
+    "protobufjs": "^6.8.8",
+    "pug": "2.0.0-beta11",
+    "request": "^2.88.0",
+    "serve-favicon": "^2.5.0",
+    "typedarray-to-buffer": "^3.1.5",
+    "zeromq": "^5.1.0"
+  }
+}
