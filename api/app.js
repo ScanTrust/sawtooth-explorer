@@ -5,14 +5,13 @@ let express = require('express')
   , cookieParser = require('cookie-parser')
   , bodyParser = require('body-parser')
   , mongoose = require('mongoose')
-  , { syncDB } = require('./syncDB')
-  , { subscribeToBlockchainEvents } = require('./blockchainEventsWorker')
-  , blockchainEventHandlers = require('./handleBlockchainEvents')
-  , protos = require('./proto_processing/protos')
+  , { syncDB } = require('./lib/syncDB')
+  , { subscribeToBlockchainEvents } = require('./lib/events/subscriber')
+  , blockchainEventHandlers = require('./lib/events/handlers')
 
 let app = express();
 
-let config = require('./config');
+let config = require('./lib/config');
 
 mongoose.connect(config.mongoUrl);
 let db = mongoose.connection;
@@ -75,8 +74,6 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
-
-//protos.compile().then(() => console.log("Protos compiled"))
 
 syncDB(function () {
   subscribeToBlockchainEvents(blockchainEventHandlers)

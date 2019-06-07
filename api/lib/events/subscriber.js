@@ -1,4 +1,4 @@
-const Block = require('./models/block');
+const Block = require('@root/models/block');
 
 const {
 	encodeValidatorMessage,
@@ -11,9 +11,9 @@ const {
 	decodeSubscribeResponse,
 	decodeUnsubscribeResponse,
 	decodeEventsList
-} = require('./proto_processing/eventsEncoding')
+} = require('./encoding')
 
-const { blockchain } = require('./config')
+const { blockchain } = require('@root/config')
 
 const zmq = require('zeromq')
 let blockchainSocket

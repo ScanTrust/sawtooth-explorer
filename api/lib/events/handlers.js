@@ -1,15 +1,13 @@
-const http = require('./http')
+const http = require('@root/http')
 
-const { decodeSingleStateElData, decodeSingleTransaction, getProtoName } = require('./proto_processing/decoding')
-const { decodeStateChangeList } = require('./proto_processing/eventsEncoding')
-const { blockchain } = require('./config')
-// const { fixAsset, fixHolding, fixOffer, fixMakeTransfer, fixMutualPayoff } = require('./syncStateDB')
-const { requestEventCatchUp } = require('./blockchainEventsWorker')
-const { transformBlockDataBeforeDB } = require('./syncDB')
+const { decodeStateChangeList } = require('./encoding')
+const { blockchain } = require('@root/config')
+const { requestEventCatchUp } = require('./subscriber')
+const { transformBlockDataBeforeDB } = require('@root/syncDB')
 
-const Block = require('./models/block');
-const Transaction = require('./models/transaction');
-const StateElement = require('./models/stateElement');
+const Block = require('@root/models/block');
+const Transaction = require('@root/models/transaction');
+const StateElement = require('@root/models/stateElement');
 
 /*
 let lastBlocksTree = {}
