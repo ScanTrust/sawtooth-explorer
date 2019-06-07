@@ -2,9 +2,9 @@ const http = require('./http')
 const toBuffer = require('typedarray-to-buffer')
 const { blockchain } = require('./config')
 
-let StateElement = require('../models/stateElement');
-let Block = require('../models/block');
-let Transaction = require('../models/transaction');
+let StateElement = require('@root/models/stateElement');
+let Block = require('@root/models/block');
+let Transaction = require('@root/models/transaction');
 
 function syncState (callback) {
   http.get(blockchain.REST_API_URL + blockchain.STATE_PATH, function (ok, stateBody) {

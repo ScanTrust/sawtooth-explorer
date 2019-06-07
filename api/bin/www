@@ -4,7 +4,7 @@
  * Module dependencies.
  */
 
-var app = require('../app');
+var app = require('@root/app');
 var debug = require('debug')('sawtooth-explorer-backend:server');
 var http = require('http');
 
