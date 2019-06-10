@@ -13,7 +13,7 @@ const {
 	decodeEventsList
 } = require('./encoding')
 
-const { blockchain } = require('@root/config')
+const { blockchain } = require('@root/lib/common/config')
 
 const zmq = require('zeromq')
 let blockchainSocket
@@ -56,7 +56,7 @@ function subscribeToBlockchainEvents (handlers, callback) {
 	})
 }
 
-function requestEventCatchUp (blockchain, lastKnownBlockIds, callback) {
+function requestEventCatchUp (lastKnownBlockIds, callback) {
 	blockchainSocket.send(
 		makeSubReqMessage(lastKnownBlockIds),
 		undefined,

@@ -5,13 +5,13 @@ let express = require('express')
   , cookieParser = require('cookie-parser')
   , bodyParser = require('body-parser')
   , mongoose = require('mongoose')
-  , { syncDB } = require('./lib/syncDB')
+//  , { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
   , { subscribeToBlockchainEvents } = require('./lib/events/subscriber')
   , blockchainEventHandlers = require('./lib/events/handlers')
 
 let app = express();
 
-let config = require('./lib/config');
+let config = require('./lib/common/config');
 
 mongoose.connect(config.mongoUrl);
 let db = mongoose.connection;
@@ -75,10 +75,6 @@ app.use(function(err, req, res, next) {
   });
 });
 
-syncDB(function () {
-  subscribeToBlockchainEvents(blockchainEventHandlers)
-});
-
-
+subscribeToBlockchainEvents(blockchainEventHandlers)
 
 module.exports = app;

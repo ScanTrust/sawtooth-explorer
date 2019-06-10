@@ -1,9 +1,8 @@
-const http = require('@root/http')
+const http = require('@root/lib/common/http')
 
 const { decodeStateChangeList } = require('./encoding')
-const { blockchain } = require('@root/config')
+const { blockchain } = require('@root/lib/common/config')
 const { requestEventCatchUp } = require('./subscriber')
-const { transformBlockDataBeforeDB } = require('@root/syncDB')
 
 const Block = require('@root/models/block');
 const Transaction = require('@root/models/transaction');
@@ -79,6 +78,29 @@ function handleDelta (stateDelta, correspondingBlockId) {
   StateElement._create(stateElements)
 }
 
+// it's a separate func bc it's used in handling POST on /blocks
+function transformBlockDataBeforeDB (blockData) {
+  const transactions = []
+  const block = {
+    id: blockData["header_signature"],
+    num: blockData["header"]["block_num"],
+    stateHash: blockData["header"]["state_root_hash"],
+    previousBlockId: blockData["header"]["previous_block_id"]
+  }
+  blockData["batches"].forEach((batch) => {
+    batch["transactions"].forEach((txn) => {
+      transactions.push({
+        id: txn["header_signature"],
+        blockId: blockData["header_signature"],
+        batchId: batch["header_signature"],
+        payload: txn["payload"],
+        signerPublicKey: txn["header"]["signer_public_key"]
+      })
+    })
+  })
+  return { block, transactions }
+}
+
 let blocksProcessesQueue = []
 
 function getAndHandleActualBlock (blockCommit) {
@@ -89,18 +111,21 @@ function getAndHandleActualBlock (blockCommit) {
   console.log('before handling', block['block_num'])
   blocksProcessesQueue.push(function (hasUnprocessedBlocks) {
     Block._getWithMaxNumber(function (maxNumberBlock) {
-      console.log('handling', block['block_num'])
-      if (maxNumberBlock && maxNumberBlock.id != block["previous_block_id"]/* && !hasUnprocessedBlocks*/) {
-        console.log('catching up on received block')
-        return requestEventCatchUp(blockchain, [maxNumberBlock.id])
-      }
-      const url = blockchain.BLOCKS_PATH + "/" + block["block_id"]
-      http.get(url, function (ok, blockInfoJSON) {
-        if (!ok) return;
-        const blockInfo = JSON.parse(blockInfoJSON)
-        const {block, transactions} = transformBlockDataBeforeDB(blockInfo)
-        Block._create(block, () => {
-          Transaction._create(transactions)
+      Block._getById(block["block_id"], function (receivedBlockFromDB) {
+        console.log('handling', block['block_num'])
+        const receivedBlockIsSequent = maxNumberBlock && maxNumberBlock.id != block["previous_block_id"]
+        if ((receivedBlockFromDB || receivedBlockIsSequent) && !hasUnprocessedBlocks) {
+          console.log('catching up on received block')
+          return requestEventCatchUp([maxNumberBlock.id])
+        }
+        const url = blockchain.REST_API_URL + blockchain.BLOCKS_PATH + "/" + block["block_id"]
+        http.get(url, function (ok, blockInfoJSON) {
+          if (!ok) return;
+          const blockInfo = JSON.parse(blockInfoJSON)["data"]
+          const {block, transactions} = transformBlockDataBeforeDB(blockInfo)
+          Block._upsert(block, () => {
+            Transaction._upsertAll(transactions)
+          })
         })
       })
     })
@@ -113,11 +138,12 @@ function processNextInQueue () {
     processFunc(blocksProcessesQueue.length > 0)
 }
 
-setInterval(processNextInQueue, 500)
+setInterval(processNextInQueue, 100)
 
 module.exports = {
   // stateDelta: saveStateDelta,
   // blockCommit: handleBlockCommit
   stateDelta: handleDelta,
-  blockCommit: getAndHandleActualBlock
+  blockCommit: getAndHandleActualBlock,
+  transformBlockDataBeforeDB
 }

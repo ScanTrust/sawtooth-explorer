@@ -19,6 +19,23 @@ Block._create = (block, callback) => {
     });
 };
 
+Block._upsert = function (block, callback) {
+    Block.findOneAndUpdate({
+      id: block.id
+    }, block, { upsert: true }, callback)
+}
+
+function upsertAll(blocks, callback) {
+  if (blocks.length > 0) {
+    let block = blocks.shift()
+    Block._upsert(block, () => upsertAll(blocks, callback))
+  } else if (callback) {
+    return callback()
+  }
+}
+
+Block._upsertAll = upsertAll;
+
 Block._get = function (params, callback) {
   Block.find(params, function (err, blocks) {
     if (err)
@@ -26,6 +43,14 @@ Block._get = function (params, callback) {
     callback(blocks);
   });
 }
+
+Block._getById = (id, callback) => {
+  Block.findOne({id}, (err, block) => {
+    if (err)
+      console.log('Err on finding block by id:', err);
+    callback(block);
+  });
+};
 
 Block._getByNumber = (num, callback) => {
   Block.findOne({num}, (err, block) => {

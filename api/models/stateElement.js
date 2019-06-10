@@ -3,7 +3,7 @@ let Schema = mongoose.Schema;
 
 let StateElement = new Schema({
     address: String,
-    data: String,
+    data: Buffer,
     createdAt: Date,
     transactionId: String
 });
@@ -18,6 +18,23 @@ StateElement._create = (stateElement, callback) => {
             callback()
     });
 };
+
+StateElement._upsert = function (stateElement, callback) {
+    StateElement.findOneAndUpdate({
+        address: stateElement.address
+    }, stateElement, { upsert: true }, callback)
+}
+
+function upsertAll(stateElements, callback) {
+  if (stateElements.length > 0) {
+    let stateElement = stateElements.shift()
+    StateElement._upsert(stateElement, () => upsertAll(stateElements, callback))
+  } else if (callback) {
+    return callback()
+  }
+}
+
+StateElement._upsertAll = upsertAll;
 
 StateElement._get = function (params, callback) {
     StateElement.find(params, function (err, stateElements) {
