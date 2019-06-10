@@ -1,4 +1,4 @@
-#Sawtooth Explorer
+# Sawtooth Explorer
 
 - [Specs](./specs/README.md)
 - [API](./api/README.md)
