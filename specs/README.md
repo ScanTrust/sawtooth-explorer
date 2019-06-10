@@ -1,10 +1,12 @@
 # Technical Specification
 
+## General
+
 Explorer consists of four main components:
 
-1. **Listener.** Listens to sawtooth events (*state-delta*, *block-commit*) and caches every change in database.
+1. [**Listener.**](./api/README.md) Listens to sawtooth events (*state-delta*, *block-commit*) and caches every change in database.
 On launch requests events replay since last known block (see *"catch-up"* in sawtooth docs). **createdAt** field of StateElement may be wrong in case described above because of that it's db document creation date. So, having blockchain with blocks commited, first launch will make DB having all replay-created StateElements **createdAt** field set approximately to the moment of the launch.
-2. **API.** Provides access to all cached data.
+2. [**API.**](./api/README.md) Provides access to all cached data.
 3. **Frontend.** VueJS app communicating with the API and providing an interface to explore data in different ways.
 4. **Cache.** MongoDB for now, may change to Postgres. Data models have following structure:
     1. **StateElement** -- a snapshot of one state element (e.g. address and binary data) in time. Write is always caused by *state-delta* event. To get a full history on certain state address, query documents with address specified and sort by createdAt. Fields:
