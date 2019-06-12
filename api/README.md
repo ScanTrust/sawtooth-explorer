@@ -20,7 +20,7 @@ API part is under `routes/`
 
 `GET /transactions?signer=...&since=...&ids=...&blockIds=...&batchIds=...`  
 **signer** — signer public key.  
-**since** — UNIX timestamp to return transactions which were written to db after it.  
+**since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
 **ids** — requested txns' ids.  
 **blockIds** and **batchIds** — comma-separated id strings.  
 
@@ -34,5 +34,8 @@ API part is under `routes/`
 
 ## Deployment
 
-First, you should have MongoDB running and port specified in `./config.js` in MONGO_URL if it's different from 27017.
-Then, install npm and node, then in root of this app: `PORT=3001 npm run start` to start API on 3001 port.
+1. MongoDB should be running.
+2. MongoDB's and Sawtooth's urls and ports are specified in `./config.js`.
+3. npm and node installed.
+4. `npm i`.
+5. `PORT=3001 npm run start` to start API on 3001 port.
