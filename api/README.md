@@ -15,5 +15,4 @@ API part is under `routes/`
 ## Deployment
 
 First, you should have MongoDB running and port specified in `./config.js` in MONGO_URL if it's different from 27017.
-Then, install npm and node, then in root of this app:
-`npm run start`
+Then, install npm and node, then in root of this app: `PORT=3001 npm run start` to start API on 3001 port.
