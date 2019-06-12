@@ -13,19 +13,19 @@ There's also `lib/syncDBHTTP.js` file which has methods for pulling `/state` or 
 API part is under `routes/`
 
 `GET /stateElements?addresses=...&txnIds=...`  
-**addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.
-**txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.
+**addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
+**txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.  
 
 `GET /transactions?signer=...&since=...&ids=...&blockIds=...&batchIds=...`  
-**signer** — signer public key.
-**since** — UNIX timestamp to return transactions which were written to db after it.
-**ids** — requested txns' ids.
-**blockIds** and **batchIds** — comma-separated id strings.
+**signer** — signer public key.  
+**since** — UNIX timestamp to return transactions which were written to db after it.  
+**ids** — requested txns' ids.  
+**blockIds** and **batchIds** — comma-separated id strings.  
 
 `GET /blocks?ids=...&recentN=...&txnIds=...`  
-**ids** — requested blocks' ids.
-**recentN** — number of most recent blocks to be returned.
-**txnIds** — comma-separated txnIds. All blocks which had transactions with these ids are returned.
+**ids** — requested blocks' ids.  
+**recentN** — number of most recent blocks to be returned.  
+**txnIds** — comma-separated txnIds. All blocks which had transactions with these ids are returned.  
 
 `GET /signers?publicKeys=...`  
 **publicKeys** — comma-separated pubKeys. All signers with these pubKeys are returned.
