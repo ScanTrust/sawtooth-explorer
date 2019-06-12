@@ -19,10 +19,6 @@ router.get('/', function(req, res, next) {
 	if (req.query.signer) {
 		dbQuery["signerPublicKey"] = req.query.signer 
 	}
-	if (req.query.since) {
-        const sinceDate = new Date(parseInt(req.query.since));
-		dbQuery["createdAt"] = {$gte: sinceDate} 
-	}
 	Transaction._get(dbQuery, transactions => {
 		res.send(transactions)
 	})

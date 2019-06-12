@@ -12,6 +12,10 @@ router.get('/', function(req, res, next) {
         const txnIds = req.query.txnIds.split(',')
         dbQuery["transactionId"] = {$in: txnIds}
     }
+	if (req.query.since) {
+        const sinceDate = new Date(parseInt(req.query.since));
+		dbQuery["createdAt"] = {$gte: sinceDate} 
+	}
     StateElement._get(dbQuery, stateElemets => {
         res.send(stateElemets)
     })
