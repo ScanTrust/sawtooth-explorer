@@ -8,29 +8,41 @@ Listener code is under `lib/events/`. It has 3 `.js` files — `encoding.js`, `h
 There's also `lib/syncDBHTTP.js` file which has methods for pulling `/state` or `/blocks` and populating DB with the results.  
 `lib/common/` now has only `http.js` with http wrapper-methods.  
 
-## API (not there yet)
+## API
 
 API part is under `routes/`
 
 ### Specification
 
 `GET /stateElements?addresses=...&txnIds=...`  
-**addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
-**txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.  
+*optional* **addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
+*optional* **txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.  
+*optional* **since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
 
 `GET /transactions?signer=...&since=...&ids=...&blockIds=...&batchIds=...`  
-**signer** — signer public key.  
-**since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
-**ids** — requested txns' ids.  
-**blockIds** and **batchIds** — comma-separated id strings.  
+*optional* **signer** — signer public key.  
+*optional* **ids** — requested txns' ids.  
+*optional* **blockIds** and **batchIds** — comma-separated id strings.  
 
 `GET /blocks?ids=...&recentN=...&txnIds=...`  
-**ids** — requested blocks' ids.  
-**recentN** — number of most recent blocks to be returned.  
-**txnIds** — comma-separated txnIds. All blocks which had transactions with these ids are returned.  
+*optional* **ids** — requested blocks' ids.  
+*optional* **recentN** — number of most recent blocks to be returned.  
+*optional* **txnIds** — comma-separated txnIds. All blocks which had transactions with these ids are returned.  
 
 `GET /signers?publicKeys=...`  
-**publicKeys** — comma-separated pubKeys. All signers with these pubKeys are returned.
+*optional* **publicKeys** — comma-separated pubKeys. All signers with these pubKeys are returned.  
+
+`POST /signin`  
+*required* **login**  
+*required* **password**  
+
+`POST /signup`  
+*required* **login**  
+*required* **password**  
+
+`POST /addsigner`  
+*required* **publicKey** — pubKey.  
+*required* **label** — signer label/name.  
 
 ## Deployment
 
