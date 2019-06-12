@@ -13,7 +13,7 @@ const {
 	decodeEventsList
 } = require('./encoding')
 
-const { blockchain } = require('@root/lib/common/config')
+const { blockchain } = require('@root/config')
 
 const zmq = require('zeromq')
 let blockchainSocket

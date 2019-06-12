@@ -1,6 +1,6 @@
 const http = require('./common/http')
 const toBuffer = require('typedarray-to-buffer')
-const { blockchain } = require('./common/config')
+const { blockchain } = require('@root/config')
 const { transformBlockDataBeforeDB } = require('@root/lib/events/handlers')
 
 let StateElement = require('@root/models/stateElement');

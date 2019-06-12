@@ -11,9 +11,9 @@ let express = require('express')
 
 let app = express();
 
-let config = require('./lib/common/config');
+let config = require('./config');
 
-mongoose.connect(config.mongoUrl);
+mongoose.connect(config.MONGO_URL);
 let db = mongoose.connection;
 db.on('error', console.error.bind(console, 'connection error:'));
 db.once('open', function () {

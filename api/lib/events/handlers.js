@@ -1,7 +1,7 @@
 const http = require('@root/lib/common/http')
 
 const { decodeStateChangeList } = require('./encoding')
-const { blockchain } = require('@root/lib/common/config')
+const { blockchain } = require('@root/config')
 const { requestEventCatchUp } = require('./subscriber')
 
 const Block = require('@root/models/block');
