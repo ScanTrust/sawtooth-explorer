@@ -12,6 +12,8 @@ There's also `lib/syncDBHTTP.js` file which has methods for pulling `/state` or 
 
 API part is under `routes/`
 
+### Specification
+
 `GET /stateElements?addresses=...&txnIds=...`  
 **addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
 **txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.  
