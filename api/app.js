@@ -1,13 +1,14 @@
-let express = require('express')
-  , path = require('path')
-  , favicon = require('serve-favicon')
-  , logger = require('morgan')
-  , cookieParser = require('cookie-parser')
-  , bodyParser = require('body-parser')
-  , mongoose = require('mongoose')
-//  , { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
-  , { subscribeToBlockchainEvents } = require('./lib/events/subscriber')
-  , blockchainEventHandlers = require('./lib/events/handlers')
+let express = require('express'),
+  path = require('path'),
+  favicon = require('serve-favicon'),
+  logger = require('morgan'),
+  cookieParser = require('cookie-parser'),
+  bodyParser = require('body-parser'),
+  mongoose = require('mongoose'),
+  { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
+  blockchainEventHandlers = require('./lib/events/handlers')
+require('./authentication')
+//  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
 
 let app = express();
 
@@ -21,6 +22,7 @@ db.once('open', function () {
 });
 
 let routes = require('./routes/index');
+let auth = require('./routes/auth');
 let stateElements = require('./routes/stateElements');
 let transactions = require('./routes/transactions');
 let blocks = require('./routes/blocks');
@@ -48,6 +50,7 @@ app.use(function(req, res, next) {
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
+app.use('/auth', auth);
 app.use('/stateElements', stateElements);
 app.use('/transactions', transactions);
 app.use('/blocks', blocks);
