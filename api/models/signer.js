@@ -2,7 +2,10 @@ let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
 let Signer = new Schema({
-    publicKey: String,
+    publicKey: {
+        type: String,
+        unique: true
+    },
     label: String
 });
 
@@ -10,10 +13,13 @@ Signer = mongoose.model('Signer', Signer);
 
 Signer._create = (signer, callback) => {
     Signer.create(signer, err => {
-        if (err)
+        if (err) {
             console.log("Err on creating signer:", err);
+            if (err.code == 11000 && callback)
+                return callback(false, "has_signer_with_such_public_key")
+        }
         if (callback)
-            callback()
+            callback(true)
     });
 };
 
