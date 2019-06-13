@@ -13,7 +13,7 @@ On launch requests events replay since last known block (see *"catch-up"* in saw
         1. **address:** string
         2. **data:** binary
         3. **createdAt:** date // may be wrong, see Listener spec
-        4. **transactionId:** string // may change to blockId if it's impossible to correlate *state-delta* to a transaction
+        4. **blockId:** string
     2. **Transaction** — transaction. Fields:
         1. **id:** string
         2. **blockId:** string
