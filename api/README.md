@@ -14,9 +14,20 @@ API part is under `routes/`
 
 ### Specification
 
+In case of some error the response is
+
+```JS
+{
+    ok: Boolean,
+    err: String
+}
+```
+
+#### Public API
+
 `GET /stateElements?addresses=...&txnIds=...`  
 *optional* **addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
-*optional* **txnIds** — comma-separated txnIds. All stateElements whose txnId match any of the ones listed are returned.  
+*optional* **blockIds** — comma-separated blockIds. All stateElements whose blockId match any of the ones listed are returned.  
 *optional* **since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
 
 `GET /transactions?signer=...&since=...&ids=...&blockIds=...&batchIds=...`  
@@ -32,15 +43,37 @@ API part is under `routes/`
 `GET /signers?publicKeys=...`  
 *optional* **publicKeys** — comma-separated pubKeys. All signers with these pubKeys are returned.  
 
-`POST /signin`  
-*required* **login**  
-*required* **password**  
+#### Authorization API
 
-`POST /signup`  
-*required* **login**  
+`POST /login`  
+*required* **username**  
 *required* **password**  
+Response on success:
 
-`POST /addsigner`  
+```JS
+{
+    "ok": true,
+    "token": "...",
+    "user": { /*...*/ }
+}
+```
+
+`POST /register`  
+*required* **username**  
+*required* **password**  
+Response on success:
+
+```JS
+{
+    "message": "registration_successful",
+    "ok": true
+}
+
+```
+
+#### Private API
+
+`POST /signers/add`  
 *required* **publicKey** — pubKey.  
 *required* **label** — signer label/name.  
 
