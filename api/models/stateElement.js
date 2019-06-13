@@ -5,7 +5,7 @@ let StateElement = new Schema({
     address: String,
     data: Buffer,
     createdAt: Date,
-    transactionId: String
+    blockId: String
 });
 
 StateElement = mongoose.model('StateElement', StateElement);

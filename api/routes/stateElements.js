@@ -8,9 +8,9 @@ router.get('/', function(req, res, next) {
         const prefixes = req.query.addresses.split(',')
         dbQuery["address"] = {$in: prefixes.map(pref => new RegExp('^' + pref, 'i'))}
     }
-    if (req.query.txnIds) {
-        const txnIds = req.query.txnIds.split(',')
-        dbQuery["transactionId"] = {$in: txnIds}
+    if (req.query.blockIds) {
+        const blockIds = req.query.blockIds.split(',')
+        dbQuery["blockId"] = {$in: blockIds}
     }
 	if (req.query.since) {
         const sinceDate = new Date(parseInt(req.query.since));

@@ -44,6 +44,13 @@ function subscribeToBlockchainEvents (handlers, callback) {
 					handlers.blockCommit(events[i])
 				} else {
 					const correspondingBlockId = events[i - 1].attributes[0].value
+					if (!correspondingBlockId)
+						console.log(
+							"Didn't have corresponging block id:",
+							events[i - 1],
+							events[i - 1].attributes,
+							events[i - 1].attributes[0]
+						)
 					handlers.stateDelta(events[i], correspondingBlockId)
 				}
 			}

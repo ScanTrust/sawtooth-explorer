@@ -73,7 +73,7 @@ function handleDelta (stateDelta, correspondingBlockId) {
     address: delta.address,
     data: delta.type == 1 ? delta.value : null,
     createdAt: new Date(),
-    transactionId: null // maybe it should have blockId instead...
+    blockId: correspondingBlockId // maybe it should have blockId instead...
   }))
   StateElement._create(stateElements)
 }
