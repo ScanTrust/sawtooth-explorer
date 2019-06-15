@@ -34,8 +34,8 @@ router.get('/', function(req, res, next) {
 })
 
 router.get('/', function(req, res, next) {
-    Block._get(req._dbQuery, signers => {
-        res.send(signers)
+    Block._get(req._dbQuery, blocks => {
+        res.send(blocks)
     })
 })
 

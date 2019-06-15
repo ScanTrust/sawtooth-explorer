@@ -1,6 +1,8 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
+
 let Transaction = new Schema({
     id: String,
     blockId: String,
@@ -16,7 +18,7 @@ Transaction._create = (transaction, callback) => {
         if (err)
             console.log("Err on creating transaction:", err);
         if (callback)
-            callback()
+            callback(err)
     });
 };
 
@@ -38,7 +40,7 @@ function upsertAll(transactions, callback) {
 Transaction._upsertAll = upsertAll;
 
 Transaction._get = function (params, callback) {
-    Transaction.find(params, function (err, transactions) {
+    Transaction.find(deleteEmptyArrayFields(params), function (err, transactions) {
         if (err)
             console.log("Err on getting from transactions:", err);
         callback(transactions);

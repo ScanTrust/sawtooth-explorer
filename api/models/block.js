@@ -1,6 +1,8 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
+
 let Block = new Schema({
   id: String,
   num: Number,
@@ -15,7 +17,7 @@ Block._create = (block, callback) => {
       if (err)
         console.log("Err on creating block:", err);
       if (callback)
-        callback()
+        callback(err)
     });
 };
 
@@ -28,7 +30,7 @@ Block._upsert = function (block, callback) {
 function upsertAll(blocks, callback) {
   if (blocks.length > 0) {
     let block = blocks.shift()
-    Block._upsert(block, () => upsertAll(blocks, callback))
+    Block._upsert(block, (err, doc) => upsertAll(blocks, callback))
   } else if (callback) {
     return callback()
   }
@@ -37,7 +39,7 @@ function upsertAll(blocks, callback) {
 Block._upsertAll = upsertAll;
 
 Block._get = function (params, callback) {
-  Block.find(params, function (err, blocks) {
+  Block.find(deleteEmptyArrayFields(params), function (err, blocks) {
     if (err)
       console.log("Err on getting from blocks:", err);
     callback(blocks);

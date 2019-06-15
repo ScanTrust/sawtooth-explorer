@@ -1,6 +1,8 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
+
 let StateElement = new Schema({
     address: String,
     data: Buffer,
@@ -15,7 +17,7 @@ StateElement._create = (stateElement, callback) => {
         if (err)
             console.log("Err on creating stateElement:", err);
         if (callback)
-            callback()
+            callback(err)
     });
 };
 
@@ -37,7 +39,7 @@ function upsertAll(stateElements, callback) {
 StateElement._upsertAll = upsertAll;
 
 StateElement._get = function (params, callback) {
-    StateElement.find(params, function (err, stateElements) {
+    StateElement.find(deleteEmptyArrayFields(params), function (err, stateElements) {
         if (err)
             console.log("Err on getting from stateElements:", err);
         callback(stateElements);

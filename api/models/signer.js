@@ -1,12 +1,17 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
+
 let Signer = new Schema({
     publicKey: {
         type: String,
         unique: true
     },
-    label: String
+    label: {
+        type: String,
+        unique: true
+    }
 });
 
 Signer = mongoose.model('Signer', Signer);
@@ -16,10 +21,10 @@ Signer._create = (signer, callback) => {
         if (err) {
             console.log("Err on creating signer:", err);
             if (err.code == 11000 && callback)
-                return callback(false, "has_signer_with_such_public_key")
+                return callback(false, "has_signer_with_such_public_key_or_label")
         }
         if (callback)
-            callback(true)
+            callback(true, 'added_signer')
     });
 };
 
@@ -41,7 +46,7 @@ function upsertAll(signers, callback) {
 Signer._upsertAll = upsertAll;
 
 Signer._get = function (params, callback) {
-    Signer.find(params, function (err, signers) {
+    Signer.find(deleteEmptyArrayFields(params), function (err, signers) {
         if (err)
             console.log("Err on getting from signers:", err);
         callback(signers);
@@ -64,7 +69,7 @@ Signer._remove = (signers, callback) => {
         if (err)
             console.log(err)
         if (callback)
-            callback()
+            callback(err)
     })
 }
 
