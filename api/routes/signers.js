@@ -21,7 +21,7 @@ router.post('/add', passport.authenticate('jwt', {session: false}), [
 ], function(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({ errors: errors.array() });
+    return res.status(422).json({ ok: false, message: 'incorrect_data', errors: errors.array() });
   }
   next()
 })
@@ -30,8 +30,8 @@ router.post('/add', function(req, res, next) {
   Signer._create({
     publicKey: req.body.publicKey,
     label: req.body.label
-  }, (ok, err) => { // ok: Bool, err: String
-    res.json({ ok, err });
+  }, (ok, err) => {
+    return res.status(ok ? 200 : 500).json({ ok, message: msg })
   })
 });
 

@@ -11,12 +11,15 @@ let User = new Schema({
 User = mongoose.model('User', User)
 
 User._create = (user, callback) => {
-    User.create(user, err => {
-      if (err)
-        console.log("Err on creating user:", err);
-      if (callback)
-        callback()
-    });
+  User.create(user, err => {
+    if (err) {
+      console.log("Err on creating user:", err);
+      if (err.code == 11000 && callback)
+        return callback(false, "has_user_with_such_username")
+    }
+    if (callback)
+      callback(true)
+  });
 };
 
 User._getById = (id, callback) => {

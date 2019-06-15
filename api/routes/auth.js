@@ -27,10 +27,10 @@ router.post('/register', function(req, res, next) {
             username: req.body.username,
             passHash: passwordHash,
             salt,
-        }, function (err) {
+        }, function (ok, err) {
             if (err)
-                return res.status(500).json({ err: err })
-            return res.status(200).json({ ok: true, message: 'registration_successful' })
+                return res.status(400).json({ ok, message: err })
+            return res.status(200).json({ ok, message: 'registration_successful' })
         })
     })
 })
@@ -40,7 +40,7 @@ router.post('/login', function (req, res, next) {
         if (!user) {
             return res.status(400).json({
                 ok: false,
-                message: "no_user_with_such_username"
+                message: 'no_user_with_such_username'
             })
         }
         const { passwordHash } = saltHashPassword(req.body.password, user.salt)
@@ -66,7 +66,7 @@ router.post('/login', function (req, res, next) {
                     message: err
                 });
             const token = jwt.sign(user.toJSON(), config.JWT_SECRET);
-            return res.json({ok: true, user, token});
+            return res.json({ok: true, token, username: user.username});
         });
     })(req, res);
 })
