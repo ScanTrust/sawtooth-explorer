@@ -1,29 +1,59 @@
 <template>
-  <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
-  </div>
+  <router-view>
+    <v-snackbar
+      slot="snackbar"
+      v-model="snackbar"
+      :left="true"
+      :top="true"
+      :timeout="3000"
+    >
+      {{ snackbarText }}
+      <v-btn
+        color="indigo accent-1"
+        flat
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
+  </router-view>
 </template>
 
-<style lang="scss">
-#app {
-  font-family: 'Avenir', Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-}
-#nav {
-  padding: 30px;
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-    &.router-link-exact-active {
-      color: #42b983;
+<script>
+import Auth from '@/layouts/Auth'
+import Main from '@/layouts/Main'
+import { EventBus } from '@/lib/event-bus'
+import { SNACKBAR } from '@/store/constants'
+
+export default {
+  name: 'App',
+  components: {
+    Auth, Main
+  },
+  data: () => ({
+    snackbar: false,
+    snackbarText: '',
+  }),
+  methods: {
+    showSnackbar: function ({message}) {
+      this.snackbarText = message
+      this.snackbar = true
     }
+  },
+  created () {
+    EventBus.$on(SNACKBAR, data => {
+      this.showSnackbar(data)
+    })
   }
 }
+</script>
+
+<style>
+  .pos-relative {
+    position: relative;
+  }
+
+  .height-90-prc {
+      height: 90%;
+  }
 </style>
