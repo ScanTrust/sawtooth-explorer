@@ -10,8 +10,10 @@
                 </v-flex>
             </v-layout>
             <details-dialog
+                :title="'Signer'"
                 :shown="areDetailsShown"
-                :config="details"
+                :detailsData="detailedSigner"
+                :fieldToTitle="signerFieldToTitle"
                 @close="closeDetails">
             </details-dialog>
             <signer-add
@@ -35,21 +37,16 @@
     import SignerAdd from '@/components/dialogs/SignerAdd'
     import DetailsDialog from '@/components/dialogs/DetailsDialog'
     import { SIGNERS, LOAD, ADD } from '@/store/constants'
+    import { signerFieldToTitle } from '@/lib/display-config'
 
     export default {
         name: 'Signers',
         data: () => ({
             signers: [],
-            details: {
-                title: 'Signer',
-                fields: []
-            },
+            detailedSigner: {},
             areDetailsShown: false,
-            signerFieldToTitle: {
-                publicKey: 'Public key',
-                label: 'Label',
-            },
             signerAdding: false,
+            signerFieldToTitle,
         }),
         created () {
             this.load()
@@ -62,17 +59,12 @@
                     })
             },
             showDetails (signer) {
-                for (const field in this.signerFieldToTitle) {
-                    this.details.fields.push({
-                        label: this.signerFieldToTitle[field],
-                        value: signer[field]
-                    })
-                }
+                this.detailedSigner = signer
+                console.log(this.detailedSigner)
                 this.areDetailsShown = true
             },
             closeDetails () {
                 this.areDetailsShown = false
-                this.details.fields = []
             },
             showAdd () {
                 this.signerAdding = true
