@@ -14,7 +14,7 @@ import { EventBus } from '@/lib/event-bus'
 export default {
     namespaced: true,
     state: {
-        txnFamilies: localStorage.getItem('txnFamilies') || []
+        txnFamilies: JSON.parse(localStorage.getItem('txnFamilies')) || []
     },
     getters: {
         txnFamilies: state => state.txnFamilies

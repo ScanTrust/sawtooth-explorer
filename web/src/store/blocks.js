@@ -5,12 +5,11 @@ import {
     LOGOUT,
     LOAD
 } from './constants'
-import { EventBus } from '@/lib/event-bus'
 
 export default {
     namespaced: true,
     state: {
-        blocks: localStorage.getItem('blocks') || []
+        blocks: JSON.parse(localStorage.getItem('blocks')) || []
     },
     getters: {
         blocks: state => state.blocks
