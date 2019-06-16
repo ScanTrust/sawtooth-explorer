@@ -7,7 +7,8 @@ let Block = new Schema({
   id: String,
   num: Number,
   stateHash: String,
-  previousBlockId: String
+  previousBlockId: String,
+  signerPublicKey: String,
 });
 
 Block = mongoose.model('Block', Block);

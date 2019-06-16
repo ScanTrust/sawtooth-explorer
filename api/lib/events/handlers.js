@@ -85,7 +85,8 @@ function transformBlockDataBeforeDB (blockData) {
     id: blockData["header_signature"],
     num: blockData["header"]["block_num"],
     stateHash: blockData["header"]["state_root_hash"],
-    previousBlockId: blockData["header"]["previous_block_id"]
+    previousBlockId: blockData["header"]["previous_block_id"],
+    signerPublicKey: blockData["header"]["signer_public_key"]
   }
   blockData["batches"].forEach((batch) => {
     batch["transactions"].forEach((txn) => {

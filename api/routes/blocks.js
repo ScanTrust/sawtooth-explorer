@@ -9,6 +9,10 @@ router.get('/', function(req, res, next) {
         const ids = req.query.ids.split(',')
         req._dbQuery["$and"].push({id: {$in: ids}})
     }
+    if (req.query.signers) {
+        const signers = req.query.signers.split(',')
+        req._dbQuery["$and"].push({signerPublicKey: {$in: signers}})
+    }
     if (req.query.txnIds) {
         const txnIds = req.query.txnIds.split(',')
         Transaction._get({id: {$in: txnIds}}, txns => {
