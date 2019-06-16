@@ -9,12 +9,11 @@
                     </txn-family-tile>
                 </v-flex>
             </v-layout>
-            <txn-family-details
-                :shown="txnFamilyDetails"
-                :addressPrefix="detailedTxnFamily.addressPrefix"
-                :label="detailedTxnFamily.label"
-                @close="txnFamilyDetails = false">
-            </txn-family-details>
+            <details-dialog
+                :shown="areDetailsShown"
+                :config="details"
+                @close="closeDetails">
+            </details-dialog>
             <txn-family-add
                 :shown="txnFamilyAdding"
                 @close="txnFamilyAdding = false"
@@ -33,16 +32,23 @@
 
 <script>
     import TxnFamilyTile from '@/components/TxnFamilyTile'
-    import TxnFamilyDetails from '@/components/dialogs/TxnFamilyDetails'
     import TxnFamilyAdd from '@/components/dialogs/TxnFamilyAdd'
+    import DetailsDialog from '@/components/dialogs/DetailsDialog'
     import { TXN_FAMILIES, LOAD, ADD } from '@/store/constants'
 
     export default {
         name: 'TxnFamilies',
         data: () => ({
             txnFamilies: [],
-            txnFamilyDetails: false,
-            detailedTxnFamily: {},
+            details: {
+                title: 'Signer',
+                fields: []
+            },
+            areDetailsShown: false,
+            txnFamilyFieldToTitle: {
+                addressPrefix: 'Address prefix',
+                label: 'Label',
+            },
             txnFamilyAdding: false,
         }),
         created () {
@@ -56,8 +62,17 @@
                     })
             },
             showDetails (txnFamily) {
-                this.detailedTxnFamily = txnFamily
-                this.txnFamilyDetails = true
+                for (const field in this.txnFamilyFieldToTitle) {
+                    this.details.fields.push({
+                        label: this.txnFamilyFieldToTitle[field],
+                        value: txnFamily[field]
+                    })
+                }
+                this.areDetailsShown = true
+            },
+            closeDetails () {
+                this.areDetailsShown = false
+                this.details.fields = []
             },
             showAdd () {
                 this.txnFamilyAdding = true
@@ -69,8 +84,8 @@
         },
         components: {
             TxnFamilyTile,
-            TxnFamilyDetails,
-            TxnFamilyAdd
+            TxnFamilyAdd,
+            DetailsDialog
         }
     }
 </script>

@@ -40,28 +40,12 @@
       app
     >
       <v-list dense>
-        <v-list-tile to="/">
+        <v-list-tile v-for="item in menuItems" :key="item.to" :to="item.to">
           <v-list-tile-action>
-            <v-icon>home</v-icon>
+            <v-icon>{{ item.iconName }}</v-icon>
           </v-list-tile-action>
           <v-list-tile-content>
-            <v-list-tile-title>Home</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile to="/signers">
-          <v-list-tile-action>
-            <v-icon>people</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Signers</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-        <v-list-tile to="/txnFamilies">
-          <v-list-tile-action>
-            <v-icon>settings_input_component</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Txn Families</v-list-tile-title>
+            <v-list-tile-title>{{ item.label }}</v-list-tile-title>
           </v-list-tile-content>
         </v-list-tile>
       </v-list>
@@ -98,6 +82,25 @@
       drawerRight: false,
       right: false,
       left: false,
+      menuItems: [
+        {
+          to: '/',
+          iconName: 'home',
+          label: 'Home'
+        }, {
+          to: '/blocks',
+          iconName: 'filter_none',
+          label: 'Blocks'
+        },  {
+          to: '/signers',
+          iconName: 'people',
+          label: 'Signers'
+        }, {
+          to: '/txnFamilies',
+          iconName: 'settings_input_component',
+          label: 'Transaction Families'
+        },
+      ]
     }),
     props: {
 
@@ -107,7 +110,7 @@
     },
     methods: {
       logout: function () {
-        this.$store.dispatch(AUTH + LOGOUT)
+        this.$store.dispatch(LOGOUT)
           .then(() => {
             this.$router.push('/auth')
           })

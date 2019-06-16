@@ -9,12 +9,11 @@
                     </signer-tile>
                 </v-flex>
             </v-layout>
-            <signer-details
-                :shown="signerDetails"
-                :publicKey="detailedSigner.publicKey"
-                :label="detailedSigner.label"
-                @close="signerDetails = false">
-            </signer-details>
+            <details-dialog
+                :shown="areDetailsShown"
+                :config="details"
+                @close="closeDetails">
+            </details-dialog>
             <signer-add
                 :shown="signerAdding"
                 @close="signerAdding = false"
@@ -33,16 +32,23 @@
 
 <script>
     import SignerTile from '@/components/SignerTile'
-    import SignerDetails from '@/components/dialogs/SignerDetails'
     import SignerAdd from '@/components/dialogs/SignerAdd'
+    import DetailsDialog from '@/components/dialogs/DetailsDialog'
     import { SIGNERS, LOAD, ADD } from '@/store/constants'
 
     export default {
         name: 'Signers',
         data: () => ({
             signers: [],
-            signerDetails: false,
-            detailedSigner: {},
+            details: {
+                title: 'Signer',
+                fields: []
+            },
+            areDetailsShown: false,
+            signerFieldToTitle: {
+                publicKey: 'Public key',
+                label: 'Label',
+            },
             signerAdding: false,
         }),
         created () {
@@ -56,8 +62,17 @@
                     })
             },
             showDetails (signer) {
-                this.detailedSigner = signer
-                this.signerDetails = true
+                for (const field in this.signerFieldToTitle) {
+                    this.details.fields.push({
+                        label: this.signerFieldToTitle[field],
+                        value: signer[field]
+                    })
+                }
+                this.areDetailsShown = true
+            },
+            closeDetails () {
+                this.areDetailsShown = false
+                this.details.fields = []
             },
             showAdd () {
                 this.signerAdding = true
@@ -69,8 +84,8 @@
         },
         components: {
             SignerTile,
-            SignerDetails,
-            SignerAdd
+            SignerAdd,
+            DetailsDialog
         }
     }
 </script>
