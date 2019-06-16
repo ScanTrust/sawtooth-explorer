@@ -3,6 +3,7 @@ import Router from 'vue-router'
 
 import Auth from '@/layouts/Auth.vue'
 import Main from '@/layouts/Main.vue'
+import Blocks from '@/views/Blocks.vue'
 import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import store from '@/store'
@@ -40,6 +41,9 @@ export default new Router({
       beforeEnter: ifAuthenticated,
       children: [
         {
+          path: 'blocks',
+          component: Blocks
+        }, {
           path: 'signers',
           component: Signers
         }, {
