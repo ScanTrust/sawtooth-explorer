@@ -14,12 +14,12 @@ API part is under `routes/`
 
 ### Specification
 
-In case of some error the response is
+POST endpoints' responses have this format (except `/login`):
 
 ```JS
 {
     ok: Boolean,
-    err: String
+    message: String
 }
 ```
 
@@ -30,18 +30,21 @@ In case of some error the response is
 *optional* **blockIds** — comma-separated blockIds. All stateElements whose blockId match any of the ones listed are returned.  
 *optional* **since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
 
-`GET /transactions?signer=...&since=...&ids=...&blockIds=...&batchIds=...`  
-*optional* **signer** — signer public key.  
+`GET /transactions?signers=...&since=...&ids=...&blockIds=...&batchIds=...`  
+*optional* **signers** — comma-separated signers' public keys.  
 *optional* **ids** — requested txns' ids.  
 *optional* **blockIds** and **batchIds** — comma-separated id strings.  
 
-`GET /blocks?ids=...&recentN=...&txnIds=...`  
+`GET /blocks?ids=...&recentN=...&txnIds=...&signers`  
 *optional* **ids** — requested blocks' ids.  
 *optional* **recentN** — number of most recent blocks to be returned.  
 *optional* **txnIds** — comma-separated txnIds. All blocks which had transactions with these ids are returned.  
 
 `GET /signers?publicKeys=...`  
 *optional* **publicKeys** — comma-separated pubKeys. All signers with these pubKeys are returned.  
+
+`GET /txnFamilies?addressPrefixes=...`  
+*optional* **addressPrefixes** — comma-separated addressPrefixes. All txnFamilies with these prefixes are returned.  
 
 #### Authorization API
 
@@ -53,8 +56,7 @@ Response on success:
 ```JS
 {
     "ok": true,
-    "token": "...",
-    "user": { /*...*/ }
+    "token": "..."
 }
 ```
 
@@ -76,6 +78,10 @@ Response on success:
 `POST /signers/add`  
 *required* **publicKey** — pubKey.  
 *required* **label** — signer label/name.  
+
+`POST /txnFamilies/add`  
+*required* **addressPrefix** — family address prefix.  
+*required* **label** — family label/name.  
 
 ## Deployment
 
