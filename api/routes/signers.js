@@ -30,7 +30,7 @@ router.post('/add', function(req, res, next) {
   Signer._create({
     publicKey: req.body.publicKey,
     label: req.body.label
-  }, (ok, err) => {
+  }, (ok, msg) => {
     return res.status(ok ? 200 : 500).json({ ok, message: msg })
   })
 });
