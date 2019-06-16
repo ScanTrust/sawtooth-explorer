@@ -16,8 +16,9 @@ router.get('/', function(req, res, next) {
 		const blockIds = req.query.blockIds.split(',')
 		dbQuery["blockId"] = {$in: blockIds}
 	}
-	if (req.query.signer) {
-		dbQuery["signerPublicKey"] = req.query.signer 
+	if (req.query.signers) {
+		const signers = req.query.signers.split(',')
+		dbQuery["signerPublicKey"] = {$in: signers}
 	}
 	Transaction._get(dbQuery, transactions => {
 		res.send(transactions)
