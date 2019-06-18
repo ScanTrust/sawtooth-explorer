@@ -5,20 +5,10 @@
                 <v-flex shrink xs12 sm6 md4 lg2 v-for="txnFamily in txnFamilies" :key="txnFamily.addressPrefix">
                     <txn-family-tile
                         :txnFamily="txnFamily"
-                        @showDetails="showDetails(txnFamily)">
+                        @showDetails="showDetails">
                     </txn-family-tile>
                 </v-flex>
             </v-layout>
-            <details-dialog
-                :shown="areDetailsShown"
-                :config="details"
-                @close="closeDetails">
-            </details-dialog>
-            <txn-family-add
-                :shown="txnFamilyAdding"
-                @close="txnFamilyAdding = false"
-                @add="add">
-            </txn-family-add>
         </v-container>
         <v-btn absolute
                 dark fab
@@ -34,7 +24,7 @@
     import TxnFamilyTile from '@/components/TxnFamilyTile'
     import TxnFamilyAdd from '@/components/dialogs/TxnFamilyAdd'
     import DetailsDialog from '@/components/dialogs/DetailsDialog'
-    import { TXN_FAMILIES, LOAD, ADD } from '@/store/constants'
+    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY } from '@/store/constants'
 
     export default {
         name: 'TxnFamilies',
@@ -45,7 +35,7 @@
                 fields: []
             },
             areDetailsShown: false,
-            txnFamilyFieldToTitle: {
+            txnFamilyFieldNameToContent: {
                 addressPrefix: 'Address prefix',
                 label: 'Label',
             },
@@ -62,13 +52,10 @@
                     })
             },
             showDetails (txnFamily) {
-                for (const field in this.txnFamilyFieldToTitle) {
-                    this.details.fields.push({
-                        label: this.txnFamilyFieldToTitle[field],
-                        value: txnFamily[field]
-                    })
-                }
-                this.areDetailsShown = true
+                EventBus.$emit(SHOW_DETAILS, {
+                    type: TXN_FAMILY,
+                    data: txnFamily
+                })
             },
             closeDetails () {
                 this.areDetailsShown = false

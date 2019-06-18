@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="shown" persistent max-width="420px">
+  <v-dialog v-model="shown" persistent max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">{{ title }}</span>
@@ -12,8 +12,8 @@
                         <span class="body-2">{{field.label}}</span>
                     </v-flex>
                     <v-flex xs11 mx-auto :key="`${field.label}-value`">
-                        <span v-if="field.value" class="subheading">{{field.value}}</span>
-                        <slot v-else             :name="field.slotName"></slot>
+                        <slot v-if="field.tagName" :name="field.tagName"></slot>
+                        <span v-else class="subheading">{{field.value || 'Unknown'}}</span>
                     </v-flex>
                 </template>
             </v-layout>
@@ -49,9 +49,9 @@
             },
             detailsData: {
                 type: Object,
-                default: () => ({})
+                default: null
             },
-            fieldToTitle: {
+            fieldNameToContent: {
                 type: Object,
                 default: () => ({})
             }
@@ -59,16 +59,23 @@
         computed: {
             displayedFields () {
                 const result = []
-                for (const field in this.fieldToTitle) {
-                    if (typeof this.fieldToTitle[field] === 'string') {
+                for (const field in this.fieldNameToContent) {
+                    if (!this.detailsData) {
                         result.push({
-                            label: this.fieldToTitle[field],
+                            label: this.fieldNameToContent[field],
+                            value: 'Unknown'
+                        })
+                        continue
+                    }
+                    if (typeof this.fieldNameToContent[field] === 'string') {
+                        result.push({
+                            label: this.fieldNameToContent[field],
                             value: this.detailsData[field]
                         })
                     } else {
                         result.push({
-                            label: this.fieldToTitle[field].label,
-                            slotName: this.fieldToTitle[field].slotName
+                            label: this.fieldNameToContent[field].label,
+                            tagName: this.fieldNameToContent[field].tagName
                         })
                     }
                 }

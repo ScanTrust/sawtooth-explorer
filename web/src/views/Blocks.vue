@@ -5,30 +5,10 @@
                 <v-flex shrink xs2 v-for="block in blocks" :key="block.id">
                     <block-tile
                         :block="block"
-                        @showDetails="showDetails(block)">
+                        @showDetails="showDetails">
                     </block-tile>
                 </v-flex>
             </v-layout>
-            <details-dialog
-                :title="'Block'"
-                :shown="areBlockDetailsShown"
-                :detailsData="detailedBlock"
-                :fieldToTitle="blockFieldToTitle"
-                @close="closeDetails">
-                <signer-tile
-                    v-if="areBlockDetailsShown"
-                    slot="signer-tile"
-                    :signer="detailedBlockSigner"
-                    @showDetails="showSignerDetails">
-                </signer-tile>
-            </details-dialog>
-            <details-dialog
-                :title="'Signer'"
-                :shown="areSignerDetailsShown"
-                :detailsData="detailedBlockSigner"
-                :fieldToTitle="signerFieldToTitle"
-                @close="closeSignerDetails">
-            </details-dialog>
         </v-container>
     </div>
 </template>
@@ -38,59 +18,59 @@
 
     import BlockTile from '@/components/BlockTile'
     import SignerTile from '@/components/SignerTile'
+    import TransactionTile from '@/components/TransactionTile'
     import DetailsDialog from '@/components/dialogs/DetailsDialog'
-    import { BLOCKS, LOAD, SIGNERS } from '@/store/constants'
-    import { blockFieldToTitle, signerFieldToTitle } from '@/lib/display-config'
+    import {
+        BLOCKS,
+        TRANSACTIONS,
+        LOAD,
+        SIGNERS,
+        SHOW_DETAILS,
+        BLOCK
+    } from '@/store/constants'
+    import { blockFieldNameToContent, signerFieldNameToContent } from '@/lib/display-config'
+    import { EventBus } from '@/lib/event-bus'
 
     export default {
         name: 'Blocks',
-        data: () => ({
-            blocks: [],
-            detailedBlock: {},
-            detailedBlockSigner: {},
-            areBlockDetailsShown: false,
-            areSignerDetailsShown: false,
-            blockFieldToTitle,
-            signerFieldToTitle,
-        }),
+        data: () => ({ }),
         created () {
             this.load()
         },
         methods: {
             load () {
                 this.$store.dispatch(BLOCKS + LOAD)
-                    .then((blocks) => {
-                        this.blocks = blocks
-                    })
             },
             showDetails (block) {
-                this.detailedBlock = block
-                this.detailedBlockSigner = this.signers.find(
+                let detailedBlockSigner = this.signers.find(
                     signer => signer.publicKey === block.signerPublicKey)
-                this.detailedBlockSigner = this.detailedBlockSigner || {
-                    publicKey: block.signerPublicKey,
-                    label:     'Unknown'
-                }
-                console.log(this.detailedBlockSigner)
-                this.areBlockDetailsShown = true
+                detailedBlockSigner = detailedBlockSigner || { publicKey: block.signerPublicKey }
+                let detailedBlockTransactions = this.transactions.filter(txn => txn.blockId == block.id)
+                let detailedBlockTransactionsSigners = this.signers.filter(
+                    signer => detailedBlockTransactions.find(txn => txn.signerPublicKey == signer.publicKey))
+                EventBus.$emit(SHOW_DETAILS, {
+                    type: BLOCK,
+                    data: block,
+                    props: {
+                        signer: detailedBlockSigner,
+                        transactions: detailedBlockTransactions,
+                        detailsProps: {
+                            signers: detailedBlockTransactionsSigners
+                        }
+                    }
+                })
+
             },
-            showSignerDetails (signer) {
-                this.areSignerDetailsShown = true
-            },
-            closeDetails () {
-                this.areBlockDetailsShown = false
-                this.detailedBlockSigner = {}
-            },
-            closeSignerDetails () {
-                this.areSignerDetailsShown = false
-            }
         },
         computed: {
-            ...mapGetters(SIGNERS, ['signers'])
+            ...mapGetters(BLOCKS, ['blocks']),
+            ...mapGetters(SIGNERS, ['signers']),
+            ...mapGetters(TRANSACTIONS, ['transactions']),
         },
         components: {
             BlockTile,
             SignerTile,
+            TransactionTile,
             DetailsDialog
         }
     }
