@@ -4,6 +4,7 @@ import Router from 'vue-router'
 import Auth from '@/layouts/Auth.vue'
 import Main from '@/layouts/Main.vue'
 import Blocks from '@/views/Blocks.vue'
+import Transactions from '@/views/Transactions.vue'
 import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import store from '@/store'
@@ -49,6 +50,9 @@ export default new Router({
         }, {
           path: 'txnFamilies',
           component: TxnFamilies
+        }, {
+          path: 'transactions',
+          component: Transactions
         }
       ]
     }

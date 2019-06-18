@@ -5,9 +5,10 @@ import auth from './auth'
 import signers from './signers'
 import txnFamilies from './txn-families'
 import blocks from './blocks'
+import transactions from './transactions'
 
-import { AUTH, BLOCKS, SIGNERS, TXN_FAMILIES, LOGOUT } from './constants'
-const modules = [AUTH, BLOCKS, SIGNERS, TXN_FAMILIES]
+import { AUTH, BLOCKS, TRANSACTIONS, SIGNERS, TXN_FAMILIES, LOGOUT } from './constants'
+const modules = [AUTH, BLOCKS, TRANSACTIONS, SIGNERS, TXN_FAMILIES]
 
 Vue.use(Vuex)
 
@@ -17,6 +18,7 @@ export default new Vuex.Store({
         signers,
         txnFamilies,
         blocks,
+        transactions,
         actions: {
             [LOGOUT]: ({commit, dispatch}) => {
                 modules.forEach(m => {

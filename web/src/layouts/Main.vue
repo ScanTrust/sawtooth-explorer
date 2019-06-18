@@ -1,23 +1,5 @@
 <template>
   <v-app id="inspire">
-<!--     <v-navigation-drawer
-      v-model="drawerRight"
-      fixed
-      right
-      clipped
-      app
-    >
-      <v-list dense>
-        <v-list-tile @click.stop="right = !right">
-          <v-list-tile-action>
-            <v-icon>exit_to_app</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>Open Temporary Drawer</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-navigation-drawer> -->
     <v-toolbar
       dark
       color="indigo"
@@ -31,7 +13,6 @@
       <v-spacer></v-spacer>
       <v-toolbar-title>Welcome, {{ username }}!</v-toolbar-title>
       <v-icon :style="{margin: '0px 10px 0px 20px'}" @click="logout">exit_to_app</v-icon>
-<!--       <v-toolbar-side-icon @click.stop="drawerRight = !drawerRight"></v-toolbar-side-icon> -->
     </v-toolbar>
     <v-navigation-drawer
       v-model="drawer"
@@ -61,18 +42,20 @@
       temporary
       fixed
     ></v-navigation-drawer>
-    <v-footer absolute dark color="indigo" class="white--text" app>
+    <v-footer fixed dark color="indigo" class="white--text" app>
       <span>&nbsp; ScanTrust</span>
       <v-spacer></v-spacer>
       <span>&copy; 2019 &nbsp;</span>
     </v-footer>
     <slot name="snackbar" />
+    <dialogs-manager></dialogs-manager>
   </v-app>
 </template>
 
 <script>
   import { mapState } from 'vuex'
   
+  import DialogsManager from '@/components/dialogs/DialogsManager'
   import { AUTH, LOGOUT, SIGNERS, LOAD } from '@/store/constants'
   
   export default {
@@ -85,19 +68,27 @@
       menuItems: [
         {
           to: '/',
-          iconName: 'home',
+          iconName: 'public',
           label: 'Home'
         }, {
+          to: '/state',
+          iconName: 'library_books',
+          label: 'State'
+        },  {
           to: '/blocks',
           iconName: 'filter_none',
           label: 'Blocks'
+        }, {
+          to: '/transactions',
+          iconName: 'card_travel',
+          label: 'Transactions'
         },  {
           to: '/signers',
-          iconName: 'people',
+          iconName: 'vpn_key',
           label: 'Signers'
         }, {
           to: '/txnFamilies',
-          iconName: 'settings_input_component',
+          iconName: 'memory',
           label: 'Transaction Families'
         },
       ]
@@ -115,6 +106,9 @@
             this.$router.push('/auth')
           })
       }
+    },
+    components: {
+      DialogsManager
     }
   }
 </script>
