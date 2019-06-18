@@ -4,5 +4,25 @@ export default {
             type: String,
             default: null
         },
+        username: {
+            type: String,
+            default: null
+        },
+        transactions: {
+            type: Array,
+            default: null
+        },
+        txnFamilies: {
+            type: Array,
+            default: null
+        },
+        signers: {
+            type: Array,
+            default: null
+        },
+        blocks: {
+            type: Array,
+            default: null
+        }
     }
 }

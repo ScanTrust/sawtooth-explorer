@@ -5,14 +5,12 @@
       v-model="snackbar"
       :left="true"
       :top="true"
-      :timeout="3000"
-    >
+      :timeout="3000">
       {{ snackbarText }}
       <v-btn
         color="indigo accent-1"
         flat
-        @click="snackbar = false"
-      >
+        @click="snackbar = false">
         Close
       </v-btn>
     </v-snackbar>

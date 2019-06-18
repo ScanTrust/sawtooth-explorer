@@ -47,6 +47,7 @@ export default {
                 http({ url: '/signers/add', data, method: 'POST'})
                     .then(resp => {
                         EventBus.$emit(SNACKBAR, resp.data)
+                        dispatch(LOAD)
                         resolve(resp)
                     })
                     .catch(err => {

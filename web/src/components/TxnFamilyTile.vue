@@ -2,7 +2,7 @@
     <v-list-tile class="tile">
         <v-list-tile-content @click="clicked">
             <v-list-tile-title v-html="txnFamily.addressPrefix"></v-list-tile-title>
-            <v-list-tile-sub-title v-html="txnFamily.label"></v-list-tile-sub-title>
+            <v-list-tile-sub-title v-html="txnFamily.label || 'Unknown'"></v-list-tile-sub-title>
         </v-list-tile-content>
     </v-list-tile>
 </template>

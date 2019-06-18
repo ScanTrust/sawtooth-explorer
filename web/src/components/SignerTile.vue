@@ -4,7 +4,7 @@
             <img :src="makeAvatar(signer.publicKey)">
         </v-list-tile-avatar>
         <v-list-tile-content @click="clicked">
-            <v-list-tile-title v-html="signer.label"></v-list-tile-title>
+            <v-list-tile-title v-html="signer.label || 'Unknown'"></v-list-tile-title>
         </v-list-tile-content>
     </v-list-tile>
 </template>
