@@ -28,10 +28,11 @@
         },
         methods: {
             clicked () {
-                this.$emit('showDetails')
+                this.$emit('showDetails', this.signer)
             },
             makeAvatar: makeAvatarBase64
-        }
+        },
+        
     }
 </script>
 

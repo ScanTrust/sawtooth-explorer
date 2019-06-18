@@ -28,7 +28,7 @@
         },
         methods: {
             clicked () {
-                this.$emit('showDetails')
+                this.$emit('showDetails', this.block)
             },
             makeAvatar: makeAvatarBase64
         }

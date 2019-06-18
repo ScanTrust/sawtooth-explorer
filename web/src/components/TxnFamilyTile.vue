@@ -24,7 +24,7 @@
         },
         methods: {
             clicked () {
-                this.$emit('showDetails')
+                this.$emit('showDetails', this.txnFamily)
             }
         }
     }
