@@ -53,6 +53,10 @@
         type: Boolean,
         default: false
       },
+      data: {
+        type: Object,
+        default: () => ({ })
+      }
     },
     methods: {
       add () {
@@ -69,6 +73,13 @@
     watch: {
       shown () {
         this.$refs.form.reset()
+      },
+      data () {
+        for (let field in data) {
+          if (data[field]) {
+            this[field] = data[field]
+          }
+        }
       }
     }
   }

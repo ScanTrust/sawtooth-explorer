@@ -53,6 +53,22 @@
         type: Boolean,
         default: false
       },
+      data: {
+        type: Object,
+        default: () => ({ })
+      }
+    },
+    watch: {
+      shown () {
+        this.$refs.form.reset()
+      },
+      data () {
+        for (let field in this.data) {
+          if (this.data[field]) {
+            this[field] = this.data[field]
+          }
+        }
+      }
     },
     methods: {
       add () {
@@ -66,11 +82,6 @@
         this.$emit('close')
       }
     },
-    watch: {
-      shown () {
-        this.$refs.form.reset()
-      }
-    }
   }
 </script>
 

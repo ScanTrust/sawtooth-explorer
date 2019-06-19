@@ -9,6 +9,8 @@
             :shown="detailsShown"
             :detailsData="details.data"
             :fieldNameToContent="details.fieldNameToContent"
+            :dataPresent="detailedDataPresent"
+            :changeable="datailedDataChangeable"
             @close="closeDetails">
                 <template v-if="detailsShown">
                     <!-- One of *-tile or *-list components,
@@ -38,11 +40,13 @@
         </edit-dialog>
         <signer-add
             :shown="signerAddShown"
+            :data="addData.signer"
             @close="signerAddShown = false"
             @add="addSigner">
         </signer-add>
         <txn-family-add
             :shown="txnFamilyAddShown"
+            :data="addData.txnSigner"
             @close="txnFamilyAddShown = false"
             @add="addTxnFamily">
         </txn-family-add>
@@ -65,12 +69,15 @@
     import {
         SHOW_DETAILS,
         SHOW_EDIT,
+        SHOW_ADD,
         SHOW_SIGNER_ADD,
         SHOW_TXN_FAMILY_ADD,
         SIGNERS,
+        TXN_FAMILIES,
         BLOCKS,
         TRANSACTIONS,
-        TXN_FAMILIES,
+        SIGNER,
+        TXN_FAMILY,
         ADD,
         EDIT,
     } from '@/store/constants'
@@ -96,6 +103,8 @@
                 props: {},
                 slots: []
             },
+            detailedDataPresent: false,
+            datailedDataChangeable: false,
             lastDetailedType: null,
 
             editData: {
@@ -104,10 +113,21 @@
                 uneditableFields: [],
                 editableFields: [],
             },
+
+            addData: {
+                signer: { },
+                txnFamily: { }
+            },
+
+            typeToEntityName: {
+                [SIGNER]: 'signer',
+                [TXN_FAMILY]: 'txnFamily',
+            }
         }),
         created () {
             EventBus.$on(SHOW_DETAILS, this.showDetails)
             EventBus.$on(SHOW_EDIT, this.showEdit)
+            EventBus.$on(SHOW_ADD, this.showAdd)
             EventBus.$on(SHOW_SIGNER_ADD, () => {
                 this.signerAddShown = true
             })
@@ -127,8 +147,10 @@
                 data
             }) {
                 this.lastDetailedType = type
-                this.detailsShown = false // TODO: check if this line is needed
+                // this.detailsShown = false // TODO: check if this line is needed
                 this.details.title = detailsConfig[type].title
+                this.datailedDataChangeable = editingConfig[type] !== undefined
+                this.detailedDataPresent = Object.keys(data).length > 1
                 this.details.data = data
                 this.details.fieldNameToContent = detailsConfig[type].fieldNameToContent
                 if (detailsConfig[type].slots && detailsConfig[type].slots.length > 0) {
@@ -176,6 +198,11 @@
                 }
                 this.editShown = true
             },
+            showAdd ({data}) {
+                const entityName = this.typeToEntityName[this.lastDetailedType]
+                this.addData[entityName] = data
+                this[`${entityName}AddShown`] = true
+            },
             closeDetails () {
                 this.detailsShown = false
             },
@@ -186,12 +213,19 @@
                 this.$store
                     .dispatch(typeToStoreNamespace[this.lastDetailedType] + EDIT, entity)
                     .then(this.closeDetails)
+                    .catch(this.closeDetails)
             },
             addSigner (signer) {
-                this.$store.dispatch(SIGNERS + ADD, signer)
+                this.$store
+                    .dispatch(SIGNERS + ADD, signer)
+                    .then(this.closeDetails)
+                    .catch(this.closeDetails)
             },
             addTxnFamily (txnFamily) {
-                this.$store.dispatch(TXN_FAMILIES + ADD, txnFamily)
+                this.$store
+                    .dispatch(TXN_FAMILIES + ADD, txnFamily)
+                    .then(this.closeDetails)
+                    .catch(this.closeDetails)
             }
         },
         computed: {
