@@ -1,7 +1,7 @@
 <template>
     <div class="pos-relative height-90-prc">
-        <v-container fill-height fluid pa-5 grid-list-xl>
-            <v-layout>
+        <v-container fluid pa-5 grid-list-xl>
+            <v-layout wrap>
                 <v-flex shrink xs12 sm6 md4 lg2 v-for="txnFamily in txnFamilies" :key="txnFamily.addressPrefix">
                     <txn-family-tile
                         :txnFamily="txnFamily"

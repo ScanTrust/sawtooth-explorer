@@ -1,6 +1,6 @@
 <template>
     <div class="pos-relative height-90-prc">
-        <v-container fill-height fluid pa-5 grid-list-xl>
+        <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
                 <v-flex shrink xs2 v-for="block in blocks" :key="block.id">
                     <block-tile
