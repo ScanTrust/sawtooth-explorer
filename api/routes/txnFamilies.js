@@ -38,7 +38,7 @@ router.post('/add', function(req, res, next) {
 
 router.post('/edit', function(req, res, next) {
   TxnFamily._upsert({
-    addressPrefix: req.body.addressPrefix,
+    addressPrefix: req.body.prefix,
     label: req.body.label
   }, (ok, msg) => {
     return res.status(ok ? 200 : 500).json({ ok, message: msg })
