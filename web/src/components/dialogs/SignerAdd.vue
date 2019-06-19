@@ -45,8 +45,8 @@
     data: () => ({
       publicKey: '',
       label: '',
-      rules: rules,
-      dataIsCorrect: false
+      dataIsCorrect: false,
+      rules,
     }),
     props: {
       shown: {

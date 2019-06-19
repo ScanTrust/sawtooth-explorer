@@ -7,7 +7,8 @@ import {
     LOGOUT,
 
     LOAD,
-    ADD
+    ADD,
+    EDIT,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
@@ -45,6 +46,20 @@ export default {
         [ADD]: ({commit, dispatch}, data) => {
             return new Promise((resolve, reject) => {
                 http({ url: '/signers/add', data, method: 'POST'})
+                    .then(resp => {
+                        EventBus.$emit(SNACKBAR, resp.data)
+                        dispatch(LOAD)
+                        resolve(resp)
+                    })
+                    .catch(err => {
+                        EventBus.$emit(SNACKBAR, err.response.data)
+                        reject(err)
+                    })
+            })
+        },
+        [EDIT]: ({commit, dispatch}, data) => {
+            return new Promise((resolve, reject) => {
+                http({ url: '/signers/edit', data, method: 'POST' })
                     .then(resp => {
                         EventBus.$emit(SNACKBAR, resp.data)
                         dispatch(LOAD)

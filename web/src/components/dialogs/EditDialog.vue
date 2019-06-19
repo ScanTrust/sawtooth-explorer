@@ -6,29 +6,35 @@
       </v-card-title>
       <v-card-text>
         <v-container grid-list-md>
-            <v-layout wrap v-if="displayedFields.length > 0">
-                <template v-for="field in displayedFields">
-                    <v-flex xs12 :key="`${field.label}-label`">
+            <v-layout wrap v-if="uneditableFields.length > 0">
+                <template v-for="field in uneditableFields">
+                    <v-flex xs12 :key="`${field.name}-label`">
                         <span class="body-2">{{field.label}}</span>
                     </v-flex>
-                    <v-flex xs11 mx-auto :key="`${field.label}-value`">
-                        <slot v-if="field.tagName" :name="field.tagName"></slot>
-                        <span v-else class="subheading">{{field.value || 'Unknown'}}</span>
+                    <v-flex xs11 mx-auto :key="`${field.name}-value`">
+                        <span class="subheading">{{data[field.name] || 'Unknown'}}</span>
                     </v-flex>
                 </template>
             </v-layout>
-            <v-layout wrap v-else justify-center align-center fill-height>
-                <v-flex xs4>
-                    <h3 style="color: grey" class="unselectable">No data :(</h3>
+            <v-layout wrap v-if="editableFields.length > 0">
+                <v-flex xs12>
+                    <v-form v-model="dataIsCorrect" ref="form">
+                        <v-flex xs12 v-for="field in editableFields" :key="field.name">
+                            <v-text-field @keyup.enter="edit" 
+                                        :label="field.label"
+                                        v-model="editedData[field.name]"
+                                        :rules="field.rules">
+                            </v-text-field>
+                        </v-flex>
+                    </v-form>
                 </v-flex>
-          </v-layout>
+            </v-layout>
         </v-container>
       </v-card-text>
       <v-card-actions>
-        <v-btn v-if="dataPresent" color="blue darken-1" flat @click.native="edit">Edit</v-btn>
-        <v-btn v-else color="blue darken-1" flat @click.native="add">Add</v-btn>
         <v-spacer></v-spacer>
-        <v-btn color="blue darken-1" flat @click.native="$emit('close')">Close</v-btn>
+        <v-btn color="blue darken-1" flat @click.native="close">Cancel</v-btn>
+        <v-btn color="blue darken-1" flat @click.native="edit" :disabled="!dataIsCorrect">Edit</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -36,12 +42,12 @@
 
 <script>
     import { EventBus } from '@/lib/event-bus'
-    import { SHOW_EDIT } from '@/store/constants'
 
     export default {
-        name: 'details-dialog',
+        name: 'edit-dialog',
         data: () => ({
-
+            editedData: {},
+            dataIsCorrect: false,
         }),
         props: {
             title: {
@@ -52,17 +58,33 @@
                 type: Boolean,
                 default: false
             },
-            dataPresent: {
-                type: Boolean,
-                default: false
-            },
-            detailsData: {
+            data: {
                 type: Object,
                 default: null
             },
-            fieldNameToContent: {
-                type: Object,
-                default: () => ({})
+            uneditableFields: {
+                type: Array,
+                default: () => []
+            },
+            editableFields: {
+                type: Array,
+                default: () => []
+            }
+        },
+        watch: {
+            shown () {
+                if (this.$refs.form)
+                    this.$refs.form.reset()
+            },
+            uneditableFields () {
+                this.uneditableFields.forEach(field => {
+                    this.editedData[field.name] = this.data[field.name]
+                })
+            },
+            editableFields () {
+                this.editableFields.forEach(field => {
+                    this.editedData[field.name] = this.data[field.name]
+                })
             }
         },
         computed: {
@@ -93,10 +115,11 @@
         },
         methods: {
             edit () {
-                EventBus.$emit(SHOW_EDIT, { data: this.detailsData })
+                this.$emit('edit', this.editedData)
+                this.close()
             },
-            add () {
-                EventBus.$emit(SHOW_EDIT, { data: this.detailsData })
+            close () {
+                this.$emit('close')
             }
         }
     }

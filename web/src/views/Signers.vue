@@ -33,7 +33,6 @@
         SHOW_SIGNER_ADD,
         SIGNER
     } from '@/store/constants'
-    import { signerFieldNameToContent } from '@/lib/display-config'
     import { EventBus } from '@/lib/event-bus'
 
     export default {

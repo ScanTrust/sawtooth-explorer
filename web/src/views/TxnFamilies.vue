@@ -21,35 +21,26 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex'
+
     import TxnFamilyTile from '@/components/TxnFamilyTile'
     import TxnFamilyAdd from '@/components/dialogs/TxnFamilyAdd'
     import DetailsDialog from '@/components/dialogs/DetailsDialog'
-    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY } from '@/store/constants'
+    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY, SHOW_DETAILS } from '@/store/constants'
+    import { EventBus } from '@/lib/event-bus'
 
     export default {
         name: 'TxnFamilies',
-        data: () => ({
-            txnFamilies: [],
-            details: {
-                title: 'Signer',
-                fields: []
-            },
-            areDetailsShown: false,
-            txnFamilyFieldNameToContent: {
-                addressPrefix: 'Address prefix',
-                label: 'Label',
-            },
-            txnFamilyAdding: false,
-        }),
+        data: () => ({ }),
         created () {
             this.load()
+        },
+        computed: {
+            ...mapGetters(TXN_FAMILIES, ['txnFamilies'])
         },
         methods: {
             load () {
                 this.$store.dispatch(TXN_FAMILIES + LOAD)
-                    .then((txnFamilies) => {
-                        this.txnFamilies = txnFamilies
-                    })
             },
             showDetails (txnFamily) {
                 EventBus.$emit(SHOW_DETAILS, {
@@ -57,16 +48,8 @@
                     data: txnFamily
                 })
             },
-            closeDetails () {
-                this.areDetailsShown = false
-                this.details.fields = []
-            },
             showAdd () {
-                this.txnFamilyAdding = true
-            },
-            add (txnFamily) {
-                this.$store.dispatch(TXN_FAMILIES + ADD, txnFamily)
-                    .then(this.load)
+                EventBus.$emit(SHOW_TXN_FAMILY_ADD)
             }
         },
         components: {

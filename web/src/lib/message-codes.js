@@ -1,5 +1,6 @@
 export default {
     'default_error': 'Unknown error.',
+    'unknown_error': 'Unknown error.',
     'registration_successful': 'Registration successful!',
     'no_user_with_such_username': 'No user with such username.',
     'login_failed': 'Login failed.',
@@ -10,5 +11,7 @@ export default {
     'has_user_with_such_username': 'Has user with such username.',
     'added_signer': 'Added signer!',
     'added_txn_family': 'Added transaction family!',
-    'has_transaction_family_with_such_prefix_or_label': 'Has transaction family with such prefix or label.'
+    'has_transaction_family_with_such_prefix_or_label': 'Has transaction family with such prefix or label.',
+    'updated_transaction_family': 'Updated transaction family!',
+    'updated_signer': 'Updated signer!',
 }

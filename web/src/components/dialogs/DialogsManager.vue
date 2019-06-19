@@ -11,10 +11,10 @@
             :fieldNameToContent="details.fieldNameToContent"
             @close="closeDetails">
                 <template v-if="detailsShown">
-                    <!-- One of *-tile components,
+                    <!-- One of *-tile or *-list components,
                         depending on what is detailed right now
                         (i.e. what details.slots it has) -->
-                    <component 
+                    <component
                         v-for="slot in details.slots"
                         :key="slot.tagName"
                         :is="slot.tagName"
@@ -27,6 +27,15 @@
                     </component>
                 </template>
         </details-dialog>
+        <edit-dialog
+            :title="editData.title"
+            :shown="editShown"
+            :data="editData.editedEntity"
+            :uneditableFields="editData.uneditableFields"
+            :editableFields="editData.editableFields"
+            @close="closeEdit"
+            @edit="editEntity">
+        </edit-dialog>
         <signer-add
             :shown="signerAddShown"
             @close="signerAddShown = false"
@@ -44,6 +53,7 @@
     import { mapGetters } from 'vuex'
 
     import DetailsDialog from './DetailsDialog'
+    import EditDialog from './EditDialog'
     import SignerAdd from './SignerAdd'
     import TxnFamilyAdd from './TxnFamilyAdd'
     import BlockTile from '@/components/BlockTile'
@@ -54,6 +64,7 @@
     import { EventBus } from '@/lib/event-bus'
     import {
         SHOW_DETAILS,
+        SHOW_EDIT,
         SHOW_SIGNER_ADD,
         SHOW_TXN_FAMILY_ADD,
         SIGNERS,
@@ -61,13 +72,20 @@
         TRANSACTIONS,
         TXN_FAMILIES,
         ADD,
+        EDIT,
     } from '@/store/constants'
-    import { detailsConfig } from '@/lib/display-config'
+    import {
+        detailsConfig,
+        editingConfig,
+        entityNameToFieldsConfig,
+        typeToStoreNamespace,
+    } from '@/lib/display-config'
 
     export default {
         name: 'dialogs',
         data: () => ({
             detailsShown: false,
+            editShown: false,
             signerAddShown: false,
             txnFamilyAddShown: false,
 
@@ -76,11 +94,20 @@
                 fieldNameToContent: {},
                 data: {},
                 props: {},
-                slots: [ ]
+                slots: []
+            },
+            lastDetailedType: null,
+
+            editData: {
+                title: 'Unknown',
+                editedEntity: {},
+                uneditableFields: [],
+                editableFields: [],
             },
         }),
         created () {
             EventBus.$on(SHOW_DETAILS, this.showDetails)
+            EventBus.$on(SHOW_EDIT, this.showEdit)
             EventBus.$on(SHOW_SIGNER_ADD, () => {
                 this.signerAddShown = true
             })
@@ -89,7 +116,7 @@
             })
         },
         methods: {
-            /* 
+            /*
              * Options:
              *   type  -- string like "TRANSACTION", "BLOCK", "SIGNER", "TXN_FAMILY",
              *            initially passed as constant imported from @/store/constants
@@ -99,7 +126,8 @@
                 type,
                 data
             }) {
-                this.detailsShown = false
+                this.lastDetailedType = type
+                this.detailsShown = false // TODO: check if this line is needed
                 this.details.title = detailsConfig[type].title
                 this.details.data = data
                 this.details.fieldNameToContent = detailsConfig[type].fieldNameToContent
@@ -128,24 +156,53 @@
                 }
                 this.detailsShown = true
             },
+            showEdit ({data}) {
+                const editConfig = editingConfig[this.lastDetailedType]
+                this.editData.title = `Edit ${editConfig.title}`
+                this.editData.editedEntity = data
+                this.editData.editableFields.splice(0, this.editData.editableFields.length)
+                this.editData.uneditableFields.splice(0, this.editData.uneditableFields.length)
+                for (let fieldName in entityNameToFieldsConfig[this.lastDetailedType]) { // populating this.editData.editableFields and ..uneditableFields
+                    const editableField = editConfig.editableFields.find(field => field.name == fieldName)
+                    const accordingFieldsArray = this.editData[ // it's by ref.
+                        editableField ? 'editableFields' : 'uneditableFields'
+                    ]
+                    const label = entityNameToFieldsConfig[this.lastDetailedType][fieldName]
+                    accordingFieldsArray.push({
+                        label: label,
+                        name: fieldName,
+                        rules: editableField ? editableField.rules : null
+                    })
+                }
+                this.editShown = true
+            },
             closeDetails () {
                 this.detailsShown = false
+            },
+            closeEdit () {
+                this.editShown = false
+            },
+            editEntity (entity) {
+                this.$store
+                    .dispatch(typeToStoreNamespace[this.lastDetailedType] + EDIT, entity)
+                    .then(this.closeDetails)
             },
             addSigner (signer) {
                 this.$store.dispatch(SIGNERS + ADD, signer)
             },
             addTxnFamily (txnFamily) {
-                this.$store.dispatch(TXN_FAMILIES + ADD, txnFamily)                
+                this.$store.dispatch(TXN_FAMILIES + ADD, txnFamily)
             }
         },
         computed: {
             ...mapGetters(SIGNERS, ['signers']),
             ...mapGetters(BLOCKS, ['blocks']),
-            ...mapGetters(TRANSACTIONS, ['transactions']),  
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),  
+            ...mapGetters(TRANSACTIONS, ['transactions']),
+            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
         },
         components: {
             DetailsDialog,
+            EditDialog,
             SignerAdd,
             TxnFamilyAdd,
             BlockTile,
