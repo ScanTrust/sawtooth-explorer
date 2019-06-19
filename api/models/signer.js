@@ -17,21 +17,29 @@ let Signer = new Schema({
 Signer = mongoose.model('Signer', Signer);
 
 Signer._create = (signer, callback) => {
+    callback = callback || (() => {})
     Signer.create(signer, err => {
         if (err) {
-            console.log("Err on creating signer:", err);
+            console.log('Err on creating signer:', err);
             if (err.code == 11000 && callback)
-                return callback(false, "has_signer_with_such_public_key_or_label")
+                return callback(false, 'has_signer_with_such_public_key_or_label')
+            return callback(false, 'unknown_error')
         }
-        if (callback)
-            callback(true, 'added_signer')
+        callback(true, 'added_signer')
     });
 };
 
 Signer._upsert = function (signer, callback) {
+    callback = callback || (() => {})
     Signer.findOneAndUpdate({
         publicKey: signer.publicKey
-    }, signer, { upsert: true }, callback)
+    }, signer, { upsert: true }, err => {
+        if (err) {
+            console.log('Err on upserting signer:', err)
+            return callback(false, 'unknown_error')
+        }
+        callback(true, 'updated_signer')
+    })
 }
 
 function upsertAll(signers, callback) {
@@ -48,7 +56,7 @@ Signer._upsertAll = upsertAll;
 Signer._get = function (params, callback) {
     Signer.find(deleteEmptyArrayFields(params), function (err, signers) {
         if (err)
-            console.log("Err on getting from signers:", err);
+            console.log('Err on getting from signers:', err);
         callback(signers);
     });
 }

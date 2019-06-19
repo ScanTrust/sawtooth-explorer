@@ -15,7 +15,7 @@ router.get('/', function(req, res, next) {
   })
 });
 
-router.post('/add', passport.authenticate('jwt', {session: false}), [
+router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
   check('publicKey').isLength({min: 66, max: 66}),
   check('label').exists()
 ], function(req, res, next) {
@@ -28,6 +28,15 @@ router.post('/add', passport.authenticate('jwt', {session: false}), [
 
 router.post('/add', function(req, res, next) {
   Signer._create({
+    publicKey: req.body.publicKey,
+    label: req.body.label
+  }, (ok, msg) => {
+    return res.status(ok ? 200 : 500).json({ ok, message: msg })
+  })
+});
+
+router.post('/edit', function(req, res, next) {
+  Signer._upsert({
     publicKey: req.body.publicKey,
     label: req.body.label
   }, (ok, msg) => {

@@ -29,9 +29,16 @@ TxnFamily._create = (txnFamily, callback) => {
 };
 
 TxnFamily._upsert = function (txnFamily, callback) {
+    callback = callback || (() => {})
     TxnFamily.findOneAndUpdate({
         addressPrefix: txnFamily.addressPrefix
-    }, txnFamily, { upsert: true }, callback)
+    }, txnFamily, { upsert: true }, err => {
+        if (err) {
+            console.log('Err on upserting txnFamily:', err)
+            return callback(false, 'unknown_error')
+        }
+        callback(true, 'updated_transaction_family')
+    })
 }
 
 function upsertAll(txnFamilies, callback) {
