@@ -100,8 +100,8 @@
       ...mapState(AUTH, ['username'])
     },
     methods: {
-      logout: function () {
-        this.$store.dispatch(LOGOUT)
+      logout () {
+        this.$store.dispatch(AUTH + LOGOUT)
           .then(() => {
             this.$router.push('/auth')
           })

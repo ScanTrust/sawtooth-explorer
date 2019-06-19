@@ -18,13 +18,6 @@ export default new Vuex.Store({
         signers,
         txnFamilies,
         blocks,
-        transactions,
-        actions: {
-            [LOGOUT]: ({commit, dispatch}) => {
-                modules.forEach(m => {
-                    dispatch(m + LOGOUT)
-                })
-            }
-        }
+        transactions
     }
 })

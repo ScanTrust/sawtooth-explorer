@@ -12,6 +12,9 @@ import {
     LOGOUT,
     
     SIGNERS,
+    TXN_FAMILIES,
+    BLOCKS,
+    TRANSACTIONS,
 } from './constants'
 import { EventBus } from '@/lib/event-bus.js';
 
@@ -80,7 +83,10 @@ export default {
         [LOGOUT]: ({commit, dispatch}) => {
             return new Promise((resolve, reject) => {
                 commit(LOGOUT)
-                commit(SIGNERS + LOGOUT)
+                commit(SIGNERS + LOGOUT, null, { root: true })
+                commit(TXN_FAMILIES + LOGOUT, null, { root: true })
+                commit(BLOCKS + LOGOUT, null, { root: true })
+                commit(TRANSACTIONS + LOGOUT, null, { root: true })
                 Vue.storage.set('userToken', '')
                 delete http.defaults.headers.common['Authorization']
                 resolve()
