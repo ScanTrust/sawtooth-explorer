@@ -16,7 +16,7 @@ router.get('/', function(req, res, next) {
     })
 });
 
-router.post('/add', passport.authenticate('jwt', {session: false}), [
+router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
     check('prefix').isLength({min: 6, max: 6}),
     check('label').exists()
 ], function(req, res, next) {
