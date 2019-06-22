@@ -38,10 +38,13 @@ export default {
       this.snackbar = true
     }
   },
-  created () {
+  mounted () {
     EventBus.$on(SNACKBAR, data => {
       this.showSnackbar(data)
     })
+  },
+  beforeDestroy () {
+    EventBus.$off(SNACKBAR)
   }
 }
 </script>
