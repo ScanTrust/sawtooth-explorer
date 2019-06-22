@@ -51,8 +51,8 @@ export default {
     position: relative;
   }
 
-  .height-90-prc {
-    height: 90%;
+  .height-85-prc {
+    height: 85%;
   }
 
   .unselectable { 

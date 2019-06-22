@@ -67,12 +67,12 @@ function handleBlockCommit (blockchainId, blockCommit) {
     applyDeltasToDB(blockchainId, stateDeltas[topBlock.block_id])
 }*/
 
-function handleDelta (stateDelta, correspondingBlockId) {
+function handleDelta (stateDelta, correspondingBlockId, isFresh) {
   const stateChangeList = decodeStateChangeList(stateDelta.data).stateChanges
   const stateElements = stateChangeList.map(delta => ({ // delta = {value: .., address: .., type: ..}
     address: delta.address,
     data: delta.type == 1 ? delta.value : null,
-    createdAt: new Date(),
+    createdAt: isFresh ? new Date() : null,
     blockId: correspondingBlockId // maybe it should have blockId instead...
   }))
   StateElement._create(stateElements)

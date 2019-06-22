@@ -17,7 +17,7 @@ router.get('/', function(req, res, next) {
 });
 
 router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
-    check('prefix').isLength({min: 6, max: 6}),
+    check('addressPrefix').isLength({min: 6, max: 6}),
     check('label').exists()
 ], function(req, res, next) {
     const errors = validationResult(req);
@@ -29,7 +29,7 @@ router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
 
 router.post('/add', function(req, res, next) {
     TxnFamily._create({
-        addressPrefix: req.body.prefix,
+        addressPrefix: req.body.addressPrefix,
         label: req.body.label
     }, (ok, msg) => {
         res.status(ok ? 200 : 500).json({ ok, message: msg });
@@ -38,7 +38,7 @@ router.post('/add', function(req, res, next) {
 
 router.post('/edit', function(req, res, next) {
   TxnFamily._upsert({
-    addressPrefix: req.body.prefix,
+    addressPrefix: req.body.addressPrefix,
     label: req.body.label
   }, (ok, msg) => {
     return res.status(ok ? 200 : 500).json({ ok, message: msg })

@@ -18,6 +18,10 @@ const { blockchain } = require('@root/config')
 const zmq = require('zeromq')
 let blockchainSocket
 
+let handlingCatchUp = false;
+let justStartedCatchUp = false;
+let lastStateDeltaHandleDate = null;
+
 function subscribeToBlockchainEvents (handlers, callback) {
 	blockchainSocket = zmq.socket('dealer')
 	const validatorUrl = blockchain.VALIDATOR_URL
@@ -43,6 +47,11 @@ function subscribeToBlockchainEvents (handlers, callback) {
 				if (i % 2 == 0) {
 					handlers.blockCommit(events[i])
 				} else {
+					const secondsSinceLastStateDeltaHandle = (new Date() - lastStateDeltaHandleDate) / 1000
+					if (!justStartedCatchUp && secondsSinceLastStateDeltaHandle > 0.1)
+						handlingCatchUp = false
+					lastStateDeltaHandleDate = new Date()
+					justStartedCatchUp = false
 					const correspondingBlockId = events[i - 1].attributes[0].value
 					if (!correspondingBlockId)
 						console.log(
@@ -51,19 +60,21 @@ function subscribeToBlockchainEvents (handlers, callback) {
 							events[i - 1].attributes,
 							events[i - 1].attributes[0]
 						)
-					handlers.stateDelta(events[i], correspondingBlockId)
+					handlers.stateDelta(events[i], correspondingBlockId, !handlingCatchUp)
 				}
 			}
 		}
 	})
 	Block._getWithMaxNumber(function (maxNumberBlock) {
 		maxNumberBlock = maxNumberBlock || {id: '0000000000000000'} // initial block id
-		console.log(`subscribing for ${validatorUrl} block-commit events and requesting event catch-up since block: ${maxNumberBlock}`)
-		blockchainSocket.send(makeSubReqMessage([maxNumberBlock.id]), undefined, callback)
+		console.log(`subscribing for ${validatorUrl} block-commit events and requesting event catch-up since block`, maxNumberBlock)
+		requestEventCatchUp([maxNumberBlock.id], callback)
 	})
 }
 
 function requestEventCatchUp (lastKnownBlockIds, callback) {
+	handlingCatchUp = true
+	justStartedCatchUp = true
 	blockchainSocket.send(
 		makeSubReqMessage(lastKnownBlockIds),
 		undefined,
