@@ -48,6 +48,7 @@ export default {
                 http({ url: '/txnFamilies/add', data, method: 'POST'})
                     .then(resp => {
                         EventBus.$emit(SNACKBAR, resp.data)
+                        dispatch(LOAD)
                         resolve(resp)
                     })
                     .catch(err => {

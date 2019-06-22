@@ -28,7 +28,7 @@ export default {
                 http({ url: '/transactions', data: query, method: 'GET' })
                     .then(resp => {
                         const transactions = resp.data.reverse().map(txn => {
-                            txn.payload = Buffer(txn.payload).toString()
+                            txn.payload = Buffer(txn.payload).toString('base64')
                             return txn
                         })
                         Vue.storage.set('transactions', JSON.stringify(transactions))
