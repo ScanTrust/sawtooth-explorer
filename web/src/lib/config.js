@@ -23,6 +23,10 @@ export default {
         blocks: {
             type: Array,
             default: null
+        },
+        stateElements: {
+            type: Array,
+            default: null
         }
     }
 }

@@ -5,6 +5,7 @@ import Auth from '@/layouts/Auth.vue'
 import Main from '@/layouts/Main.vue'
 import Blocks from '@/views/Blocks.vue'
 import Transactions from '@/views/Transactions.vue'
+import StateElements from '@/views/StateElements.vue'
 import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import store from '@/store'
@@ -53,6 +54,9 @@ export default new Router({
         }, {
           path: 'transactions',
           component: Transactions
+        }, {
+          path: 'state',
+          component: StateElements
         }
       ]
     }

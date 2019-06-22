@@ -6,9 +6,7 @@ import signers from './signers'
 import txnFamilies from './txn-families'
 import blocks from './blocks'
 import transactions from './transactions'
-
-import { AUTH, BLOCKS, TRANSACTIONS, SIGNERS, TXN_FAMILIES, LOGOUT } from './constants'
-const modules = [AUTH, BLOCKS, TRANSACTIONS, SIGNERS, TXN_FAMILIES]
+import stateElements from './state-elements'
 
 Vue.use(Vuex)
 
@@ -18,6 +16,7 @@ export default new Vuex.Store({
         signers,
         txnFamilies,
         blocks,
-        transactions
+        transactions,
+        stateElements
     }
 })
