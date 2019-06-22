@@ -1,12 +1,13 @@
 <template>
-    <div class="pos-relative height-90-prc">
+    <div class="pos-relative height-85-prc">
         <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
                 <v-flex shrink xs12 sm6 md4 lg2 v-for="signer in signers" :key="signer.publicKey">
-                    <signer-tile
-                        :signer="signer"
+                    <entity-tile
+                        :entity="signer"
+                        :type="SIGNER"
                         @showDetails="showDetails">
-                    </signer-tile>
+                    </entity-tile>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -23,22 +24,19 @@
 <script>
     import { mapGetters } from 'vuex'
 
-    import SignerTile from '@/components/SignerTile'
-    import SignerAdd from '@/components/dialogs/SignerAdd'
-    import DetailsDialog from '@/components/dialogs/DetailsDialog'
+    import EntityTile from '@/components/EntityTile'
     import {
+        SIGNER,
         SIGNERS,
         LOAD, ADD,
         SHOW_DETAILS,
         SHOW_SIGNER_ADD,
-        SIGNER
     } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
     export default {
         name: 'Signers',
-        data: () => ({
-        }),
+        data: () => ({ SIGNER }),
         created () {
             this.load()
         },
@@ -60,9 +58,7 @@
             }
         },
         components: {
-            SignerTile,
-            SignerAdd,
-            DetailsDialog
+            EntityTile,
         }
     }
 </script>

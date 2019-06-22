@@ -1,12 +1,13 @@
 <template>
-    <div class="pos-relative height-90-prc">
+    <div class="pos-relative height-85-prc">
         <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
                 <v-flex shrink xs12 sm6 md4 lg2 v-for="txnFamily in txnFamilies" :key="txnFamily.addressPrefix">
-                    <txn-family-tile
-                        :txnFamily="txnFamily"
+                    <entity-tile
+                        :entity="txnFamily"
+                        :type="TXN_FAMILY"
                         @showDetails="showDetails">
-                    </txn-family-tile>
+                    </entity-tile>
                 </v-flex>
             </v-layout>
         </v-container>
@@ -23,15 +24,13 @@
 <script>
     import { mapGetters } from 'vuex'
 
-    import TxnFamilyTile from '@/components/TxnFamilyTile'
-    import TxnFamilyAdd from '@/components/dialogs/TxnFamilyAdd'
-    import DetailsDialog from '@/components/dialogs/DetailsDialog'
-    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY, SHOW_DETAILS } from '@/store/constants'
+    import EntityTile from '@/components/EntityTile'
+    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY, SHOW_DETAILS, SHOW_TXN_FAMILY_ADD } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
     export default {
         name: 'TxnFamilies',
-        data: () => ({ }),
+        data: () => ({ TXN_FAMILY }),
         created () {
             this.load()
         },
@@ -53,9 +52,7 @@
             }
         },
         components: {
-            TxnFamilyTile,
-            TxnFamilyAdd,
-            DetailsDialog
+            EntityTile,
         }
     }
 </script>
