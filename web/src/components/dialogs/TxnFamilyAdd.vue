@@ -61,7 +61,7 @@
     methods: {
       add () {
         this.$emit('add', {
-          prefix: this.addressPrefix,
+          addressPrefix: this.addressPrefix,
           label: this.label
         })
         this.close()
@@ -75,9 +75,9 @@
         this.$refs.form.reset()
       },
       data () {
-        for (let field in data) {
-          if (data[field]) {
-            this[field] = data[field]
+        for (let field in this.data) {
+          if (this.data[field]) {
+            this[field] = this.data[field]
           }
         }
       }
