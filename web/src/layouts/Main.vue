@@ -21,27 +21,38 @@
       app
     >
       <v-list dense>
-        <v-list-tile v-for="item in menuItems" :key="item.to" :to="item.to">
-          <v-list-tile-action>
-            <v-icon>{{ item.iconName }}</v-icon>
-          </v-list-tile-action>
-          <v-list-tile-content>
-            <v-list-tile-title>{{ item.label }}</v-list-tile-title>
-          </v-list-tile-content>
-        </v-list-tile>
+        <template v-for="(item, i) in menuItems">
+          <v-flex v-if="item.heading" :key="i" xs6>
+            <v-subheader v-if="item.heading">
+              {{ item.heading }}
+            </v-subheader>
+          </v-flex>
+          <v-divider
+            v-else-if="item.divider" class="my-3" :key="i" />
+          <v-list-tile v-else-if="item.to" :key="i" :to="item.to">
+            <v-list-tile-action>
+              <v-icon>{{ item.iconName }}</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ item.label }}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+          <v-list-tile v-else-if="item.event" :key="i" @click="emitEvent(item.event)">
+            <v-list-tile-action>
+              <v-icon>{{ item.iconName }}</v-icon>
+            </v-list-tile-action>
+            <v-list-tile-content>
+              <v-list-tile-title>{{ item.label }}</v-list-tile-title>
+            </v-list-tile-content>
+          </v-list-tile>
+        </template>
       </v-list>
     </v-navigation-drawer>
     <v-content>
-      <filters/>
+      
       <router-view/>
-    
+
     </v-content>
-    <v-navigation-drawer
-      v-model="right"
-      right
-      temporary
-      fixed
-    ></v-navigation-drawer>
     <v-footer fixed dark color="indigo" class="white--text" app>
       <span>&nbsp; ScanTrust</span>
       <v-spacer></v-spacer>
@@ -56,16 +67,13 @@
   import { mapState } from 'vuex'
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
-  import Filters from '@/components/Filters'
-  import { AUTH, LOGOUT, SIGNERS, LOAD } from '@/store/constants'
+  import { EventBus } from '@/lib/event-bus'
+  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS } from '@/store/constants'
   
   export default {
     name: 'Main',
     data: () => ({
-      drawer: false,
-      drawerRight: false,
-      right: false,
-      left: false,
+      drawer: true,
       menuItems: [
         {
           to: '/',
@@ -91,7 +99,15 @@
           to: '/txnFamilies',
           iconName: 'memory',
           label: 'Transaction Families'
-        },
+        }, {
+          divider: true
+        }, {
+          heading: 'SEARCH'
+        }, {
+          event: SHOW_FILTERS,
+          iconName: 'find_in_page',
+          label: 'Filters'
+        }
       ]
     }),
     props: {
@@ -106,11 +122,13 @@
           .then(() => {
             this.$router.push('/auth')
           })
+      },
+      emitEvent (event) {
+        EventBus.$emit(event)
       }
     },
     components: {
       DialogsManager,
-      Filters
     }
   }
 </script>

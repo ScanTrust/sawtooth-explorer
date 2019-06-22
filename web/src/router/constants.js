@@ -1,0 +1,7 @@
+export const AUTH_PATH = '/auth'
+export const ROOT_PATH = '/'
+export const BLOCKS_PATH = '/blocks'
+export const SIGNERS_PATH = '/signers'
+export const TXN_FAMILIES_PATH = '/txnFamilies'
+export const TRANSACTIONS_PATH = '/transactions'
+export const STATE_PATH = '/state'

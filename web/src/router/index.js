@@ -10,6 +10,15 @@ import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import store from '@/store'
 import { AUTH } from '@/store/constants'
+import {
+  AUTH_PATH,
+  ROOT_PATH,
+  BLOCKS_PATH,
+  SIGNERS_PATH,
+  TXN_FAMILIES_PATH,
+  TRANSACTIONS_PATH,
+  STATE_PATH,
+} from './constants'
 
 Vue.use(Router)
 
@@ -18,7 +27,7 @@ const ifNotAuthenticated = (to, from, next) => {
     next()
     return
   }
-  next('/')
+  next(ROOT_PATH)
 }
 
 const ifAuthenticated = (to, from, next) => {
@@ -26,36 +35,36 @@ const ifAuthenticated = (to, from, next) => {
     next()
     return
   }
-  next('/auth')
+  next(AUTH_PATH)
 }
 
 export default new Router({
   routes: [
     {
-      path: '/auth',
+      path: AUTH_PATH,
       name: 'auth',
       component: Auth,
       beforeEnter: ifNotAuthenticated
     }, {
-      path: '/',
+      path: ROOT_PATH,
       name: 'main',
       component: Main,
       beforeEnter: ifAuthenticated,
       children: [
         {
-          path: 'blocks',
+          path: BLOCKS_PATH,
           component: Blocks
         }, {
-          path: 'signers',
+          path: SIGNERS_PATH,
           component: Signers
         }, {
-          path: 'txnFamilies',
+          path: TXN_FAMILIES_PATH,
           component: TxnFamilies
         }, {
-          path: 'transactions',
+          path: TRANSACTIONS_PATH,
           component: Transactions
         }, {
-          path: 'state',
+          path: STATE_PATH,
           component: StateElements
         }
       ]

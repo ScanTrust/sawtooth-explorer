@@ -51,6 +51,10 @@
             @close="txnFamilyAddShown = false"
             @add="addTxnFamily">
         </txn-family-add>
+        <filters-dialog
+            :shown="filtersShown"
+            @close="filtersShown = false">
+        </filters-dialog>
     </div>
 </template>
 
@@ -59,12 +63,13 @@
 
     import DetailsDialog from './DetailsDialog'
     import EditDialog from './EditDialog'
+    import FiltersDialog from './FiltersDialog'
     import SignerAdd from './SignerAdd'
     import TxnFamilyAdd from './TxnFamilyAdd'
     import EntityTile from '@/components/EntityTile'
     import EntitiesList from '@/components/EntitiesList'
     import TransactionsList from '@/components/TransactionsList'
-    
+
     import { EventBus } from '@/lib/event-bus'
     import {
         SHOW_DETAILS,
@@ -72,6 +77,7 @@
         SHOW_ADD,
         SHOW_SIGNER_ADD,
         SHOW_TXN_FAMILY_ADD,
+        SHOW_FILTERS,
         SIGNERS,
         TXN_FAMILIES,
         BLOCKS,
@@ -96,6 +102,7 @@
             editShown: false,
             signerAddShown: false,
             txnFamilyAddShown: false,
+            filtersShown: false,
 
             details: {
                 title: 'Unknown',
@@ -125,7 +132,7 @@
                 [TXN_FAMILY]: 'txnFamily',
             }
         }),
-        created () {
+        mounted () {
             EventBus.$on(SHOW_DETAILS, this.showDetails)
             EventBus.$on(SHOW_EDIT, this.showEdit)
             EventBus.$on(SHOW_ADD, this.showAdd)
@@ -134,6 +141,9 @@
             })
             EventBus.$on(SHOW_TXN_FAMILY_ADD, () => {
                 this.txnFamilyAddShown = true
+            })
+            EventBus.$on(SHOW_FILTERS, () => {
+                this.filtersShown = true
             })
         },
         methods: {
@@ -239,9 +249,22 @@
             ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
             ...mapGetters(STATE_ELEMENTS, ['stateElements']),
         },
+        beforeDestroy () {
+            [
+                SHOW_DETAILS,
+                SHOW_EDIT,
+                SHOW_ADD,
+                SHOW_SIGNER_ADD,
+                SHOW_TXN_FAMILY_ADD,
+                SHOW_FILTERS
+            ].forEach(event => {
+                EventBus.$off(event)
+            })
+        },
         components: {
             DetailsDialog,
             EditDialog,
+            FiltersDialog,
             SignerAdd,
             TxnFamilyAdd,
             EntityTile,

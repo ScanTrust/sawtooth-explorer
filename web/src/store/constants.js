@@ -23,6 +23,7 @@ export const SHOW_EDIT = 'SHOW_EDIT'
 export const SHOW_ADD = 'SHOW_ADD'
 export const SHOW_SIGNER_ADD = 'SHOW_SIGNER_ADD'
 export const SHOW_TXN_FAMILY_ADD = 'SHOW_TXN_FAMILY_ADD'
+export const SHOW_FILTERS = 'SHOW_FILTERS'
 
 // types for SHOW_DETAILS
 export const TRANSACTION = 'TRANSACTION'
