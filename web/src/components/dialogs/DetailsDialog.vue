@@ -12,7 +12,7 @@
                                 <span class="body-2">{{field.label}}</span>
                             </v-flex>
                             <v-flex xs11 mx-auto :key="`${field.label}-value`">
-                                <slot v-if="field.tagName" :name="field.tagName"></slot>
+                                <slot v-if="field.tagName" :name="field.detailsType"></slot>
                                 <span v-else class="subheading">{{field.value || 'Unknown'}}</span>
                             </v-flex>
                         </template>
@@ -74,7 +74,6 @@
         computed: {
             displayedFields () {
                 const result = []
-                console.log(this.detailsData)
                 for (const field in this.fieldNameToContent) {
                     if (!this.detailsData) {
                         result.push({
@@ -91,7 +90,8 @@
                     } else {
                         result.push({
                             label: this.fieldNameToContent[field].label,
-                            tagName: this.fieldNameToContent[field].tagName
+                            tagName: this.fieldNameToContent[field].tagName,
+                            detailsType: this.fieldNameToContent[field].detailsType
                         })
                     }
                 }

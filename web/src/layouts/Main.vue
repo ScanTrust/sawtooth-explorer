@@ -32,8 +32,8 @@
       </v-list>
     </v-navigation-drawer>
     <v-content>
-
-      <router-view></router-view>
+      <filters/>
+      <router-view/>
     
     </v-content>
     <v-navigation-drawer
@@ -56,6 +56,7 @@
   import { mapState } from 'vuex'
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
+  import Filters from '@/components/Filters'
   import { AUTH, LOGOUT, SIGNERS, LOAD } from '@/store/constants'
   
   export default {
@@ -108,7 +109,8 @@
       }
     },
     components: {
-      DialogsManager
+      DialogsManager,
+      Filters
     }
   }
 </script>

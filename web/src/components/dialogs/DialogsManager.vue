@@ -13,14 +13,15 @@
             :changeable="datailedDataChangeable"
             @close="closeDetails">
                 <template v-if="detailsShown">
-                    <!-- One of *-tile or *-list components,
+                    <!-- Either entity-tile or transactions-list now,
                         depending on what is detailed right now
                         (i.e. what details.slots it has) -->
                     <component
                         v-for="slot in details.slots"
-                        :key="slot.tagName"
+                        :key="slot.detailsType"
                         :is="slot.tagName"
-                        :slot="slot.tagName"
+                        :slot="slot.detailsType"
+                        :type="slot.detailsType"
                         v-bind="slot.props"
                         @showDetails="showDetails({
                             type: slot.detailsType,
@@ -46,7 +47,7 @@
         </signer-add>
         <txn-family-add
             :shown="txnFamilyAddShown"
-            :data="addData.txnSigner"
+            :data="addData.txnFamily"
             @close="txnFamilyAddShown = false"
             @add="addTxnFamily">
         </txn-family-add>
@@ -60,11 +61,10 @@
     import EditDialog from './EditDialog'
     import SignerAdd from './SignerAdd'
     import TxnFamilyAdd from './TxnFamilyAdd'
-    import BlockTile from '@/components/BlockTile'
-    import SignerTile from '@/components/SignerTile'
-    import TransactionTile from '@/components/TransactionTile'
+    import EntityTile from '@/components/EntityTile'
+    import EntitiesList from '@/components/EntitiesList'
     import TransactionsList from '@/components/TransactionsList'
-    import TxnFamilyTile from '@/components/TxnFamilyTile'
+    
     import { EventBus } from '@/lib/event-bus'
     import {
         SHOW_DETAILS,
@@ -76,6 +76,7 @@
         TXN_FAMILIES,
         BLOCKS,
         TRANSACTIONS,
+        STATE_ELEMENTS,
         SIGNER,
         TXN_FAMILY,
         ADD,
@@ -147,7 +148,6 @@
                 data
             }) {
                 this.lastDetailedType = type
-                // this.detailsShown = false // TODO: check if this line is needed
                 this.details.title = detailsConfig[type].title
                 this.datailedDataChangeable = editingConfig[type] !== undefined
                 this.detailedDataPresent = Object.keys(data).length > 1
@@ -158,25 +158,29 @@
                     detailsConfig[type].slots.forEach(slotConfig => {
                         const slot = Object.assign({}, slotConfig)
                         slot.props = {}
-                        slot.propNames.forEach(propName => {
-                            // Need to fetch prop-value for this propName
-                            // from store using display-config.js and
-                            // passed data argument.
-                            const searchConfig = detailsConfig[type].slotPropNameToSearchConfig[propName]
-                            const entities = this[searchConfig.getterName]
-                            slot.props[propName] = entities[searchConfig.multiple ? 'filter' : 'find'](entity => {
-                                return entity[searchConfig.searchedEntityKey] == data[searchConfig.entityKey]
-                            }) || { [searchConfig.searchedEntityKey]: data[searchConfig.entityKey] }
-                            // Example of possible call above when
-                            // some values are substituted is
-                            // slot.props['signer'] = this.signers.find(
-                            //     signer => signer.puplicKey == data.signerPublicKey)
-                            // (data variable can contain a block or a transaction here)
-                        })
+                        slot.type = type
+                        for (let propName in slot.propNameToSearchConfig) {
+                            slot.props[propName] = this.fetchPropValue(propName, slot, data)
+                        }
                         this.details.slots.push(slot)
                     })
                 }
                 this.detailsShown = true
+            },
+            fetchPropValue (propName, slot, data) {
+                // Need to fetch prop-value for this propName
+                // from store using slot config and
+                // passed data argument.
+                let searchConfig = slot.propNameToSearchConfig[propName][slot.type]
+                const entities = this[searchConfig.getterName]
+                return entities[searchConfig.multiple ? 'filter' : 'find'](entity => {
+                    return entity[searchConfig.searchedEntityKey] == data[searchConfig.entityKey]
+                }) || { [searchConfig.searchedEntityKey]: data[searchConfig.entityKey] }
+                // Example of possible call above when
+                // some values are substituted is
+                // slot.props['signer'] = this.signers.find(
+                //     signer => signer.puplicKey == data.signerPublicKey)
+                // (data variable can contain a block or a transaction here)
             },
             showEdit ({data}) {
                 const editConfig = editingConfig[this.lastDetailedType]
@@ -233,17 +237,16 @@
             ...mapGetters(BLOCKS, ['blocks']),
             ...mapGetters(TRANSACTIONS, ['transactions']),
             ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
+            ...mapGetters(STATE_ELEMENTS, ['stateElements']),
         },
         components: {
             DetailsDialog,
             EditDialog,
             SignerAdd,
             TxnFamilyAdd,
-            BlockTile,
-            SignerTile,
-            TransactionTile,
+            EntityTile,
+            EntitiesList,
             TransactionsList,
-            TxnFamilyTile,
         }
     }
 </script>

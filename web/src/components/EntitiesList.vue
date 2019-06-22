@@ -1,10 +1,10 @@
 <template>
     <v-list>
         <entity-tile
-            v-for="transaction in transactions"
-            :key="transaction.id"
-            :entity="transaction"
-            :type="TRANSACTION"
+            v-for="entity in entities"
+            :key="entity._id"
+            :entity="entity"
+            :type="type"
             @showDetails="showDetails">
         </entity-tile>
     </v-list>
@@ -12,15 +12,18 @@
 
 <script>
     import EntityTile from './EntityTile'
-    import { TRANSACTION } from '@/store/constants'
 
     export default {
-        name: 'transactions-list',
-        data: () => ({ TRANSACTION }),
+        name: 'entities-list',
+        data: () => ({ }),
         props: {
-            transactions: {
+            entities: {
                 type: Array,
                 default: () => ([ ])
+            },
+            type: {
+                type: String,
+                required: true
             }
         },
         methods: {
