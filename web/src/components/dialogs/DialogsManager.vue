@@ -13,7 +13,7 @@
             :changeable="datailedDataChangeable"
             @close="closeDetails">
                 <template v-if="detailsShown">
-                    <!-- Either entity-tile or transactions-list now,
+                    <!-- Either entity-tile or entities-list now,
                         depending on what is detailed right now
                         (i.e. what details.slots it has) -->
                     <component
@@ -68,7 +68,6 @@
     import TxnFamilyAdd from './TxnFamilyAdd'
     import EntityTile from '@/components/EntityTile'
     import EntitiesList from '@/components/EntitiesList'
-    import TransactionsList from '@/components/TransactionsList'
 
     import { EventBus } from '@/lib/event-bus'
     import {
@@ -250,14 +249,12 @@
             ...mapGetters(STATE_ELEMENTS, ['stateElements']),
         },
         beforeDestroy () {
-            [
-                SHOW_DETAILS,
-                SHOW_EDIT,
-                SHOW_ADD,
-                SHOW_SIGNER_ADD,
-                SHOW_TXN_FAMILY_ADD,
-                SHOW_FILTERS
-            ].forEach(event => {
+            [SHOW_DETAILS,
+            SHOW_EDIT,
+            SHOW_ADD,
+            SHOW_SIGNER_ADD,
+            SHOW_TXN_FAMILY_ADD,
+            SHOW_FILTERS].forEach(event => {
                 EventBus.$off(event)
             })
         },
@@ -269,7 +266,6 @@
             TxnFamilyAdd,
             EntityTile,
             EntitiesList,
-            TransactionsList,
         }
     }
 </script>
