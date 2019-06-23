@@ -1,9 +1,20 @@
 <template>
     <v-form>
-        <v-text-field v-for="(value, i) in fieldsValues" :key="i" v-model="fieldsValues[i]" :label="label"></v-text-field>
-        <v-btn outline icon color="blue darken-2" :disabled="fieldsValues.length > maxFieldsAmount" @click="addField">
-            <v-icon>add</v-icon>
-        </v-btn>
+        <v-layout justify-end wrap>
+            <template v-for="(value, i) in fieldsValues">
+                <v-flex :key="i" :xs12="i == 0" :xs11="i > 0">
+                    <v-text-field
+                        v-model="fieldsValues[i]" :label="label">
+                        <v-icon
+                            v-if="i == 0" slot="prepend"
+                            @click="maxFieldsExceeded ? null : addField()"
+                            :style="{ cursor: maxFieldsExceeded ? 'default' : 'pointer' }">
+                            add
+                        </v-icon>
+                    </v-text-field>
+                </v-flex>
+            </template>
+        </v-layout>
     </v-form>
 </template>
 
@@ -19,13 +30,16 @@ export default {
         },
         maxFieldsAmount: {
             type: Number,
-            default: 2
+            default: 3
         }
     },
     watch: {
         fieldsValues () {
             this.$emit('input', this.fieldsValues)
         }
+    },
+    computed: {
+        maxFieldsExceeded () { return this.fieldsValues.length >= this.maxFieldsAmount }
     },
     methods: {
         addField () {

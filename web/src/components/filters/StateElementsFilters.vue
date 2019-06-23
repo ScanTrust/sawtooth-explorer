@@ -1,6 +1,6 @@
 <template>
-    <v-container>
-        <v-layout justify-center wrap>
+    <v-container pa-0>
+        <v-layout justify-end wrap>
             <v-flex xs11>
                 <v-datetime-picker
                     v-model="since"
@@ -8,10 +8,10 @@
                     :width="400">
                 </v-datetime-picker>
             </v-flex>
-            <v-flex xs11>
+            <v-flex xs12>
                 <text-fields-list v-model="addresses" :label="'Address prefix'"></text-fields-list>
             </v-flex>
-            <v-flex xs11>
+            <v-flex xs12>
                 <text-fields-list v-model="blockIds" :label="'Block id'"></text-fields-list>
             </v-flex>
         </v-layout>
@@ -32,7 +32,7 @@ export default {
     computed: {
         filters () {
             return {
-                since: this.since ? this.since.getTime() / 1000 : null,
+                since: this.since ? this.since.getTime() : null,
                 addresses: this.addresses.join(',') || null,
                 blockIds: this.blockIds.join(',') || null,
             }

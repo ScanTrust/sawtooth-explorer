@@ -1,16 +1,16 @@
 <template>
-    <v-container>
-        <v-layout justify-center wrap>
+    <v-container pa-0>
+        <v-layout justify-end wrap>
             <v-flex xs11>
                 <v-text-field v-model="recentN" :label="'Most recent blocks amount'"></v-text-field>
             </v-flex>
-            <v-flex xs11>
+            <v-flex xs12>
                 <text-fields-list v-model="blockIds" :label="'Block id'"></text-fields-list>                
             </v-flex>
-            <v-flex xs11>
+            <v-flex xs12>
                 <text-fields-list v-model="transactionIds" :label="'Transaction id'"></text-fields-list>                
             </v-flex>
-            <v-flex xs11>
+            <v-flex xs12>
                 <text-fields-list v-model="signers" :label="'Signer public key'"></text-fields-list>                
             </v-flex>
         </v-layout>
