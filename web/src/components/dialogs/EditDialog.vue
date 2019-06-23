@@ -9,7 +9,7 @@
             <v-layout wrap v-if="uneditableFields.length > 0">
                 <template v-for="field in uneditableFields">
                     <v-flex xs12 :key="`${field.name}-label`">
-                        <span class="body-2">{{field.label}}</span>
+                        <span class="details-label">{{field.label}}</span>
                     </v-flex>
                     <v-flex xs11 mx-auto :key="`${field.name}-value`">
                         <span class="subheading">{{data[field.name] || 'Unknown'}}</span>
@@ -126,10 +126,6 @@
 </script>
 
 <style scoped>
-  .body-2 {
-    color: grey;
-  }
-
   .subheading {
     overflow-wrap: break-word;
   }

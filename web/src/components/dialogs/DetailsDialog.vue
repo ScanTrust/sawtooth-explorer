@@ -9,7 +9,7 @@
                     <v-layout wrap v-if="displayedFields.length > 0">
                         <template v-for="field in displayedFields">
                             <v-flex xs12 :key="`${field.label}-label`">
-                                <span class="body-2">{{field.label}}</span>
+                                <span class="details-label">{{field.label}}</span>
                             </v-flex>
                             <v-flex xs11 mx-auto :key="`${field.label}-value`">
                                 <slot v-if="field.tagName" :name="field.detailsType"></slot>
