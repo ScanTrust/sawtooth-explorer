@@ -25,7 +25,7 @@ POST endpoints' responses have this format (except `/login`):
 
 #### Public API
 
-`GET /stateElements?addresses=...&txnIds=...`  
+`GET /stateElements?addresses=...&blockIds=...&since=...`  
 *optional* **addresses** — comma-separated address prefixes. All stateElements matching any of prefixes are returned.  
 *optional* **blockIds** — comma-separated blockIds. All stateElements whose blockId match any of the ones listed are returned.  
 *optional* **since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
