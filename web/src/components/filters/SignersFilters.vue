@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <v-layout justify-center wrap>
+        <v-layout justify-end wrap>
             <v-flex xs12>
                 
             </v-flex>
