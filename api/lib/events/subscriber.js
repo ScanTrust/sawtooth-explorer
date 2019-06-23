@@ -19,7 +19,7 @@ const zmq = require('zeromq')
 let blockchainSocket
 
 let handlingCatchUp = false;
-let justStartedCatchUp = false;
+let catchUpStartDate = null;
 let lastStateDeltaHandleDate = null;
 
 function subscribeToBlockchainEvents (handlers, callback) {
@@ -48,10 +48,10 @@ function subscribeToBlockchainEvents (handlers, callback) {
 					handlers.blockCommit(events[i])
 				} else {
 					const secondsSinceLastStateDeltaHandle = (new Date() - lastStateDeltaHandleDate) / 1000
-					if (!justStartedCatchUp && secondsSinceLastStateDeltaHandle > 0.1)
+					const secondsSinceCatchUpStart = (new Date() - catchUpStartDate) / 1000
+					if (secondsSinceCatchUpStart > 5 && secondsSinceLastStateDeltaHandle > 0.1)
 						handlingCatchUp = false
 					lastStateDeltaHandleDate = new Date()
-					justStartedCatchUp = false
 					const correspondingBlockId = events[i - 1].attributes[0].value
 					if (!correspondingBlockId)
 						console.log(
@@ -74,7 +74,7 @@ function subscribeToBlockchainEvents (handlers, callback) {
 
 function requestEventCatchUp (lastKnownBlockIds, callback) {
 	handlingCatchUp = true
-	justStartedCatchUp = true
+	catchUpStartDate = new Date()
 	blockchainSocket.send(
 		makeSubReqMessage(lastKnownBlockIds),
 		undefined,
