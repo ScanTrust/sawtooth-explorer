@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import moment from 'moment'
 
 import http from '@/lib/http'
 import {
@@ -39,6 +40,7 @@ export default {
                     .then(resp => {
                         const stateElements = resp.data.map(stateElement => {
                             stateElement.data = Buffer(stateElement.data).toString('base64')
+                            stateElement.createdAt = moment(stateElement.createdAt).format('LLL')
                             stateElement.addressPrefix = stateElement.address.slice(0, 6)
                             return stateElement
                         })

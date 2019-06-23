@@ -11,6 +11,7 @@
     "buffer": "^5.2.1",
     "core-js": "^2.6.5",
     "identicon.js": "^2.3.3",
+    "moment": "^2.24.0",
     "vue": "^2.6.10",
     "vue-localstorage": "^0.6.2",
     "vue-router": "^3.0.3",
