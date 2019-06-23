@@ -9,12 +9,28 @@ import {
     BLOCKS,
     STATE_ELEMENT,
     STATE_ELEMENTS,
+
     SIGNERS_GETTER_NAME,
     TXN_FAMILIES_GETTER_NAME,
     BLOCKS_GETTER_NAME,
     TRANSACTIONS_GETTER_NAME,
     STATE_ELEMENTS_GETTER_NAME,
+
+    AUTH_FILTERS_COMPONENT,
+    ROOT_FILTERS_COMPONENT,
+    BLOCKS_FILTERS_COMPONENT,
+    SIGNERS_FILTERS_COMPONENT,
+    TXN_FAMILIES_FILTERS_COMPONENT,
+    TRANSACTIONS_FILTERS_COMPONENT,
+    STATE_ELEMENTS_FILTERS_COMPONENT,
 } from '@/store/constants'
+import {
+    BLOCKS_PATH,
+    SIGNERS_PATH,
+    TXN_FAMILIES_PATH,
+    TRANSACTIONS_PATH,
+    STATE_PATH,
+} from '@/router/constants'
 import { rules } from '@/lib/validation-rules'
 
 export const typeToStoreNamespace = {
@@ -227,4 +243,20 @@ export const editingConfig = {
             rules: [rules.required, rules.minLength(4)]
         }]
     },
+}
+
+export const routePathToFiltersComponent = {
+    [BLOCKS_PATH]: BLOCKS_FILTERS_COMPONENT,
+    [SIGNERS_PATH]: SIGNERS_FILTERS_COMPONENT,
+    [TXN_FAMILIES_PATH]: TXN_FAMILIES_FILTERS_COMPONENT,
+    [TRANSACTIONS_PATH]: TRANSACTIONS_FILTERS_COMPONENT,
+    [STATE_PATH]: STATE_ELEMENTS_FILTERS_COMPONENT,
+}
+
+export const routePathToStoreNamespace = {
+    [TRANSACTIONS_PATH]: TRANSACTIONS,
+    [BLOCKS_PATH]: BLOCKS,
+    [SIGNERS_PATH]: SIGNERS,
+    [TXN_FAMILIES_PATH]: TXN_FAMILIES,
+    [STATE_PATH]: STATE_ELEMENTS,
 }

@@ -1,17 +1,12 @@
 <template>
-  <v-dialog v-model="shown" persistent max-width="700px">
+  <v-dialog v-model="shown" persistent max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">Specify Filters</span>
       </v-card-title>
       <v-card-text>
-        <v-container grid-list-md>
-          <v-layout wrap>
-            <v-flex xs12>
-                {{$route.path}}
-            </v-flex>
-          </v-layout>
-        </v-container>
+        <component v-if="currentFiltersComponent" :is="currentFiltersComponent" v-model="filters"></component>
+        <h3 v-else style="color: grey" class="unselectable">No filters :(</h3>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>
@@ -23,12 +18,25 @@
 </template>
 
 <script>
-  import { rules } from '@/lib/validation-rules'
+  import {
+    routePathToFiltersComponent,
+    routePathToStoreNamespace,
+  } from '@/lib/display-config'
+  import {
+    UPDATE_FILTERS,
+    RESET_FILTERS
+  } from '@/store/constants'
+  import { EventBus } from '@/lib/event-bus'
+  import BlocksFilters from '@/components/filters/BlocksFilters'
+  import SignersFilters from '@/components/filters/SignersFilters'
+  import TxnFamiliesFilters from '@/components/filters/TxnFamiliesFilters'
+  import TransactionsFilters from '@/components/filters/TransactionsFilters'
+  import StateElementsFilters from '@/components/filters/StateElementsFilters'
 
   export default {
     name: 'filters-dialog',
     data: () => ({
-
+      filters: {},
     }),
     props: {
       shown: {
@@ -36,13 +44,38 @@
         default: false
       }
     },
+    mounted () {
+      EventBus.$on(RESET_FILTERS, this.resetFilters)
+    },
+    computed: {
+      currentFiltersComponent () {
+        return routePathToFiltersComponent[this.$route.path]
+      },
+      currentStoreNamespace () {
+        return routePathToStoreNamespace[this.$route.path]
+      },
+    },
     methods: {
       apply () {
+        this.$store.dispatch(this.currentStoreNamespace + UPDATE_FILTERS, this.filters)
         this.close()
       },
       close () {
         this.$emit('close')
+      },
+      resetFilters () {
+        this.$store.dispatch(this.currentStoreNamespace + UPDATE_FILTERS, {})
       }
+    },
+    beforeDestroy () {
+      EventBus.$off(RESET_FILTERS)
+    },
+    components: {
+      BlocksFilters,
+      SignersFilters,
+      TxnFamiliesFilters,
+      TransactionsFilters,
+      StateElementsFilters,
     },
   }
 </script>

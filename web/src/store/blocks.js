@@ -3,16 +3,21 @@ import Vue from 'vue'
 import http from '@/lib/http'
 import {
     LOGOUT,
-    LOAD
+    LOAD,
+    BLOCKS,
+    UPDATE_FILTERS,
+    UPDATE_QUERY,
 } from './constants'
 
 export default {
     namespaced: true,
     state: {
-        blocks: JSON.parse(localStorage.getItem('blocks')) || []
+        blocks: JSON.parse(localStorage.getItem('blocks')) || [],
+        query: JSON.parse(localStorage.getItem('query')) || {},
     },
     getters: {
-        blocks: state => state.blocks
+        blocks: state => state.blocks,
+        query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, blocks) => {
@@ -20,12 +25,15 @@ export default {
         },
         [LOGOUT]: (state) => {
             state.blocks = []
+        },
+        [UPDATE_QUERY]: (state, query) => {
+            state.query = query
         }
     },
     actions: {
-        [LOAD]: ({commit, dispatch}, query) => {
+        [LOAD]: ({commit, getters}, query) => {
             return new Promise((resolve, reject) => {
-                http({ url: '/blocks', data: query, method: 'GET' })
+                http({ url: '/blocks', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const blocks = resp.data.reverse()
                         Vue.storage.set('blocks', JSON.stringify(blocks))
@@ -36,6 +44,11 @@ export default {
                         reject(err)
                     })
             })
+        },
+        [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
+            Vue.storage.set(`${BLOCKS}query`, JSON.stringify(filters))
+            commit(UPDATE_QUERY, filters)
+            dispatch(LOAD)
         }
     }
 }

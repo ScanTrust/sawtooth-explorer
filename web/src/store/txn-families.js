@@ -9,16 +9,22 @@ import {
     LOAD,
     ADD,
     EDIT,
+
+    TXN_FAMILIES,
+    UPDATE_FILTERS,
+    UPDATE_QUERY,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
 export default {
     namespaced: true,
     state: {
-        txnFamilies: JSON.parse(localStorage.getItem('txnFamilies')) || []
+        txnFamilies: JSON.parse(localStorage.getItem('txnFamilies')) || [],
+        query: JSON.parse(localStorage.getItem('query')) || {},
     },
     getters: {
-        txnFamilies: state => state.txnFamilies
+        txnFamilies: state => state.txnFamilies,
+        query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, txnFamilies) => {
@@ -26,12 +32,15 @@ export default {
         },
         [LOGOUT]: (state) => {
             state.txnFamilies = []
+        },
+        [UPDATE_QUERY]: (state, query) => {
+            state.query = query
         }
     },
     actions: {
-        [LOAD]: ({commit, dispatch}, query) => {
+        [LOAD]: ({commit, getters}, query) => {
             return new Promise((resolve, reject) => {
-                http({ url: '/txnFamilies', data: query, method: 'GET' })
+                http({ url: '/txnFamilies', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const txnFamilies = resp.data
                         Vue.storage.set('txnFamilies', JSON.stringify(txnFamilies))
@@ -70,6 +79,11 @@ export default {
                         reject(err)
                     })
             })
+        },
+        [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
+            Vue.storage.set(`${TXN_FAMILIES}query`, JSON.stringify(filters))
+            commit(UPDATE_QUERY, filters)
+            dispatch(LOAD)
         }
     }
 }

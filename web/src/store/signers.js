@@ -9,16 +9,22 @@ import {
     LOAD,
     ADD,
     EDIT,
+
+    SIGNERS,
+    UPDATE_FILTERS,
+    UPDATE_QUERY,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
 export default {
     namespaced: true,
     state: {
-        signers: JSON.parse(localStorage.getItem('signers')) || []
+        signers: JSON.parse(localStorage.getItem('signers')) || [],
+        query: JSON.parse(localStorage.getItem('query')) || {},
     },
     getters: {
-        signers: state => state.signers
+        signers: state => state.signers,
+        query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, signers) => {
@@ -26,12 +32,15 @@ export default {
         },
         [LOGOUT]: (state) => {
             state.signers = []
+        },
+        [UPDATE_QUERY]: (state, query) => {
+            state.query = query
         }
     },
     actions: {
-        [LOAD]: ({commit, dispatch}, query) => {
+        [LOAD]: ({commit, getters}, query) => {
             return new Promise((resolve, reject) => {
-                http({ url: '/signers', data: query, method: 'GET' })
+                http({ url: '/signers', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const signers = resp.data
                         Vue.storage.set('signers', JSON.stringify(signers))
@@ -70,6 +79,11 @@ export default {
                         reject(err)
                     })
             })
+        },
+        [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
+            Vue.storage.set(`${SIGNERS}query`, JSON.stringify(filters))
+            commit(UPDATE_QUERY, filters)
+            dispatch(LOAD)
         }
     }
 }

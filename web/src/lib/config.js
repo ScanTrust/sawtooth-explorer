@@ -1,3 +1,5 @@
+import { TXN_FAMILIES, TRANSACTIONS, SIGNERS, BLOCKS, STATE_ELEMENTS } from "../store/constants";
+
 export default {
     LOCAL_STORAGE: {
         userToken: {
@@ -10,23 +12,43 @@ export default {
         },
         transactions: {
             type: Array,
-            default: null
+            default: []
         },
         txnFamilies: {
             type: Array,
-            default: null
+            default: []
         },
         signers: {
             type: Array,
-            default: null
+            default: []
         },
         blocks: {
             type: Array,
-            default: null
+            default: []
         },
         stateElements: {
             type: Array,
-            default: null
-        }
+            default: []
+        },
+        [`${TRANSACTIONS}query`]: {
+            type: Object,
+            default: {}
+        },
+        [`${TXN_FAMILIES}query`]: {
+            type: Object,
+            default: {}
+        },
+        [`${SIGNERS}query`]: {
+            type: Object,
+            default: {}
+        },
+        [`${BLOCKS}query`]: {
+            type: Object,
+            default: {}
+        },
+        [`${STATE_ELEMENTS}query`]: {
+            type: Object,
+            default: {}
+        },
     }
 }

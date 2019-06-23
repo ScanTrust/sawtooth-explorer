@@ -37,7 +37,7 @@
               <v-list-tile-title>{{ item.label }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-          <v-list-tile v-else-if="item.event" :key="i" @click="emitEvent(item.event)">
+          <v-list-tile v-else-if="item.event" :key="i" @click="emitEvent(item.event, item.eventPayload)">
             <v-list-tile-action>
               <v-icon>{{ item.iconName }}</v-icon>
             </v-list-tile-action>
@@ -68,7 +68,7 @@
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
   import { EventBus } from '@/lib/event-bus'
-  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS } from '@/store/constants'
+  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS } from '@/store/constants'
   
   export default {
     name: 'Main',
@@ -102,11 +102,15 @@
         }, {
           divider: true
         }, {
-          heading: 'SEARCH'
+          heading: 'FILTERS'
         }, {
           event: SHOW_FILTERS,
-          iconName: 'find_in_page',
-          label: 'Filters'
+          iconName: 'assignment',
+          label: 'Specify'
+        }, {
+          event: RESET_FILTERS,
+          iconName: 'close',
+          label: 'Reset'
         }
       ]
     }),
@@ -123,8 +127,8 @@
             this.$router.push('/auth')
           })
       },
-      emitEvent (event) {
-        EventBus.$emit(event)
+      emitEvent (event, eventPayload) {
+        EventBus.$emit(event, eventPayload)
       }
     },
     components: {
@@ -132,3 +136,10 @@
     }
   }
 </script>
+
+<style>
+  .details-label {
+    color: grey;
+  }
+</style>
+

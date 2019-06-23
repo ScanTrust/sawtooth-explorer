@@ -3,16 +3,21 @@ import Vue from 'vue'
 import http from '@/lib/http'
 import {
     LOGOUT,
-    LOAD
+    LOAD,
+    TRANSACTIONS,
+    UPDATE_FILTERS,
+    UPDATE_QUERY,
 } from './constants'
 
 export default {
     namespaced: true,
     state: {
-        transactions: JSON.parse(localStorage.getItem('transactions')) || []
+        transactions: JSON.parse(localStorage.getItem('transactions')) || [],
+        query: JSON.parse(localStorage.getItem('query')) || {},
     },
     getters: {
-        transactions: state => state.transactions
+        transactions: state => state.transactions,
+        query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, transactions) => {
@@ -20,12 +25,15 @@ export default {
         },
         [LOGOUT]: (state) => {
             state.transactions = []
+        },
+        [UPDATE_QUERY]: (state, query) => {
+            state.query = query
         }
     },
     actions: {
-        [LOAD]: ({commit, dispatch}, query) => {
+        [LOAD]: ({commit, getters}, query) => {
             return new Promise((resolve, reject) => {
-                http({ url: '/transactions', data: query, method: 'GET' })
+                http({ url: '/transactions', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const transactions = resp.data.reverse().map(txn => {
                             txn.payload = Buffer(txn.payload).toString('base64')
@@ -39,6 +47,11 @@ export default {
                         reject(err)
                     })
             })
+        },
+        [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
+            Vue.storage.set(`${TRANSACTIONS}query`, JSON.stringify(filters))
+            commit(UPDATE_QUERY, filters)
+            dispatch(LOAD)
         }
     }
 }
