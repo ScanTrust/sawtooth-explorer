@@ -1,7 +1,19 @@
-let express = require('express');
-let router = express.Router();
-let Block = require('@root/models/block')
-let Transaction = require('@root/models/transaction')
+const express = require('express');
+const router = express.Router();
+const { check, validationResult } = require('express-validator/check')
+
+const Block = require('@root/models/block')
+const Transaction = require('@root/models/transaction')
+
+router.get('/', [
+    check('recentN').optional().isInt(),
+], function(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(422).json({ errors: errors.array() });
+    }
+    next()
+})
 
 router.get('/', function(req, res, next) {
     req._dbQuery = {$and: []}
