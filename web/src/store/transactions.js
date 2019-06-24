@@ -13,7 +13,7 @@ export default {
     namespaced: true,
     state: {
         transactions: JSON.parse(localStorage.getItem('transactions')) || [],
-        query: JSON.parse(localStorage.getItem('query')) || {},
+        query: JSON.parse(localStorage.getItem(`${TRANSACTIONS}query`)) || {},
     },
     getters: {
         transactions: state => state.transactions,

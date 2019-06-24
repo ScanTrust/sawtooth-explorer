@@ -20,7 +20,7 @@ export default {
     namespaced: true,
     state: {
         signers: JSON.parse(localStorage.getItem('signers')) || [],
-        query: JSON.parse(localStorage.getItem('query')) || {},
+        query: JSON.parse(localStorage.getItem(`${SIGNERS}query`)) || {},
     },
     getters: {
         signers: state => state.signers,

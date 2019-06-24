@@ -20,7 +20,7 @@ export default {
     namespaced: true,
     state: {
         txnFamilies: JSON.parse(localStorage.getItem('txnFamilies')) || [],
-        query: JSON.parse(localStorage.getItem('query')) || {},
+        query: JSON.parse(localStorage.getItem(`${TXN_FAMILIES}query`)) || {},
     },
     getters: {
         txnFamilies: state => state.txnFamilies,
