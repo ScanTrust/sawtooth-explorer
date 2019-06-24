@@ -8,7 +8,7 @@
                 <text-fields-list v-model="blockIds" :label="'Block id'"></text-fields-list>                
             </v-flex>
             <v-flex xs12>
-                <text-fields-list v-model="transactionIds" :label="'Transaction id'"></text-fields-list>                
+                <text-fields-list v-model="txnIds" :label="'Transaction id'"></text-fields-list>                
             </v-flex>
             <v-flex xs12>
                 <text-fields-list v-model="signers" :label="'Signer public key'"></text-fields-list>                
@@ -24,7 +24,7 @@ import TextFieldsList from '@/components/TextFieldsList'
 export default {
     name: BLOCKS_FILTERS_COMPONENT,
     data: () => ({
-        transactionIds: [],
+        txnIds: [],
         blockIds: [],
         signers: [],
         recentN: null,
@@ -32,8 +32,8 @@ export default {
     computed: {
         filters () {
             return {
-                transactionIds: this.transactionIds.join(',') || null,
-                blockIds: this.blockIds.join(',') || null,
+                ids: this.blockIds.join(',') || null,
+                txnIds: this.txnIds.join(',') || null,
                 signers: this.signers.join(',') || null,
                 recentN: this.recentN,
             }
