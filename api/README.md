@@ -30,7 +30,7 @@ POST endpoints' responses have this format (except `/login`):
 *optional* **blockIds** — comma-separated blockIds. All stateElements whose blockId match any of the ones listed are returned.  
 *optional* **since** — UNIX timestamp (ms) to return transactions which were written to db after it.  
 
-`GET /transactions?signers=...&since=...&ids=...&blockIds=...&batchIds=...`  
+`GET /transactions?signers=...&ids=...&blockIds=...&batchIds=...`  
 *optional* **signers** — comma-separated signers' public keys.  
 *optional* **ids** — requested txns' ids.  
 *optional* **blockIds** and **batchIds** — comma-separated id strings.  
