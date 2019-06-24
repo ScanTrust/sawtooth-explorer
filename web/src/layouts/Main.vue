@@ -37,7 +37,7 @@
               <v-list-tile-title>{{ item.label }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-          <v-list-tile v-else-if="item.event" :key="i" @click="emitEvent(item.event, item.eventPayload)">
+          <v-list-tile :disabled="isRootPath" v-else-if="item.event" :key="i" @click="emitEvent(item.event, item.eventPayload)">
             <v-list-tile-action>
               <v-icon>{{ item.iconName }}</v-icon>
             </v-list-tile-action>
@@ -49,7 +49,7 @@
       </v-list>
     </v-navigation-drawer>
     <v-content>
-      
+
       <router-view/>
 
     </v-content>
@@ -69,7 +69,14 @@
   import DialogsManager from '@/components/dialogs/DialogsManager'
   import { EventBus } from '@/lib/event-bus'
   import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS } from '@/store/constants'
-  
+  import {
+    AUTH_PATH, ROOT_PATH,
+    BLOCKS_PATH, SIGNERS_PATH,
+    TXN_FAMILIES_PATH,
+    TRANSACTIONS_PATH,
+    STATE_PATH,
+  } from '@/router/constants'
+
   export default {
     name: 'Main',
     data: () => ({
@@ -112,13 +119,16 @@
           iconName: 'close',
           label: 'Reset'
         }
-      ]
+      ],
     }),
     props: {
 
     },
     computed: {
-      ...mapState(AUTH, ['username'])
+      ...mapState(AUTH, ['username']),
+      isRootPath () {
+        return this.$route.path === ROOT_PATH
+      }
     },
     methods: {
       logout () {
@@ -138,7 +148,7 @@
 </script>
 
 <style>
-  .details-label {
+  .color-grey {
     color: grey;
   }
 </style>
