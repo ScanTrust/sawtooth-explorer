@@ -6,7 +6,7 @@
       </v-card-title>
       <v-card-text>
         <component v-if="currentFiltersComponent" :is="currentFiltersComponent" v-model="filters"></component>
-        <h3 v-else style="color: grey" class="unselectable">No filters :(</h3>
+        <h3 v-else class="unselectable color-grey">No filters :(</h3>
       </v-card-text>
       <v-card-actions>
         <v-spacer></v-spacer>

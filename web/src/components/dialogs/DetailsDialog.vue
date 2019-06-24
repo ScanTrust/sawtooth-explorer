@@ -9,7 +9,7 @@
                     <v-layout wrap v-if="displayedFields.length > 0">
                         <template v-for="field in displayedFields">
                             <v-flex xs12 :key="`${field.label}-label`">
-                                <span class="details-label">{{field.label}}</span>
+                                <span class="unselectable color-grey">{{field.label}}</span>
                             </v-flex>
                             <v-flex xs11 mx-auto :key="`${field.label}-value`">
                                 <slot v-if="field.tagName" :name="field.detailsType"></slot>
@@ -19,7 +19,7 @@
                     </v-layout>
                     <v-layout wrap v-else justify-center align-center fill-height>
                         <v-flex xs4>
-                            <h3 style="color: grey" class="unselectable">No data :(</h3>
+                            <h3 class="unselectable color-grey">No data :(</h3>
                         </v-flex>
                     </v-layout>
                 </v-container>
@@ -110,10 +110,6 @@
 </script>
 
 <style scoped>
-  .body-2 {
-    color: grey;
-  }
-
   .subheading {
     overflow-wrap: break-word;
   }
