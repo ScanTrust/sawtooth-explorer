@@ -17,11 +17,12 @@ import {
     TRANSACTIONS,
 } from './constants'
 import { EventBus } from '@/lib/event-bus.js';
+import router from '@/router';
 
 export default {
     namespaced: true,
     state: {
-        token: localStorage.getItem('userToken'), // Vue.storage is not there yet and VueLocalStorage is not usable here for some reason
+        token: localStorage.getItem('userToken'), // Vue.storage is not there yet and VueLocalStorage (if imported) is not usable here for some reason
         username: localStorage.getItem('username'),
         status: ''
     },
@@ -89,6 +90,7 @@ export default {
                 commit(TRANSACTIONS + LOGOUT, null, { root: true })
                 Vue.storage.set('userToken', '')
                 delete http.defaults.headers.common['Authorization']
+                router.push('/auth')
                 resolve()
             })
         }

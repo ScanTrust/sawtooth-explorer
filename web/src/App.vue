@@ -21,7 +21,7 @@
 import Auth from '@/layouts/Auth'
 import Main from '@/layouts/Main'
 import { EventBus } from '@/lib/event-bus'
-import { SNACKBAR } from '@/store/constants'
+import { SNACKBAR, LOAD } from '@/store/constants'
 
 export default {
   name: 'App',
@@ -42,6 +42,7 @@ export default {
     EventBus.$on(SNACKBAR, data => {
       this.showSnackbar(data)
     })
+    this.$store.dispatch(LOAD)
   },
   beforeDestroy () {
     EventBus.$off(SNACKBAR)

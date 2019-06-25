@@ -19,8 +19,8 @@ import { EventBus } from '@/lib/event-bus'
 export default {
     namespaced: true,
     state: {
-        signers: JSON.parse(localStorage.getItem('signers')) || [],
-        query: JSON.parse(localStorage.getItem(`${SIGNERS}query`)) || {},
+        signers: JSON.parse(localStorage.getItem('signers') || '[]'),
+        query: JSON.parse(localStorage.getItem(`${SIGNERS}query`) || '{}'),
     },
     getters: {
         signers: state => state.signers,
