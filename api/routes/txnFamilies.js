@@ -3,23 +3,24 @@ let router = express.Router();
 const { check, validationResult } = require('express-validator/check')
 const passport = require('passport')
 
-let TxnFamily = require('@root/models/txnFamily')
+const TxnFamily = require('@root/models/txnFamily')
+const { isAdmin } = require('@root/authentication')
 
 router.get('/', function(req, res, next) {
     const dbQuery = {}
-    if (req.query.prefixes) {
-        const prefixes = req.query.prefixes.split(',')
-        dbQuery["addressPrefix"] = {$in: prefixes}
+    if (req.query.addressPrefixes) {
+        const addressPrefixes = req.query.addressPrefixes.split(',')
+        dbQuery["addressPrefix"] = {$in: addressPrefixes}
     }
     TxnFamily._get(dbQuery, txnFamilies => {
         res.send(txnFamilies)
     })
 });
 
-router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
+router.post(['/add', '/edit'], [
     check('addressPrefix').isLength({min: 6, max: 6}),
     check('label').exists()
-], function(req, res, next) {
+], isAdmin, function(req, res, next) {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({ ok: false, message: 'incorrect_data', errors: errors.array() });

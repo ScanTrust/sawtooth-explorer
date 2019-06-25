@@ -1,6 +1,5 @@
 let express = require('express'),
   path = require('path'),
-  favicon = require('serve-favicon'),
   logger = require('morgan'),
   cookieParser = require('cookie-parser'),
   bodyParser = require('body-parser'),
@@ -8,8 +7,10 @@ let express = require('express'),
   { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
   blockchainEventHandlers = require('./lib/events/handlers'),
   proxy = require('http-proxy-middleware'),
-  config = require('./config')
-require('./authentication')
+  passport = require('passport')
+
+  config = require('./config'),
+  { normalizeError } = require('./authentication')
 //  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
 
 let app = express();
@@ -55,9 +56,27 @@ app.use(function(req, res, next) {
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With, x-access-token");
   return next();
 });
-
+// right after setting necessary headers
+app.options('*', function (req, res) {
+  res.status(200).end('ok')
+})
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+function authenticateJwt(req, res, next) {
+  passport.authenticate('jwt', { session: false }, function(info, user, err) {
+    console.log({err, user, info})
+    if (err) return next(err);
+    if (!user) throw new AuthError('401', 'User is not authenticated.');
+    req.user = user;
+    next();
+  })(req, res, next);
+}
+
+app.use([
+  '/signers/*',
+  '/txnFamilies/*'
+], authenticateJwt)
 
 app.use('/', routes);
 app.use('/auth', auth);
@@ -66,6 +85,17 @@ app.use('/transactions', transactions);
 app.use('/blocks', blocks);
 app.use('/signers', signers);
 app.use('/txnFamilies', txnFamilies);
+
+app.use([
+  '/auth',
+  '/stateElements',
+  '/transactions',
+  '/blocks',
+  '/signers',
+  '/txnFamilies'
+], function (err, req, res, next) {
+  next(normalizeError(err))
+})
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -79,10 +109,12 @@ app.use(function(req, res, next) {
 // will print stacktrace
 if (app.get('env') === 'development') {
   app.use(function(err, req, res, next) {
+    console.log({err})
     res.status(err.status || 500);
     res.json({
       message: err.message,
-      error: err
+      error: err,
+      ok: false
     });
   });
 }
@@ -93,7 +125,7 @@ app.use(function(err, req, res, next) {
   res.status(err.status || 500);
   res.json({
     message: err.message,
-    error: {}
+    ok: false
   });
 });
 

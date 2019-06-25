@@ -33,19 +33,51 @@ passport.use(
     }
 ));
 
-passport.use(new JWTStrategy({
-        jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-        secretOrKey   : config.JWT_SECRET
+passport.use(new JWTStrategy(
+    {
+        jwtFromRequest   : ExtractJWT.fromAuthHeaderAsBearerToken(),
+        secretOrKey      : config.JWT_SECRET,
+        passReqToCallback: true
     },
-    function (jwtPayload, callback) {
-
-        //find the user in db if needed
-        return User._getById(jwtPayload.id, user => {
-            return callback(null, (user, err) => {
-                if (err)
-                    return callback(err)
+    function (req, jwtPayload, callback) {
+        return User._getById(jwtPayload.id, (user, err) => {
+            if (err) return callback(err)
+            if (user) {
+                //req.user = user;
                 return callback(null, user);
-            });
+            }
+            return callback(null, false);
         });
     }
 ));
+
+const errToStatus = {
+    'No auth token': 401,
+    'Unauthorized': 401,
+    'invalid signature': 401
+}
+
+const errToMessage = {
+    'No auth token': 'no_session_try_to_sign_in_again',
+    'Unauthorized': 'lol',
+    'invalid signature': 'no_session_try_to_sign_in_again'
+}
+
+function isAdmin (req, res, next) {
+    if (req.user.role != 1) { // checking undefined == 1 is also fine
+        return res.status(403).json({ ok: false, message: 'action_unallowed' });
+    }
+    next()
+}
+
+function normalizeError (err) {
+    console.log({err})
+    if (Object.values(errToMessage).includes(err.message)) // if normalized
+        return err
+    const error = new Error()
+    error.message = errToMessage[err.message] || 'unknown_error'
+    error.status = errToStatus[err.message] || 500
+    return error
+}
+
+module.exports = { isAdmin, normalizeError }

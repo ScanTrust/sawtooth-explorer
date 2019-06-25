@@ -5,7 +5,8 @@ let User = new Schema({
     id: Number,
     username: String,
     passHash: String,
-    salt: String
+    salt: String,
+    role: Number // 0 - usual user, 1 - admin
 });
 
 User = mongoose.model('User', User)

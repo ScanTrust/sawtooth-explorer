@@ -1,8 +1,10 @@
 let express = require('express');
 let router = express.Router();
-let Signer = require('@root/models/signer')
 const { check, validationResult } = require('express-validator/check')
 const passport = require('passport')
+
+let Signer = require('@root/models/signer')
+const { isAdmin } = require('@root/authentication')
 
 router.get('/', function(req, res, next) {
   const dbQuery = {}
@@ -15,10 +17,10 @@ router.get('/', function(req, res, next) {
   })
 });
 
-router.post(['/add', '/edit'], passport.authenticate('jwt', {session: false}), [
+router.post(['/add', '/edit'], [
   check('publicKey').isLength({min: 66, max: 66}),
   check('label').exists()
-], function(req, res, next) {
+], isAdmin, function(req, res, next) {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(422).json({ ok: false, message: 'incorrect_data', errors: errors.array() });
