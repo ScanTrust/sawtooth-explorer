@@ -43,13 +43,13 @@ this block was cached as a result of the real-time listener, then it should be c
 
 ### Transaction
 
-| Field             | Type   | Comment                                     |
-| ----------------- | ------ | ------------------------------------------- |
+| Field             | Type        | Comment                                     |
+| ----------------- | ----------- | ------------------------------------------- |
 | `id`              | `pk` string | The transaction ID                          |
-| `batchId`         | string | Batch ID this transaction was included in   |
-| `blockId`         | string | Block ID this write is located in           |
-| `payload`         | binary | The transaction payload                     |
-| `signerPublicKey` | string | Public key associated with this transaction |
+| `batchId`         | string      | Batch ID this transaction was included in   |
+| `blockId`         | `fk` string | Block ID this write is located in           |
+| `payload`         | binary      | The transaction payload                     |
+| `signerPublicKey` | `fk` string | Public key associated with this transaction |
 
 ### Block
 
@@ -69,8 +69,30 @@ We do not currently cache batch information.
 We do not currently capture custom events.  This information is available in the 
 block, should we desire to add this feature.
 
-| Field             | Type   | Comment                           |
-| ----------------- | ------ | --------------------------------- |
-| `event`           | string | The event name                    |
-| `payload`         | string | Payload sent by the event         |
-| `blockId`         | string | Block ID this event was generated |
+| Field     | Type   | Comment                           |
+| --------- | ------ | --------------------------------- |
+| `event`   | string | The event name                    |
+| `payload` | string | Payload sent by the event         |
+| `blockId` | string | Block ID this event was generated |
+
+### Signers
+
+Signers is a list of public signing keys along with a friendly 
+name so that they can be displayed in the dashboard. This can 
+be used to show the source of the transaction in human readable
+form.
+
+| Field       | Type   | Comment                          |
+| ----------- | ------ | -------------------------------- |
+| `publicKey` | string | The public key of the signer     |
+| `name`      | string | The friendly name of for the key |
+
+
+### TxP
+
+| Field    | Type   | Comment                          |
+| -------- | ------ | -------------------------------- |
+| `prefix` | string | 6 char hex prefix for the family |
+| `name`   | string | Name of the transaction family   |
+
+
