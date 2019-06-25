@@ -1,7 +1,6 @@
 let express = require('express');
 let router = express.Router();
 const { check, validationResult } = require('express-validator/check')
-const passport = require('passport')
 
 const TxnFamily = require('@root/models/txnFamily')
 const { isAdmin } = require('@root/authentication')

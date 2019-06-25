@@ -1,7 +1,6 @@
 let express = require('express');
 let router = express.Router();
 const { check, validationResult } = require('express-validator/check')
-const passport = require('passport')
 
 let Signer = require('@root/models/signer')
 const { isAdmin } = require('@root/authentication')
