@@ -15,8 +15,8 @@ import {
 export default {
     namespaced: true,
     state: {
-        stateElements: JSON.parse(localStorage.getItem('stateElements')) || [],
-        query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS}query`)) || {},
+        stateElements: JSON.parse(localStorage.getItem('stateElements') || '[]'),
+        query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS}query`) || '{}'),
     },
     getters: {
         stateElements: state => state.stateElements,

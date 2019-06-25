@@ -37,7 +37,9 @@
               <v-list-tile-title>{{ item.label }}</v-list-tile-title>
             </v-list-tile-content>
           </v-list-tile>
-          <v-list-tile :disabled="isRootPath" v-else-if="item.event" :key="i" @click="emitEvent(item.event, item.eventPayload)">
+          <v-list-tile
+            :disabled="isRootPath" v-else-if="item.event" :key="i"
+            @click="emitEvent(item.event, item.eventPayload)">
             <v-list-tile-action>
               <v-icon>{{ item.iconName }}</v-icon>
             </v-list-tile-action>
@@ -133,9 +135,6 @@
     methods: {
       logout () {
         this.$store.dispatch(AUTH + LOGOUT)
-          .then(() => {
-            this.$router.push('/auth')
-          })
       },
       emitEvent (event, eventPayload) {
         EventBus.$emit(event, eventPayload)

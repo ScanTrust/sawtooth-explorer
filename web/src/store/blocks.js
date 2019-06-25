@@ -12,8 +12,8 @@ import {
 export default {
     namespaced: true,
     state: {
-        blocks: JSON.parse(localStorage.getItem('blocks')) || [],
-        query: JSON.parse(localStorage.getItem(`${BLOCKS}query`)) || {},
+        blocks: JSON.parse(localStorage.getItem('blocks') || '[]'),
+        query: JSON.parse(localStorage.getItem(`${BLOCKS}query`) || '{}'),
     },
     getters: {
         blocks: state => state.blocks,
