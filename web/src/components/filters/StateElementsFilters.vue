@@ -14,6 +14,9 @@
             <v-flex xs12>
                 <text-fields-list v-model="blockIds" :label="'Block id'"></text-fields-list>
             </v-flex>
+            <v-flex xs12>
+                <v-switch v-model="isChronologicalOrder" :label="'Chronological order'"></v-switch>
+            </v-flex>
         </v-layout>
     </v-container>    
 </template>
@@ -27,7 +30,8 @@ export default {
     data: () => ({
         since: null,
         addresses: [],
-        blockIds: []
+        blockIds: [],
+        isChronologicalOrder: false,
     }),
     computed: {
         filters () {
@@ -35,6 +39,7 @@ export default {
                 since: this.since ? this.since.getTime() : null,
                 addresses: this.addresses.join(',') || null,
                 blockIds: this.blockIds.join(',') || null,
+                isChronologicalOrder: +this.isChronologicalOrder
             }
         }
     },
