@@ -10,18 +10,18 @@
             <v-flex xs12>
               <v-form v-model="dataIsCorrect" ref="form">
                   <v-flex xs12>
-                  <v-text-field @keyup.enter="add" 
-                                label="Public Key"
-                                v-model="publicKey"
-                                :rules="[rules.required, rules.publicKey]">
-                  </v-text-field>
+                    <v-text-field @keyup.enter="add" 
+                                  label="Public Key"
+                                  v-model="publicKey"
+                                  :rules="[rules.required, rules.publicKey]">
+                    </v-text-field>
                   </v-flex>
                   <v-flex xs12>
-                  <v-text-field @keyup.enter="add" 
-                                label="Label"
-                                v-model="label"
-                                :rules="[rules.required, rules.minLength(4)]">
-                  </v-text-field>
+                    <v-text-field @keyup.enter="add" 
+                                  label="Label"
+                                  v-model="label"
+                                  :rules="[rules.required, rules.minLength(4)]">
+                    </v-text-field>
                   </v-flex>
               </v-form>
             </v-flex>
