@@ -20,8 +20,6 @@ services:
       - 3000:3000
     volumes:
       - ../api:/api
-    links:
-      - mongo-db
     depends_on: 
       - mongo-db
     environment:
@@ -30,9 +28,8 @@ services:
       - NODE_ENV=development
       - PORT=3000
       # TODO: work on ability to use env vars like below
-      - SAWTOOTH_ADDRESS=46.173.219.81
-      - SAWTOOTH_VALIDATOR_PORT=4040
-      - SAWTOOTH_REST_API_PORT=8043
+      - VALIDATOR_URL=tcp://46.173.219.81:4040
+      - REST_API_URL=http://46.173.219.81:8043
 
   mongo-db:
     container_name: mongo-db
