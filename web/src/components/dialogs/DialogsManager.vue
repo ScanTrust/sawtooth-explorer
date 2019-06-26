@@ -87,6 +87,11 @@
         TXN_FAMILY,
         ADD,
         EDIT,
+        SIGNERS_GETTER_NAME,
+        TXN_FAMILIES_GETTER_NAME,
+        BLOCKS_GETTER_NAME,
+        TRANSACTIONS_GETTER_NAME,
+        STATE_ELEMENTS_GETTER_NAME,
     } from '@/store/constants'
     import {
         entityNameToConfig,
@@ -241,11 +246,11 @@
             }
         },
         computed: {
-            ...mapGetters(SIGNERS, ['signers']),
-            ...mapGetters(BLOCKS, ['blocks']),
-            ...mapGetters(TRANSACTIONS, ['transactions']),
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
-            ...mapGetters(STATE_ELEMENTS, ['stateElements']),
+            ...mapGetters(SIGNERS, [SIGNERS_GETTER_NAME]),
+            ...mapGetters(BLOCKS, [BLOCKS_GETTER_NAME]),
+            ...mapGetters(TRANSACTIONS, [TRANSACTIONS_GETTER_NAME]),
+            ...mapGetters(TXN_FAMILIES, [TXN_FAMILIES_GETTER_NAME]),
+            ...mapGetters(STATE_ELEMENTS, [STATE_ELEMENTS_GETTER_NAME]),
         },
         beforeDestroy () {
             [SHOW_DETAILS,
