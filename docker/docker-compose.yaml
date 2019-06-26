@@ -1,0 +1,43 @@
+version: "3"
+
+services:
+  vue-js:
+    build:
+      context: ../web
+      dockerfile: ./Dockerfile
+    ports:
+      - 8080:8080
+    volumes:
+      - ../web:/web
+    environment:
+      - API_URL=http://localhost:3000/
+
+  express-js:
+    build:
+      context: ../api
+      dockerfile: ./Dockerfile
+    ports:
+      - 3000:3000
+    volumes:
+      - ../api:/api
+    links:
+      - mongo-db
+    depends_on: 
+      - mongo-db
+    environment:
+      - DATABASE_URL=mongo-db
+      - WAIT_HOSTS=mongo-db:27017
+      - NODE_ENV=development
+      - PORT=3000
+      # TODO: work on ability to use env vars like below
+      - SAWTOOTH_ADDRESS=46.173.219.81
+      - SAWTOOTH_VALIDATOR_PORT=4040
+      - SAWTOOTH_REST_API_PORT=8043
+
+  mongo-db:
+    container_name: mongo-db
+    image: mongo
+    ports:
+      - 27017:27017
+    volumes:
+      - ../db:/db
