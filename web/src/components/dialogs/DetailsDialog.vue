@@ -13,7 +13,7 @@
                             </v-flex>
                             <v-flex xs11 mx-auto :key="`${field.label}-value`">
                                 <slot v-if="field.tagName" :name="field.detailsType"></slot>
-                                <span v-else class="subheading">{{field.value || 'Unknown'}}</span>
+                                <span v-else class="subheading">{{field.value != undefined ? field.value : 'Unknown'}}</span>
                             </v-flex>
                         </template>
                     </v-layout>

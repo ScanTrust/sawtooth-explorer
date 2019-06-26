@@ -160,6 +160,8 @@ const stateElementsListSlotConfig = {
 export const signerFieldNameToContent = {
     publicKey: 'Public key',
     label: 'Label',
+    txnsAmount: 'Transactions Signed',
+    blocksAmount: 'Blocks Signed',
 }
 
 export const txnFamilyFieldNameToContent = {
