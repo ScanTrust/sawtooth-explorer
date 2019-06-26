@@ -65,186 +65,163 @@ export const tilesConfig = {
 }
 
 const signerBaseSearchConfig = { // config used in search of the required prop
-    getterName: SIGNERS_GETTER_NAME,
     entityKey: 'signerPublicKey',
     searchedEntityKey: 'publicKey',
 }
 
-const signerSearchConfigFor = {
-    [BLOCK]: signerBaseSearchConfig,
-    [TRANSACTION]: signerBaseSearchConfig,
-}
-
 const blockBaseSearchConfig = {
-    getterName: BLOCKS_GETTER_NAME,
     entityKey: 'blockId',
     searchedEntityKey: 'id',
 }
 
-const blockSearchConfigFor = {
-    [STATE_ELEMENT]: blockBaseSearchConfig,
-    [TRANSACTION]: blockBaseSearchConfig,
-}
-
-const transactionsSearchConfigFor = {
-    [BLOCK]: {
-        getterName: TRANSACTIONS_GETTER_NAME,
-        entityKey: 'id',
-        searchedEntityKey: 'blockId',
-        multiple: true
-    },
-}
-
-const txnFamilySearchConfigFor = {
-    [STATE_ELEMENT]: {
-        getterName: TXN_FAMILIES_GETTER_NAME,
-        entityKey: 'addressPrefix',
-        searchedEntityKey: 'addressPrefix',
-    }
-}
-
-const stateElementsSearchConfigFor = {
-    [BLOCK]: {
-        getterName: STATE_ELEMENTS_GETTER_NAME,
-        entityKey: 'id',
-        searchedEntityKey: 'blockId',
-        multiple: true
-    },
-}
-
-const signerTileSlotConfig = {
-    label: 'Signer',
-    tagName: 'entity-tile',
-    detailsType: SIGNER,
-    propNameToSearchConfig: {
-        entity: signerSearchConfigFor
-    },
-}
-
-const blockTileSlotConfig = {
-    label: 'Block',
-    tagName: 'entity-tile',
-    detailsType: BLOCK,
-    propNameToSearchConfig: {
-        entity: blockSearchConfigFor
-    },
-}
-
-const transactionsListSlotConfig = {
-    label: 'Transactions',
-    tagName: 'entities-list',
-    detailsType: TRANSACTION,
-    propNameToSearchConfig: {
-        entities: transactionsSearchConfigFor
-    },
-}
-
-const txnFamilyTileSlotConfig = {
-    label: 'Transaction Family',
-    tagName: 'entity-tile',
-    detailsType: TXN_FAMILY,
-    propNameToSearchConfig: {
-        entity: txnFamilySearchConfigFor
-    },
-}
-
-const stateElementsListSlotConfig = {
-    label: 'Produced State Elements',
-    tagName: 'entities-list',
-    detailsType: STATE_ELEMENT,
-    propNameToSearchConfig: {
-        entities: stateElementsSearchConfigFor
-    },
-}
-
-export const signerFieldNameToContent = {
-    publicKey: 'Public key',
-    label: 'Label',
-    txnsAmount: 'Transactions Signed',
-    blocksAmount: 'Blocks Signed',
-}
-
-export const txnFamilyFieldNameToContent = {
-    addressPrefix: 'Address prefix',
-    label: 'Label',
-}
-
-export const blockFieldNameToContent = {
-    id: 'Id',
-    num: 'Number',
-    previousBlockId: 'Previous block id',
-    stateHash: 'State hash',
-    signerPublicKey: signerTileSlotConfig,
-    transactions: transactionsListSlotConfig,
-    stateElements: stateElementsListSlotConfig,
-}
-
-export const transactionFieldNameToContent = {
-    id: 'Id',
-    batchId: 'Batch id',
-    payload: 'Payload',
-    blockId: blockTileSlotConfig,
-    signerPublicKey: signerTileSlotConfig,
-}
-
-export const stateElementFieldNameToContent = {
-    address: 'Address',
-    data: 'Data',
-    createdAt: 'Created At',
-    block: blockTileSlotConfig,
-    txnFamily: txnFamilyTileSlotConfig,
-}
-
-export const entityNameToFieldsConfig = {
-    [SIGNER]: signerFieldNameToContent,
-    [TXN_FAMILY]: txnFamilyFieldNameToContent,
-    // the rest is never used, so not added
-    // btw, it's assumed (e.g. in DialogsManager.vue in showEdit method)
-    // that these dicts' values are strings (e.g. 'Public key', 'Block id'...)
-}
-
-
-export const detailsConfig = {
+export const entityNameToConfig = {
     [BLOCK]: {
         title: 'Block',
-        fieldNameToContent: blockFieldNameToContent,
-        slots: [signerTileSlotConfig, transactionsListSlotConfig, stateElementsListSlotConfig]
+        fieldNameToLabel: {
+            id: 'Id',
+            num: 'Number',
+            previousBlockId: 'Previous block id',
+            stateHash: 'State hash',
+            signerPublicKey: 'Signer',
+            transactions: 'Transactions',
+            stateElements: 'State Elements',
+        },
+        fieldNameToEntityName: {
+            signerPublicKey: SIGNER,
+            transactions: TRANSACTIONS,
+            stateElements: STATE_ELEMENTS,
+        },
+        tileSlotConfig: {
+            tagName: 'entity-tile',
+            getterName: BLOCKS_GETTER_NAME,
+            detailsType: BLOCK,
+            propNameToSearchConfig: {
+                entity: {
+                    [STATE_ELEMENT]: blockBaseSearchConfig,
+                    [TRANSACTION]: blockBaseSearchConfig,
+                }
+            },
+        }
     },
     [TRANSACTION]: {
         title: 'Transaction',
-        fieldNameToContent: transactionFieldNameToContent,
-        slots: [signerTileSlotConfig, blockTileSlotConfig],
+        fieldNameToLabel: {
+            id: 'Id',
+            batchId: 'Batch id',
+            payload: 'Payload',
+            blockId: 'Block id',
+            signerPublicKey: 'Signer',
+        },
+        fieldNameToEntityName: {
+            blockId: BLOCK,
+            signerPublicKey: SIGNER,
+        },
+    },
+    [TRANSACTIONS]: {
+        tileSlotConfig: {
+            tagName: 'entities-list',
+            getterName: TRANSACTIONS_GETTER_NAME,
+            detailsType: TRANSACTION,
+            propNameToSearchConfig: {
+                entities: {
+                    [BLOCK]: {
+                        entityKey: 'id',
+                        searchedEntityKey: 'blockId',
+                        multiple: true
+                    },
+                }
+            },
+        }
     },
     [STATE_ELEMENT]: {
         title: 'State Element',
-        fieldNameToContent: stateElementFieldNameToContent,
-        slots: [blockTileSlotConfig, txnFamilyTileSlotConfig],
+        fieldNameToLabel: {
+            address: 'Address',
+            data: 'Data',
+            createdAt: 'Created At',
+            block: 'Block',
+            txnFamily: 'Transaction Family',
+        },
+        fieldNameToEntityName: {
+            block: BLOCK,
+            txnFamily: TXN_FAMILY,
+        },
+    },
+    [STATE_ELEMENTS]: {
+        tileSlotConfig: {
+            tagName: 'entities-list',
+            detailsType: STATE_ELEMENT,
+            getterName: STATE_ELEMENTS_GETTER_NAME,
+            propNameToSearchConfig: {
+                entities: {
+                    [BLOCK]: {
+                        // e.g. for this tileSlot,
+                        // searching for a value to pass it to
+                        // its prop called 'entities',
+                        // for if it's in BLOCK's details,
+                        // use this tileSlot's getterName to get list of
+                        // entities from vuex store;
+                        // compare their searchedEntityKey's value
+                        // to entityKey's value of detailed(!) entity
+                        // iterating over these entities;
+                        // according to multiple do this with
+                        // either 'filter', or 'find' js array methods
+                        entityKey: 'id',
+                        searchedEntityKey: 'blockId',
+                        multiple: true
+                    },
+                }
+            },
+        }
     },
     [SIGNER]: {
         title: 'Signer',
-        fieldNameToContent: signerFieldNameToContent
+        fieldNameToLabel: {
+            publicKey: 'Public key',
+            label: 'Label',
+            txnsAmount: 'Transactions Signed',
+            blocksAmount: 'Blocks Signed',
+        },
+        editableFields: [{
+            name: 'label',
+            rules: [rules.required, rules.minLength(4)]
+        }],
+        tileSlotConfig: {
+            tagName: 'entity-tile',
+            getterName: SIGNERS_GETTER_NAME,
+            detailsType: SIGNER,
+            propNameToSearchConfig: {
+                entity: {
+                    [BLOCK]: signerBaseSearchConfig,
+                    [TRANSACTION]: signerBaseSearchConfig,
+                }
+            },
+        }
     },
     [TXN_FAMILY]: {
         title: 'Transaction Family',
-        fieldNameToContent: txnFamilyFieldNameToContent
+        fieldNameToLabel: {
+            addressPrefix: 'Address prefix',
+            label: 'Label',
+        },
+        editableFields: [{
+            name: 'label',
+            rules: [rules.required, rules.minLength(4)]
+        }],
+        tileSlotConfig: {
+            tagName: 'entity-tile',
+            detailsType: TXN_FAMILY,
+            getterName: TXN_FAMILIES_GETTER_NAME,
+            propNameToSearchConfig: {
+                entity: {
+                    [STATE_ELEMENT]: {
+                        entityKey: 'addressPrefix',
+                        searchedEntityKey: 'addressPrefix',
+                    }
+                }
+            },
+        }
     }
-}
-
-export const editingConfig = {
-    [SIGNER]: {
-        title: 'Signer',
-        editableFields: [{
-            name: 'label',
-            rules: [rules.required, rules.minLength(4)]
-        }]
-    },
-    [TXN_FAMILY]: {
-        title: 'Transaction Family',
-        editableFields: [{
-            name: 'label',
-            rules: [rules.required, rules.minLength(4)]
-        }]
-    },
 }
 
 export const routePathToFiltersComponent = {

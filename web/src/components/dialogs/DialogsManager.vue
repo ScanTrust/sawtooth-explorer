@@ -8,7 +8,8 @@
             :title="details.title"
             :shown="detailsShown"
             :detailsData="details.data"
-            :fieldNameToContent="details.fieldNameToContent"
+            :fieldNameToLabel="details.fieldNameToLabel"
+            :fieldNameToEntityName="details.fieldNameToEntityName"
             :dataPresent="detailedDataPresent"
             :changeable="datailedDataChangeable"
             @close="closeDetails">
@@ -88,9 +89,7 @@
         EDIT,
     } from '@/store/constants'
     import {
-        detailsConfig,
-        editingConfig,
-        entityNameToFieldsConfig,
+        entityNameToConfig,
         typeToStoreNamespace,
     } from '@/lib/display-config'
 
@@ -105,7 +104,7 @@
 
             details: {
                 title: 'Unknown',
-                fieldNameToContent: {},
+                fieldNameToEntityName: {},
                 data: {},
                 props: {},
                 slots: []
@@ -157,22 +156,22 @@
                 data
             }) {
                 this.lastDetailedType = type
-                this.details.title = detailsConfig[type].title
-                this.datailedDataChangeable = editingConfig[type] !== undefined
+                this.details.title = entityNameToConfig[type].title
+                this.datailedDataChangeable = !!entityNameToConfig[type].editableFields
                 this.detailedDataPresent = Object.keys(data).length > 1
                 this.details.data = data
-                this.details.fieldNameToContent = detailsConfig[type].fieldNameToContent
-                if (detailsConfig[type].slots && detailsConfig[type].slots.length > 0) {
-                    this.details.slots.splice(0, this.details.slots.length)
-                    detailsConfig[type].slots.forEach(slotConfig => {
-                        const slot = Object.assign({}, slotConfig)
-                        slot.props = {}
-                        slot.type = type
-                        for (let propName in slot.propNameToSearchConfig) {
-                            slot.props[propName] = this.fetchPropValue(propName, slot, data)
-                        }
-                        this.details.slots.push(slot)
-                    })
+                this.details.fieldNameToLabel = entityNameToConfig[type].fieldNameToLabel
+                this.details.fieldNameToEntityName = entityNameToConfig[type].fieldNameToEntityName
+                this.details.slots.splice(0, this.details.slots.length)
+                for (let slotFieldName in entityNameToConfig[type].fieldNameToEntityName) {
+                    const slotEntityName = entityNameToConfig[type].fieldNameToEntityName[slotFieldName]
+                    const slot = entityNameToConfig[slotEntityName].tileSlotConfig
+                    slot.props = {}
+                    slot.type = type
+                    for (let propName in slot.propNameToSearchConfig) {
+                        slot.props[propName] = this.fetchPropValue(propName, slot, data)
+                    }
+                    this.details.slots.push(slot)
                 }
                 this.detailsShown = true
             },
@@ -180,8 +179,8 @@
                 // Need to fetch prop-value for this propName
                 // from store using slot config and
                 // passed data argument.
+                const entities = this[slot.getterName]
                 let searchConfig = slot.propNameToSearchConfig[propName][slot.type]
-                const entities = this[searchConfig.getterName]
                 return entities[searchConfig.multiple ? 'filter' : 'find'](entity => {
                     return entity[searchConfig.searchedEntityKey] == data[searchConfig.entityKey]
                 }) || { [searchConfig.searchedEntityKey]: data[searchConfig.entityKey] }
@@ -192,17 +191,17 @@
                 // (data variable can contain a block or a transaction here)
             },
             showEdit ({data}) {
-                const editConfig = editingConfig[this.lastDetailedType]
-                this.editData.title = `Edit ${editConfig.title}`
+                const config = entityNameToConfig[this.lastDetailedType]
+                this.editData.title = `Edit ${config.title}`
                 this.editData.editedEntity = data
                 this.editData.editableFields.splice(0, this.editData.editableFields.length)
                 this.editData.uneditableFields.splice(0, this.editData.uneditableFields.length)
-                for (let fieldName in entityNameToFieldsConfig[this.lastDetailedType]) { // populating this.editData.editableFields and ..uneditableFields
-                    const editableField = editConfig.editableFields.find(field => field.name == fieldName)
-                    const accordingFieldsArray = this.editData[ // it's by ref.
+                for (let fieldName in entityNameToConfig[this.lastDetailedType].fieldNameToLabel) { // populating this.editData.editableFields and ..uneditableFields
+                    const editableField = config.editableFields.find(field => field.name == fieldName)
+                    const accordingFieldsArray = this.editData[ // it's by ref. to fill either one or the other
                         editableField ? 'editableFields' : 'uneditableFields'
                     ]
-                    const label = entityNameToFieldsConfig[this.lastDetailedType][fieldName]
+                    const label = entityNameToConfig[this.lastDetailedType].fieldNameToLabel[fieldName]
                     accordingFieldsArray.push({
                         label: label,
                         name: fieldName,
