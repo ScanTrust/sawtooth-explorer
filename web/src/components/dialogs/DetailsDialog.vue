@@ -39,6 +39,7 @@
 <script>
     import { EventBus } from '@/lib/event-bus'
     import { SHOW_EDIT, SHOW_ADD } from '@/store/constants'
+    import { entityNameToConfig } from '@/lib/display-config'
 
     export default {
         name: 'details-dialog',
@@ -66,7 +67,11 @@
                 type: Object,
                 default: null
             },
-            fieldNameToContent: {
+            fieldNameToLabel: {
+                type: Object,
+                default: () => ({})
+            },
+            fieldNameToEntityName: {
                 type: Object,
                 default: () => ({})
             }
@@ -74,24 +79,27 @@
         computed: {
             displayedFields () {
                 const result = []
-                for (const field in this.fieldNameToContent) {
+                for (const field in this.fieldNameToLabel) {
                     if (!this.detailsData) {
                         result.push({
-                            label: this.fieldNameToContent[field],
+                            label: this.fieldNameToLabel[field],
                             value: 'Unknown'
                         })
                         continue
                     }
-                    if (typeof this.fieldNameToContent[field] === 'string') {
+                    const label = this.fieldNameToLabel[field]
+                    const slotEntityName = this.fieldNameToEntityName[field]
+                    if (slotEntityName) {
+                        const slotConfig = entityNameToConfig[slotEntityName].tileSlotConfig
                         result.push({
-                            label: this.fieldNameToContent[field],
-                            value: this.detailsData[field]
+                            label: label,
+                            tagName: slotConfig.tagName,
+                            detailsType: slotConfig.detailsType
                         })
                     } else {
                         result.push({
-                            label: this.fieldNameToContent[field].label,
-                            tagName: this.fieldNameToContent[field].tagName,
-                            detailsType: this.fieldNameToContent[field].detailsType
+                            label: label,
+                            value: this.detailsData[field]
                         })
                     }
                 }
