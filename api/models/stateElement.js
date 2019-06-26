@@ -38,8 +38,8 @@ function upsertAll(stateElements, callback) {
 
 StateElement._upsertAll = upsertAll;
 
-StateElement._get = function (params, callback) {
-    StateElement.find(deleteEmptyArrayFields(params), function (err, stateElements) {
+StateElement._get = function (params, options, callback) {
+    StateElement.find(deleteEmptyArrayFields(params), null, options, function (err, stateElements) {
         if (err)
             console.log("Err on getting from stateElements:", err);
         callback(stateElements);
