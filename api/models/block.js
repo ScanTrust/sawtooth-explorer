@@ -1,6 +1,7 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const Signer = require('./signer')
 const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
 
 let Block = new Schema({
@@ -25,7 +26,9 @@ Block._create = (block, callback) => {
 Block._upsert = function (block, callback) {
     Block.findOneAndUpdate({
       id: block.id
-    }, block, { upsert: true }, callback)
+    }, block, { upsert: true }, (err, doc) => {
+      Signer._upsert({publicKey: block.signerPublicKey}, false, () => callback(err, doc))    
+    })
 }
 
 function upsertAll(blocks, callback) {

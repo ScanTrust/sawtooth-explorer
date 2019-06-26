@@ -1,6 +1,7 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const Signer = require('./signer')
 const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
 
 let Transaction = new Schema({
@@ -25,7 +26,9 @@ Transaction._create = (transaction, callback) => {
 Transaction._upsert = function (transaction, callback) {
     Transaction.findOneAndUpdate({
         id: transaction.id
-    }, transaction, { upsert: true }, callback)
+    }, transaction, { upsert: true }, (err, doc) => {
+      Signer._upsert({publicKey: transaction.signerPublicKey}, true, () => callback(err, doc))
+    })
 }
 
 function upsertAll(transactions, callback) {
