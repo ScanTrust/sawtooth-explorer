@@ -10,7 +10,16 @@ let Signer = new Schema({
     },
     label: {
         type: String,
-        unique: true
+        unique: true,
+        sparse: true, // to be able to have multiple docs without a label (otherwise 'unique' causes error)
+    },
+    txnsAmount: {
+        type: Number,
+        default: 0,
+    },
+    blocksAmount: {
+        type: Number,
+        default: 0,
     }
 });
 
@@ -29,23 +38,32 @@ Signer._create = (signer, callback) => {
     });
 };
 
-Signer._upsert = function (signer, callback) {
+Signer._upsert = function (signer, isTxnSigner, callback) {
     callback = callback || (() => {})
-    Signer.findOneAndUpdate({
-        publicKey: signer.publicKey
-    }, signer, { upsert: true }, err => {
-        if (err) {
-            console.log('Err on upserting signer:', err)
-            return callback(false, 'unknown_error')
+    const setQuery = { publicKey: signer.publicKey }
+    if (signer.label)
+        setQuery.label = signer.label
+    const updateQuery = { $set: setQuery }
+    if (typeof isTxnSigner === 'boolean')
+        updateQuery['$inc'] = { [isTxnSigner ? 'txnsAmount' : 'blocksAmount']: 1 }
+    Signer.findOneAndUpdate(
+        { publicKey: signer.publicKey },
+        updateQuery,
+        { upsert: true },
+        (err, docs) => {
+            if (err) {
+                console.log('Err on upserting signer:', err)
+                return callback(false, 'unknown_error')
+            }
+            callback(true, 'updated_signer')
         }
-        callback(true, 'updated_signer')
-    })
+    )
 }
 
-function upsertAll(signers, callback) {
-    if (signers.length > 0) {
-        let signer = signers.shift()
-        Signer._upsert(signer, () => upsertAll(signers, callback))
+function upsertAll(signersConfig, callback) {
+    if (signersConfig.length > 0) {
+        let signerConfig = signersConfig.shift()
+        Signer._upsert(signerConfig.doc, signerConfig.isTxnSigner, () => upsertAll(signersConfig, callback))
     } else if (callback) {
         return callback()
     }

@@ -40,7 +40,7 @@ router.post('/edit', function(req, res, next) {
   Signer._upsert({
     publicKey: req.body.publicKey,
     label: req.body.label
-  }, (ok, msg) => {
+  }, null, (ok, msg) => {
     return res.status(ok ? 200 : 500).json({ ok, message: msg })
   })
 });
