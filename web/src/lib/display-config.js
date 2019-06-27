@@ -64,7 +64,7 @@ export const tilesConfig = {
     },
 }
 
-const signerBaseSearchConfig = { // config used in search of the required prop
+const signerBaseSearchConfig = { // config used in search of the required prop that is passed to slot
     entityKey: 'signerPublicKey',
     searchedEntityKey: 'publicKey',
 }
@@ -73,7 +73,43 @@ const blockBaseSearchConfig = {
     entityKey: 'blockId',
     searchedEntityKey: 'id',
 }
-
+/**
+ * Values of dict below this comment block are entities configs.
+ * 1. If an entity is ever displayed in a details dialog,
+ * its config has 'title' and 'fieldNameToLabel'. (e.g. BLOCK)
+ * 2. If one wants to pass whatever slot to this details dialog
+ * to display it infront of one of the labels from 'fieldNameToLabel' (see field's explanation below),
+ * he specifies it as an entity (name) in the value of 'fieldNameToEntityName',
+ * and also adds this entity's name's config (according to 3) in the outer dict
+ * (just like I did with TRANSACTIONS or STATE_ELEMENTS).
+ * 3. If an entity is ever passed to a slot (continuing 2),
+ * its config has 'tileSlotConfig' field. (e.g. BLOCK)
+ * 4. If an entity can be edited, there's 'editableFields' in its config (e.g. SIGNER)  
+ * 
+ * 1. 'title' is simply the title of the details dialog;
+ * 'fieldNameToLabel' is a map of entities' objects' fields' names
+ * to labels that are written each below one another in the dialog.
+ * 
+ * 2. 'fieldNameToEntityName' well explained above
+ * 
+ * 3. 'tileSlotConfig' allows to specify a 'tag-name' (tag of the component passed as slot),
+ * 'getterName' as a getter in vuex store, 'detailsType' is the type of is passed to this slot as :type, :slot, :key;
+ * :type is to provide slot-component with knowledge of where it is used,
+ * :slot is to let details dialog know where he should insert it,
+ * :key is just a vue v-for thing.
+ * Also, DetailsManager.vue listens for showDetails on the slot
+ * handling it with showDetails method,
+ * passing {type: detailsType, data: $event},
+ * where $event is an actual event payload
+ * 
+ * 4. 'editableFields' is a field used when
+ * 1) some component emitted SHOW_EDIT on a global EventBus
+ * passing { type: *edited_type*, data: *edited_data* },
+ * say, {type: 'SIGNER', data: {publicKey: ..., label: ..., ...}};
+ * the config on which editableFields is taken corresponds to 'type'
+ * 2) SHOW_DETAILS takes place and DetailsDialog.vue decides
+ * if EDIT button should be shown in it
+ */
 export const entityNameToConfig = {
     [BLOCK]: {
         title: 'Block',
