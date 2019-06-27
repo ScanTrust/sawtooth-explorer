@@ -67,6 +67,10 @@
                 type: Object,
                 default: null
             },
+            detailsType: {
+                type: String,
+                required: true
+            },
             fieldNameToLabel: {
                 type: Object,
                 default: () => ({})
@@ -108,7 +112,7 @@
         },
         methods: {
             edit () {
-                EventBus.$emit(SHOW_EDIT, { data: this.detailsData })
+                EventBus.$emit(SHOW_EDIT, { type: this.detailsType, data: this.detailsData })
             },
             add () {
                 EventBus.$emit(SHOW_ADD, { data: this.detailsData })
