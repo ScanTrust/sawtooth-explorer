@@ -67,7 +67,7 @@ function authenticateJwt(req, res, next) {
   passport.authenticate('jwt', { session: false }, function(info, user, err) {
     console.log({err, user, info})
     if (err) return next(err);
-    if (!user) throw new AuthError('401', 'User is not authenticated.');
+    if (!user) return next(Error('Unauthorized'));
     req.user = user;
     next();
   })(req, res, next);
