@@ -27,7 +27,6 @@ services:
       - WAIT_HOSTS=mongo-db:27017
       - NODE_ENV=development
       - PORT=3000
-      # TODO: work on ability to use env vars like below
       - VALIDATOR_URL=tcp://46.173.219.81:4040
       - REST_API_URL=http://46.173.219.81:8043
 
