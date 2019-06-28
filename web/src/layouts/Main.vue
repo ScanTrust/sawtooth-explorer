@@ -125,6 +125,7 @@
     }),
     created () {
       this.sockets.subscribe('txns', txns => {
+        this.$store.dispatch(LOAD)
         txns.forEach(txn => {
           EventBus.$emit(SNACKBAR, {message: `New transaction: ${txn.id.slice(0, 20)}...`})
         })
