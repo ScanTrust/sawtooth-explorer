@@ -20,7 +20,7 @@ let blockchainSocket
 
 let handlingCatchUp = false;
 let catchUpStartDate = null;
-let lastStateDeltaHandleDate = null;
+let lastEventHandleDate = null;
 
 function subscribeToBlockchainEvents (handlers, callback) {
 	blockchainSocket = zmq.socket('dealer')
@@ -44,14 +44,14 @@ function subscribeToBlockchainEvents (handlers, callback) {
 			const events = decodeEventsList(message.content).events
 			// this is to be replaced
 			for (let i = 0; i != events.length; i++) {
+				const secondsSinceLastEventHandle = (new Date() - lastEventHandleDate) / 1000
+				const secondsSinceCatchUpStart = (new Date() - catchUpStartDate) / 1000
+				if (secondsSinceCatchUpStart > 5 && secondsSinceLastEventHandle > 0.1)
+					handlingCatchUp = false
+				lastEventHandleDate = new Date()
 				if (i % 2 == 0) {
-					handlers.blockCommit(events[i])
+					handlers.blockCommit(events[i], !handlingCatchUp)
 				} else {
-					const secondsSinceLastStateDeltaHandle = (new Date() - lastStateDeltaHandleDate) / 1000
-					const secondsSinceCatchUpStart = (new Date() - catchUpStartDate) / 1000
-					if (secondsSinceCatchUpStart > 5 && secondsSinceLastStateDeltaHandle > 0.1)
-						handlingCatchUp = false
-					lastStateDeltaHandleDate = new Date()
 					const correspondingBlockId = events[i - 1].attributes[0].value
 					if (!correspondingBlockId)
 						console.log(

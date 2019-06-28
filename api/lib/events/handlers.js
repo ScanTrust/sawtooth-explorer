@@ -3,6 +3,7 @@ const http = require('@root/lib/common/http')
 const { decodeStateChangeList } = require('./encoding')
 const { blockchain } = require('@root/config')
 const { requestEventCatchUp } = require('./subscriber')
+const notifyer = require('./notifyer')
 
 const Block = require('@root/models/block');
 const Transaction = require('@root/models/transaction');
@@ -104,7 +105,7 @@ function transformBlockDataBeforeDB (blockData) {
 
 let blocksProcessesQueue = []
 
-function getAndHandleActualBlock (blockCommit) {
+function getAndHandleActualBlock (blockCommit, isFresh) {
   let block = {}
   blockCommit.attributes.forEach(attr => {
     block[attr.key] = attr.value
@@ -125,7 +126,11 @@ function getAndHandleActualBlock (blockCommit) {
           const blockInfo = JSON.parse(blockInfoJSON)["data"]
           const {block, transactions} = transformBlockDataBeforeDB(blockInfo)
           Block._upsert(block, () => {
-            Transaction._upsertAll(transactions)
+            Transaction._upsertAll(transactions.slice(), (errs) => {
+              // errs: {txnId1: mongoErr1, ...}
+              if (isFresh)
+                notifyer.notifyOn(transactions.filter(txn => !errs[txn.id]))
+            })
           })
         })
       })

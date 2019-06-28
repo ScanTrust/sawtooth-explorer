@@ -31,12 +31,17 @@ Transaction._upsert = function (transaction, callback) {
     })
 }
 
-function upsertAll(transactions, callback) {
+function upsertAll(transactions, callback, errs) {
+    errs = errs || {}
     if (transactions.length > 0) {
         let transaction = transactions.shift()
-        Transaction._upsert(transaction, () => upsertAll(transactions, callback))
+        Transaction._upsert(transaction, (err, doc) => {
+            if (err)
+                errs[transaction.id] = err
+            upsertAll(transactions, callback, errs)
+        })
     } else if (callback) {
-        return callback()
+        return callback(errs)
     }
 }
 
