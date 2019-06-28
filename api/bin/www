@@ -8,6 +8,8 @@ let app = require('@root/app');
 let debug = require('debug')('sawtooth-explorer-backend:server');
 let http = require('http');
 
+const notifyer = require('@root/lib/events/notifyer')
+
 /**
  * Get port from environment and store in Express.
  */
@@ -21,6 +23,7 @@ app.set('port', port);
 
 let server = http.createServer(app);
 
+notifyer.listen(server);
 /**
  * Listen on provided port, on all network interfaces.
  */
