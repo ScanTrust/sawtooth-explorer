@@ -1,8 +1,8 @@
 import Vue from 'vue'
 import './plugins/vuetify'
 import './plugins/datetime-picker'
+import './plugins/socket-io'
 import VueLocalStorage from 'vue-localstorage'
-
 
 Vue.use(VueLocalStorage, {
   name: 'storage'
