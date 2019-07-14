@@ -8,8 +8,9 @@ let express = require('express'),
   blockchainEventHandlers = require('./lib/events/handlers'),
   proxy = require('http-proxy-middleware'),
   config = require('./config'),
-  { authenticateJwt, normalizeError } = require('./authentication')
-//  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
+  { authenticateJwt } = require('./authentication'),
+  { normalizeError } = require('./lib/common/formatting')
+  //  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
 
 let app = express();
 
