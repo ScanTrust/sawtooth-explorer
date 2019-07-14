@@ -59,7 +59,7 @@ const errToStatus = {
 
 const errToMessage = {
     'No auth token': 'no_session_try_to_sign_in_again',
-    'Unauthorized': 'lol',
+    'Unauthorized': 'unauthorized',
     'invalid signature': 'no_session_try_to_sign_in_again'
 }
 

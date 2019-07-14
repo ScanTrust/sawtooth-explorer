@@ -12,7 +12,7 @@
                         <span class="unselectable color-grey">{{field.label}}</span>
                     </v-flex>
                     <v-flex xs11 mx-auto :key="`${field.name}-value`">
-                        <span class="subheading">{{data[field.name] || 'Unknown'}}</span>
+                        <span class="subheading">{{data[field.name] != undefined ? data[field.name] : 'Unknown'}}</span>
                     </v-flex>
                 </template>
             </v-layout>
@@ -53,6 +53,10 @@
             title: {
                 type: String,
                 default: 'Unknown'
+            },
+            type: {
+                type: String,
+                required: true
             },
             shown: {
                 type: Boolean,
@@ -115,7 +119,7 @@
         },
         methods: {
             edit () {
-                this.$emit('edit', this.editedData)
+                this.$emit('edit', { type: this.type, entity: this.editedData })
                 this.close()
             },
             close () {

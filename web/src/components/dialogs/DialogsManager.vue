@@ -8,6 +8,7 @@
             :title="details.title"
             :shown="detailsShown"
             :detailsData="details.data"
+            :detailsType="details.type"
             :fieldNameToLabel="details.fieldNameToLabel"
             :fieldNameToEntityName="details.fieldNameToEntityName"
             :dataPresent="detailedDataPresent"
@@ -33,6 +34,7 @@
         </details-dialog>
         <edit-dialog
             :title="editData.title"
+            :type="editData.type"
             :shown="editShown"
             :data="editData.editedEntity"
             :uneditableFields="editData.uneditableFields"
@@ -87,6 +89,11 @@
         TXN_FAMILY,
         ADD,
         EDIT,
+        SIGNERS_GETTER_NAME,
+        TXN_FAMILIES_GETTER_NAME,
+        BLOCKS_GETTER_NAME,
+        TRANSACTIONS_GETTER_NAME,
+        STATE_ELEMENTS_GETTER_NAME,
     } from '@/store/constants'
     import {
         entityNameToConfig,
@@ -107,7 +114,8 @@
                 fieldNameToEntityName: {},
                 data: {},
                 props: {},
-                slots: []
+                slots: [],
+                type: ''
             },
             detailedDataPresent: false,
             datailedDataChangeable: false,
@@ -115,6 +123,7 @@
 
             editData: {
                 title: 'Unknown',
+                type: '',
                 editedEntity: {},
                 uneditableFields: [],
                 editableFields: [],
@@ -156,6 +165,7 @@
                 data
             }) {
                 this.lastDetailedType = type
+                this.details.type = type
                 this.details.title = entityNameToConfig[type].title
                 this.datailedDataChangeable = !!entityNameToConfig[type].editableFields
                 this.detailedDataPresent = Object.keys(data).length > 1
@@ -190,18 +200,22 @@
                 //     signer => signer.puplicKey == data.signerPublicKey)
                 // (data variable can contain a block or a transaction here)
             },
-            showEdit ({data}) {
-                const config = entityNameToConfig[this.lastDetailedType]
+            showEdit ({
+                type,
+                data
+            }) {
+                const config = entityNameToConfig[type]
                 this.editData.title = `Edit ${config.title}`
+                this.editData.type = type
                 this.editData.editedEntity = data
                 this.editData.editableFields.splice(0, this.editData.editableFields.length)
                 this.editData.uneditableFields.splice(0, this.editData.uneditableFields.length)
-                for (let fieldName in entityNameToConfig[this.lastDetailedType].fieldNameToLabel) { // populating this.editData.editableFields and ..uneditableFields
+                for (let fieldName in config.fieldNameToLabel) { // populating this.editData.editableFields and ..uneditableFields
                     const editableField = config.editableFields.find(field => field.name == fieldName)
                     const accordingFieldsArray = this.editData[ // it's by ref. to fill either one or the other
                         editableField ? 'editableFields' : 'uneditableFields'
                     ]
-                    const label = entityNameToConfig[this.lastDetailedType].fieldNameToLabel[fieldName]
+                    const label = config.fieldNameToLabel[fieldName]
                     accordingFieldsArray.push({
                         label: label,
                         name: fieldName,
@@ -221,9 +235,9 @@
             closeEdit () {
                 this.editShown = false
             },
-            editEntity (entity) {
+            editEntity ({type, entity}) {
                 this.$store
-                    .dispatch(typeToStoreNamespace[this.lastDetailedType] + EDIT, entity)
+                    .dispatch(typeToStoreNamespace[type] + EDIT, entity)
                     .then(this.closeDetails)
                     .catch(this.closeDetails)
             },
@@ -241,11 +255,11 @@
             }
         },
         computed: {
-            ...mapGetters(SIGNERS, ['signers']),
-            ...mapGetters(BLOCKS, ['blocks']),
-            ...mapGetters(TRANSACTIONS, ['transactions']),
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
-            ...mapGetters(STATE_ELEMENTS, ['stateElements']),
+            ...mapGetters(SIGNERS, [SIGNERS_GETTER_NAME]),
+            ...mapGetters(BLOCKS, [BLOCKS_GETTER_NAME]),
+            ...mapGetters(TRANSACTIONS, [TRANSACTIONS_GETTER_NAME]),
+            ...mapGetters(TXN_FAMILIES, [TXN_FAMILIES_GETTER_NAME]),
+            ...mapGetters(STATE_ELEMENTS, [STATE_ELEMENTS_GETTER_NAME]),
         },
         beforeDestroy () {
             [SHOW_DETAILS,
