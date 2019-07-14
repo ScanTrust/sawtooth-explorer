@@ -7,6 +7,9 @@ import {
     TRANSACTIONS,
     UPDATE_FILTERS,
     UPDATE_QUERY,
+    TRANSACTIONS_GETTER_NAME,
+    PROTO,
+    DECODE,
 } from './constants'
 
 export default {
@@ -16,7 +19,7 @@ export default {
         query: JSON.parse(localStorage.getItem(`${TRANSACTIONS}query`) || '{}'),
     },
     getters: {
-        transactions: state => state.transactions,
+        [TRANSACTIONS_GETTER_NAME]: state => state.transactions,
         query: state => state.query,
     },
     mutations: {
@@ -31,17 +34,19 @@ export default {
         }
     },
     actions: {
-        [LOAD]: ({commit, getters}, query) => {
+        [LOAD]: ({dispatch, commit, getters}, query) => {
             return new Promise((resolve, reject) => {
                 http({ url: '/transactions', params: query || getters.query, method: 'GET' })
-                    .then(resp => {
-                        const transactions = resp.data.reverse().map(txn => {
-                            txn.payload = Buffer(txn.payload).toString('base64')
-                            return txn
-                        })
-                        Vue.storage.set('transactions', JSON.stringify(transactions))
-                        commit(LOAD, transactions)
-                        resolve(transactions)
+                    .then(async resp => {
+                        const transactions = resp.data.reverse()
+                        const decodedTransactions = await dispatch(
+                            PROTO + DECODE,
+                            {isTransaction: true, entities: transactions},
+                            {root: true}
+                        )
+                        Vue.storage.set('transactions', JSON.stringify(decodedTransactions))
+                        commit(LOAD, decodedTransactions)
+                        resolve(decodedTransactions)
                     })
                     .catch(err => {
                         reject(err)
