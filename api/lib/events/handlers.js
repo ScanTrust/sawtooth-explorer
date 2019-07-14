@@ -4,6 +4,7 @@ const { decodeStateChangeList } = require('./encoding')
 const { blockchain } = require('@root/config')
 const { requestEventCatchUp } = require('./subscriber')
 const notifyer = require('./notifyer')
+const { familyNameToAddressPrefix } = require('@root/lib/common/hashing')
 
 const Block = require('@root/models/block');
 const Transaction = require('@root/models/transaction');
@@ -72,7 +73,7 @@ function handleDelta (stateDelta, correspondingBlockId, isFresh) {
   const stateChangeList = decodeStateChangeList(stateDelta.data).stateChanges
   const stateElements = stateChangeList.map(delta => ({ // delta = {value: .., address: .., type: ..}
     address: delta.address,
-    data: delta.type == 1 ? delta.value : null,
+    data: delta.type == 1 ? delta.value.toString('base64') : null,
     createdAt: isFresh ? new Date() : null,
     blockId: correspondingBlockId
   }))
@@ -89,21 +90,26 @@ function transformBlockDataBeforeDB (blockData) {
     previousBlockId: blockData["header"]["previous_block_id"],
     signerPublicKey: blockData["header"]["signer_public_key"]
   }
+  const familyNameToPrefix = {}
   blockData["batches"].forEach((batch) => {
     batch["transactions"].forEach((txn) => {
+      const txnFamilyName = txn["header"]["family_name"]
+      if (!familyNameToPrefix[txnFamilyName])
+        familyNameToPrefix[txnFamilyName] = familyNameToAddressPrefix(txnFamilyName)
       transactions.push({
         id: txn["header_signature"],
         blockId: blockData["header_signature"],
         batchId: batch["header_signature"],
         payload: txn["payload"],
-        signerPublicKey: txn["header"]["signer_public_key"]
+        signerPublicKey: txn["header"]["signer_public_key"],
+        familyPrefix: familyNameToPrefix[txnFamilyName],
       })
     })
   })
   return { block, transactions }
 }
 
-let blocksProcessesQueue = []
+const blocksProcessesQueue = []
 
 function getAndHandleActualBlock (blockCommit, isFresh) {
   let block = {}
