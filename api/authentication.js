@@ -51,20 +51,6 @@ passport.use(new JWTStrategy(
     }
 ));
 
-const errToStatus = {
-    'No auth token': 401,
-    'Unauthorized': 401,
-    'invalid signature': 401,
-    'Cannot read property \'nested\' of undefined': 400,
-}
-
-const errToMessage = {
-    'No auth token': 'no_session_try_to_sign_in_again',
-    'Unauthorized': 'unauthorized',
-    'invalid signature': 'no_session_try_to_sign_in_again',
-    'Cannot read property \'nested\' of undefined': 'invalid_protos_set'
-}
-
 function authenticateJwt(req, res, next) {
   passport.authenticate('jwt', { session: false }, function(info, user, err) {
     if (err) return next(err);
@@ -81,15 +67,4 @@ function isAdmin (req, res, next) {
     next()
 }
 
-function normalizeError (err) {
-    console.log({err})
-    console.log(err.message)
-    if (Object.values(errToMessage).includes(err.message)) // if normalized
-        return err
-    const error = new Error()
-    error.message = errToMessage[err.message] || 'unknown_error'
-    error.status = errToStatus[err.message] || 500
-    return error
-}
-
-module.exports = { authenticateJwt, isAdmin, normalizeError }
+module.exports = { authenticateJwt, isAdmin }
