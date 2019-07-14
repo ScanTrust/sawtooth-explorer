@@ -7,10 +7,8 @@ let express = require('express'),
   { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
   blockchainEventHandlers = require('./lib/events/handlers'),
   proxy = require('http-proxy-middleware'),
-  passport = require('passport')
-
   config = require('./config'),
-  { normalizeError } = require('./authentication')
+  { authenticateJwt, normalizeError } = require('./authentication')
 //  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
 
 let app = express();
@@ -38,6 +36,7 @@ let transactions = require('./routes/transactions');
 let blocks = require('./routes/blocks');
 let signers = require('./routes/signers');
 let txnFamilies = require('./routes/txnFamilies');
+let proto = require('./routes/proto');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -63,19 +62,10 @@ app.options('*', function (req, res) {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-function authenticateJwt(req, res, next) {
-  passport.authenticate('jwt', { session: false }, function(info, user, err) {
-    console.log({err, user, info})
-    if (err) return next(err);
-    if (!user) return next(Error('Unauthorized'));
-    req.user = user;
-    next();
-  })(req, res, next);
-}
-
 app.use([
   '/signers/*',
-  '/txnFamilies/*'
+  '/txnFamilies/*',
+  '/proto'
 ], authenticateJwt)
 
 app.use('/', routes);
@@ -85,6 +75,7 @@ app.use('/transactions', transactions);
 app.use('/blocks', blocks);
 app.use('/signers', signers);
 app.use('/txnFamilies', txnFamilies);
+app.use('/proto', proto);
 
 app.use([
   '/auth',
@@ -92,7 +83,8 @@ app.use([
   '/transactions',
   '/blocks',
   '/signers',
-  '/txnFamilies'
+  '/txnFamilies',
+  '/proto'
 ], function (err, req, res, next) {
   next(normalizeError(err))
 })

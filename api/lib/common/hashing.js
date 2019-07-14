@@ -34,4 +34,11 @@ function saltHashPassword (password, salt) {
     return passwordData;
 }
 
-module.exports = { saltHashPassword }
+function familyNameToAddressPrefix (familyName) {
+    return crypto.createHash('sha512')
+                 .update(familyName)
+                 .digest('hex')
+                 .slice(0, 6)
+}
+
+module.exports = { saltHashPassword, familyNameToAddressPrefix }

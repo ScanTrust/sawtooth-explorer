@@ -8,8 +8,9 @@ let Transaction = new Schema({
     id: String,
     blockId: String,
     batchId: String,
-    payload: Buffer,
+    payload: String,
     signerPublicKey: String,
+    familyPrefix: String,
 });
 
 Transaction = mongoose.model('Transaction', Transaction);

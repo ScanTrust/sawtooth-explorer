@@ -5,7 +5,7 @@ const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
 
 let StateElement = new Schema({
     address: String,
-    data: Buffer,
+    data: String,
     createdAt: Date,
     blockId: String
 });
