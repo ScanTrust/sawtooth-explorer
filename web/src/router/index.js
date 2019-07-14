@@ -8,6 +8,7 @@ import Transactions from '@/views/Transactions.vue'
 import StateElements from '@/views/StateElements.vue'
 import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
+import Settings from '@/views/Settings.vue'
 import store from '@/store'
 import { AUTH } from '@/store/constants'
 import {
@@ -18,6 +19,7 @@ import {
   TXN_FAMILIES_PATH,
   TRANSACTIONS_PATH,
   STATE_PATH,
+  SETTINGS_PATH,
 } from './constants'
 
 Vue.use(Router)
@@ -66,6 +68,9 @@ export default new Router({
         }, {
           path: STATE_PATH,
           component: StateElements
+        }, {
+          path: SETTINGS_PATH,
+          component: Settings
         }
       ]
     }

@@ -50,5 +50,17 @@ export default {
             type: Object,
             default: {}
         },
+        protoMessages: {
+            type: Array,
+            default: []
+        },
+        txnFamilyPrefixToRulesConfig: {
+            type: Object,
+            default: {}
+        },
+        txnFamilyPrefixToFileNames: {
+            type: Object,
+            default: {}
+        },
     }
 }
