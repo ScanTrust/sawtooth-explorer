@@ -4,6 +4,7 @@ let StateElement = require('@root/models/stateElement')
 
 router.get('/', function(req, res, next) {
     const dbQuery = {}
+    const options = {}
     if (req.query.addresses) {
         const prefixes = req.query.addresses.split(',')
         dbQuery["address"] = {$in: prefixes.map(pref => new RegExp('^' + pref, 'i'))}
@@ -13,10 +14,16 @@ router.get('/', function(req, res, next) {
         dbQuery["blockId"] = {$in: blockIds}
     }
 	if (req.query.since) {
+        dbQuery["$and"] = []
         const sinceDate = new Date(parseInt(req.query.since));
-		dbQuery["createdAt"] = {$gte: sinceDate} 
+		dbQuery["$and"].push({createdAt: {$gte: sinceDate}}) 
 	}
-    StateElement._get(dbQuery, stateElemets => {
+	if (req.query.isChronologicalOrder == 1) {
+        dbQuery["$and"] = dbQuery["$and"] || []
+        dbQuery["$and"].push({createdAt: {$ne: null}})  
+        options.sort = {createdAt: 1}
+	}
+    StateElement._get(dbQuery, options, stateElemets => {
         res.send(stateElemets)
     })
 });

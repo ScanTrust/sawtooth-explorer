@@ -5,7 +5,7 @@ import messageCodes from './message-codes'
 import { AUTH, LOGOUT } from '@/store/constants';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: process.env.VUE_APP_API_URL || 'http://localhost:3000',
 });
 
 axiosInstance.interceptors.response.use(

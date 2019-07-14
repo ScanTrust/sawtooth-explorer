@@ -19,3 +19,6 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw*
+
+/api/lib/proto_processor/protos
+/api/lib/proto_processor/descriptor.json

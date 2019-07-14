@@ -61,7 +61,7 @@
       <span>&copy; 2019 &nbsp;</span>
     </v-footer>
     <slot name="snackbar" />
-    <dialogs-manager></dialogs-manager>
+    <dialogs-manager />
   </v-app>
 </template>
 
@@ -70,7 +70,7 @@
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
   import { EventBus } from '@/lib/event-bus'
-  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS } from '@/store/constants'
+  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS, SNACKBAR } from '@/store/constants'
   import {
     AUTH_PATH, ROOT_PATH,
     BLOCKS_PATH, SIGNERS_PATH,
@@ -123,8 +123,13 @@
         }
       ],
     }),
-    props: {
-
+    created () {
+      this.sockets.subscribe('txns', txns => {
+        this.$store.dispatch(LOAD)
+        txns.forEach(txn => {
+          EventBus.$emit(SNACKBAR, {message: `New transaction: ${txn.id.slice(0, 20)}...`})
+        })
+      })
     },
     computed: {
       ...mapState(AUTH, ['username']),
