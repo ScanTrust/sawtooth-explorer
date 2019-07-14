@@ -52,7 +52,20 @@
     </v-navigation-drawer>
     <v-content>
 
-      <router-view/>
+      <router-view v-if="storeReady"/>
+
+      <v-container v-else fill-height>
+        <v-layout column align-center justify-center>
+          <v-flex xs1>
+            <v-progress-circular
+              indeterminate
+              :color="'#969696'"
+              :width="6"
+              :size="50">
+            </v-progress-circular>
+          </v-flex>
+        </v-layout>
+      </v-container>
 
     </v-content>
     <v-footer fixed dark color="indigo" class="white--text" app>
@@ -76,36 +89,37 @@
     BLOCKS_PATH, SIGNERS_PATH,
     TXN_FAMILIES_PATH,
     TRANSACTIONS_PATH,
-    STATE_PATH,
+    STATE_PATH, SETTINGS_PATH
   } from '@/router/constants'
 
   export default {
     name: 'Main',
     data: () => ({
       drawer: true,
+      storeReady: false,
       menuItems: [
         {
-          to: '/',
+          to: ROOT_PATH,
           iconName: 'public',
           label: 'Home'
         }, {
-          to: '/state',
+          to: STATE_PATH,
           iconName: 'library_books',
           label: 'State'
         },  {
-          to: '/blocks',
+          to: BLOCKS_PATH,
           iconName: 'filter_none',
           label: 'Blocks'
         }, {
-          to: '/transactions',
+          to: TRANSACTIONS_PATH,
           iconName: 'card_travel',
           label: 'Transactions'
         },  {
-          to: '/signers',
+          to: SIGNERS_PATH,
           iconName: 'vpn_key',
           label: 'Signers'
         }, {
-          to: '/txnFamilies',
+          to: TXN_FAMILIES_PATH,
           iconName: 'memory',
           label: 'Transaction Families'
         }, {
@@ -120,6 +134,12 @@
           event: RESET_FILTERS,
           iconName: 'close',
           label: 'Reset'
+        }, {
+          divider: true
+        }, {
+          to: SETTINGS_PATH,
+          iconName: 'settings',
+          label: 'Settings'
         }
       ],
     }),
@@ -130,6 +150,10 @@
           EventBus.$emit(SNACKBAR, {message: `New transaction: ${txn.id.slice(0, 20)}...`})
         })
       })
+    },
+    async mounted () {
+      await this.$store.dispatch(LOAD)
+      this.storeReady = true
     },
     computed: {
       ...mapState(AUTH, ['username']),
@@ -154,6 +178,10 @@
 <style>
   .color-grey {
     color: grey;
+  }
+
+  .box-shadow {
+    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12) !important;
   }
 </style>
 

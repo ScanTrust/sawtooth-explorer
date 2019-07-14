@@ -2,7 +2,7 @@
     <div class="pos-relative height-85-prc">
         <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
-                <v-flex shrink xs2 v-for="block in blocks" :key="block.id">
+                <v-flex shrink xs12 sm4 md2 xl1 v-for="block in blocks" :key="block.id">
                     <entity-tile
                         :entity="block"
                         :type="BLOCK"

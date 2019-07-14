@@ -25,7 +25,13 @@
     import { mapGetters } from 'vuex'
 
     import EntityTile from '@/components/EntityTile'
-    import { TXN_FAMILIES, LOAD, ADD, TXN_FAMILY, SHOW_DETAILS, SHOW_TXN_FAMILY_ADD } from '@/store/constants'
+    import {
+        TXN_FAMILIES,
+        LOAD, ADD,
+        TXN_FAMILY,
+        SHOW_DETAILS,
+        SHOW_TXN_FAMILY_ADD,
+    } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
     export default {

@@ -17,7 +17,16 @@ router.get('/', async function(req, res, next) {
         txnFamilyPrefixToFileNames[txnFamilyPrefix] = txnFamilyPrefixToFileNames[txnFamilyPrefix] || []
         txnFamilyPrefixToFileNames[txnFamilyPrefix].push(fileName)
     })
-    const descriptorJSON = require('@root/lib/proto_processor/descriptor.json') || {}
+    let descriptorJSON
+    try {
+        descriptorJSON = require('@root/lib/proto_processor/descriptor.json')
+    } catch (error) {
+        if (error.code === 'MODULE_NOT_FOUND') {
+            descriptorJSON = { nested: {} }
+        } else {
+            return next(error)
+        }
+    }
     txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
     res.status(200).json({
         descriptor: descriptorJSON,

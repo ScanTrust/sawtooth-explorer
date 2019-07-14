@@ -1,5 +1,5 @@
 <template>
-    <v-list-tile :avatar="entity[avatar] ? true : false" class="tile">
+    <v-list-tile :avatar="!!entity[avatar]" class="tile box-shadow">
         <v-list-tile-avatar v-if="entity[avatar]" @click="clicked">
             <img :src="makeAvatar(entity[avatar])">
         </v-list-tile-avatar>
@@ -46,7 +46,6 @@
 
 <style scoped>
   .tile {
-    box-shadow: 0 2px 1px -1px rgba(0,0,0,.2),0 1px 1px 0 rgba(0,0,0,.14),0 1px 3px 0 rgba(0,0,0,.12) !important;
     cursor: pointer;
     padding: 5px 0px;
   }

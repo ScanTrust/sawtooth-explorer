@@ -2,7 +2,7 @@
     <div class="pos-relative height-85-prc">
         <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
-                <v-flex shrink xs2 v-for="transaction in transactions" :key="transaction.id">
+                <v-flex shrink xs12 sm4 md2 xl1 v-for="transaction in transactions" :key="transaction.id">
                     <entity-tile
                         :entity="transaction"
                         :type="TRANSACTION"
@@ -22,7 +22,7 @@
         TRANSACTIONS,
         LOAD,
         SHOW_DETAILS,
-        TRANSACTION
+        TRANSACTION,
     } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 

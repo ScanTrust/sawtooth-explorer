@@ -7,6 +7,7 @@ import {
     BLOCKS,
     UPDATE_FILTERS,
     UPDATE_QUERY,
+    BLOCKS_GETTER_NAME,
 } from './constants'
 
 export default {
@@ -16,7 +17,7 @@ export default {
         query: JSON.parse(localStorage.getItem(`${BLOCKS}query`) || '{}'),
     },
     getters: {
-        blocks: state => state.blocks,
+        [BLOCKS_GETTER_NAME]: state => state.blocks,
         query: state => state.query,
     },
     mutations: {
