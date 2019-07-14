@@ -23,6 +23,9 @@ import {
     TXN_FAMILIES_FILTERS_COMPONENT,
     TRANSACTIONS_FILTERS_COMPONENT,
     STATE_ELEMENTS_FILTERS_COMPONENT,
+
+    DATA_BYTE,
+    ADDRESS_SLICE,
 } from '@/store/constants'
 import {
     BLOCKS_PATH,
@@ -64,163 +67,237 @@ export const tilesConfig = {
     },
 }
 
-const signerBaseSearchConfig = { // config used in search of the required prop
-    entityKey: 'signerPublicKey',
-    searchedEntityKey: 'publicKey',
-}
-
-const blockBaseSearchConfig = {
-    entityKey: 'blockId',
-    searchedEntityKey: 'id',
-}
+/**
+ * Keys of the dict below correspond to possible details dialog types.
+ * Values are configs on displaying those dialogs' content.
+ * 'title' is just what's in the hat of the dialog.
+ * 'detailsFields' correspond to rows of the dialog. Each has a label and one of the following config-sets
+ * 1) 'entityFieldName' specified indicates that this is "raw" row and
+ *     only detailed entities' field's value should be displayed next to the label.
+ * 2) 'slotConfig' specified means that it's one of the slots passed to the
+ *     detailed dialogs should be displayed next to this label. What slots are
+ *     passed to a particular detail dialog is defined by simply taking all
+ *    'slotConfig' fields for the current detailed dialog type.
+ *    'slotConfig' necessarily has 'tagName'. It corresponds to the 'name' field
+ *     of one of the components imported to DialogsManager.vue.
+ *    'slotConfig' may have 'detailsType' which, among other,
+ *     used for deciding details dialog of which type
+ *     should be shown when clicking on that slot. Not all slots assume their data can be detailed.
+ *    'slotConfig' necessarily have either 'propNameToEntityField' or 'propNameToStoreSearchConfig'.
+ *    'propNameToEntityField' sets up in what props values of which fields of the detailed entity
+ *     should be passed to this slot.
+ *    'propNameToStoreSearchConfig' maps a propName (to pass to the slot) to a config
+ *     to search for the passed entity in vuex store. This config necessarily have
+ *    'storeGetterName' and 'storeWhereQuery' fields. The first one is just the getter name
+ *     of root (index.js) store module. 'storeWhereQuery' must be a .trim()'med string
+ *     with exactly 2 spaces deviding 3 query components:
+ *     a store entity field name, a comparison operator and a detailed entity field name.
+ *     What exactly 'comparison operator' means could be seen in @/lib/common.js
+ */
 
 export const entityNameToConfig = {
     [BLOCK]: {
         title: 'Block',
-        fieldNameToLabel: {
-            id: 'Id',
-            num: 'Number',
-            previousBlockId: 'Previous block id',
-            stateHash: 'State hash',
-            signerPublicKey: 'Signer',
-            transactions: 'Transactions',
-            stateElements: 'State Elements',
-        },
-        fieldNameToEntityName: {
-            signerPublicKey: SIGNER,
-            transactions: TRANSACTIONS,
-            stateElements: STATE_ELEMENTS,
-        },
-        tileSlotConfig: {
-            tagName: 'entity-tile',
-            getterName: BLOCKS_GETTER_NAME,
-            detailsType: BLOCK,
-            propNameToSearchConfig: {
-                entity: {
-                    [STATE_ELEMENT]: blockBaseSearchConfig,
-                    [TRANSACTION]: blockBaseSearchConfig,
-                }
-            },
-        }
+        detailsFields: [{
+            label: 'Id',
+            entityFieldName: 'id',
+        }, {
+            label: 'Number',
+            entityFieldName: 'num',
+        }, {
+            label: 'Previous Block',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: BLOCK,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeWhereQuery: 'id == previousBlockId'
+                    }
+                },
+            }
+        }, {
+            label: 'State Hash',
+            entityFieldName: 'stateHash',
+        }, {
+            label: 'Signer',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: SIGNER,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: SIGNERS_GETTER_NAME,
+                        storeWhereQuery: 'publicKey == signerPublicKey'
+                    }
+                },
+            }
+        }, {
+            label: 'Transactions',
+            slotConfig: {
+                tagName: 'entities-list',
+                detailsType: TRANSACTION,
+                propNameToStoreSearchConfig: {
+                    entities: {
+                        storeGetterName: TRANSACTIONS_GETTER_NAME,
+                        storeWhereQuery: 'blockId == id',
+                        multiple: true,
+                    }
+                },
+            }
+        }, {
+            label: 'State Elements',
+            slotConfig: {
+                tagName: 'entities-list',
+                detailsType: STATE_ELEMENT,
+                propNameToStoreSearchConfig: {
+                    entities: {
+                        storeGetterName: STATE_ELEMENTS_GETTER_NAME,
+                        storeWhereQuery: 'blockId == id',
+                        multiple: true,
+                    }
+                },
+            }
+        }],
     },
     [TRANSACTION]: {
         title: 'Transaction',
-        fieldNameToLabel: {
-            id: 'Id',
-            batchId: 'Batch id',
-            payload: 'Payload',
-            blockId: 'Block id',
-            signerPublicKey: 'Signer',
-        },
-        fieldNameToEntityName: {
-            blockId: BLOCK,
-            signerPublicKey: SIGNER,
-        },
-    },
-    [TRANSACTIONS]: {
-        tileSlotConfig: {
-            tagName: 'entities-list',
-            getterName: TRANSACTIONS_GETTER_NAME,
-            detailsType: TRANSACTION,
-            propNameToSearchConfig: {
-                entities: {
-                    [BLOCK]: {
-                        entityKey: 'id',
-                        searchedEntityKey: 'blockId',
-                        multiple: true
-                    },
-                }
-            },
-        }
+        detailsFields: [{
+            label: 'Id',
+            entityFieldName: 'id',
+        }, {
+            label: 'Batch Id',
+            entityFieldName: 'batchId',
+        }, {
+            label: 'Payload',
+            slotConfig: {
+                tagName: 'payload-section',
+                propNameToEntityField: {
+                    raw: 'payload',
+                    json: 'payloadDecoded'
+                },
+            }
+        }, {
+            label: 'Block',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: BLOCK,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeWhereQuery: 'id == blockId'
+                    }
+                },
+            }
+        }, {
+            label: 'Signer',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: SIGNER,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: SIGNERS_GETTER_NAME,
+                        storeWhereQuery: 'publicKey == signerPublicKey'
+                    }
+                },
+            }
+        }]
     },
     [STATE_ELEMENT]: {
         title: 'State Element',
-        fieldNameToLabel: {
-            address: 'Address',
-            data: 'Data',
-            createdAt: 'Created At',
-            block: 'Block',
-            txnFamily: 'Transaction Family',
-        },
-        fieldNameToEntityName: {
-            block: BLOCK,
-            txnFamily: TXN_FAMILY,
-        },
-    },
-    [STATE_ELEMENTS]: {
-        tileSlotConfig: {
-            tagName: 'entities-list',
-            detailsType: STATE_ELEMENT,
-            getterName: STATE_ELEMENTS_GETTER_NAME,
-            propNameToSearchConfig: {
-                entities: {
-                    [BLOCK]: {
-                        // e.g. for this tileSlot,
-                        // searching for a value to pass it to
-                        // its prop called 'entities',
-                        // for if it's in BLOCK's details,
-                        // use this tileSlot's getterName to get list of
-                        // entities from vuex store;
-                        // compare their searchedEntityKey's value
-                        // to entityKey's value of detailed(!) entity
-                        // iterating over these entities;
-                        // according to multiple do this with
-                        // either 'filter', or 'find' js array methods
-                        entityKey: 'id',
-                        searchedEntityKey: 'blockId',
-                        multiple: true
-                    },
-                }
+        detailsFields: [{
+            label: 'Address',
+            entityFieldName: 'address',
+        }, {
+            label: 'Data',
+            slotConfig: {
+                tagName: 'payload-section',
+                propNameToEntityField: {
+                    raw: 'data',
+                    json: 'decodedData',
+                },
             },
-        }
+        }, {
+            label: 'Created At',
+            entityFieldName: 'createdAt',
+        }, {
+            label: 'Block',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: BLOCK,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeWhereQuery: 'id == blockId',
+                    }
+                },
+            },
+        }, {
+            label: 'Transaction Family',
+            slotConfig: {
+                tagName: 'entity-tile',
+                detailsType: TXN_FAMILY,
+                propNameToStoreSearchConfig: {
+                    entity: {
+                        storeGetterName: TXN_FAMILIES_GETTER_NAME,
+                        storeWhereQuery: 'addressPrefix == addressPrefix',
+                    },
+                },
+            },
+        }],
     },
     [SIGNER]: {
         title: 'Signer',
-        fieldNameToLabel: {
-            publicKey: 'Public key',
+        detailsFields: [{
+            label: 'Public Key',
+            entityFieldName: 'publicKey'
+        }, {
             label: 'Label',
-            txnsAmount: 'Transactions Signed',
-            blocksAmount: 'Blocks Signed',
-        },
+            entityFieldName: 'label'
+        }, {
+            label: 'Transactions Signed',
+            slotConfig: {
+                tagName: 'entities-list',
+                detailsType: TRANSACTION,
+                propNameToStoreSearchConfig: {
+                    entities: {
+                        storeGetterName: TRANSACTIONS_GETTER_NAME,
+                        storeWhereQuery: 'signerPublicKey == publicKey',
+                        multiple: true,
+                    },
+                },
+            }
+        }, {
+            label: 'Blocks Signed',
+            slotConfig: {
+                tagName: 'entities-list',
+                detailsType: BLOCK,
+                propNameToStoreSearchConfig: {
+                    entities: {
+                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeWhereQuery: 'signerPublicKey == publicKey',
+                        multiple: true,
+                    },
+                },
+            }
+        }],
         editableFields: [{
-            name: 'label',
+            entityFieldName: 'label',
             rules: [rules.required, rules.minLength(4)]
         }],
-        tileSlotConfig: {
-            tagName: 'entity-tile',
-            getterName: SIGNERS_GETTER_NAME,
-            detailsType: SIGNER,
-            propNameToSearchConfig: {
-                entity: {
-                    [BLOCK]: signerBaseSearchConfig,
-                    [TRANSACTION]: signerBaseSearchConfig,
-                }
-            },
-        }
     },
     [TXN_FAMILY]: {
         title: 'Transaction Family',
-        fieldNameToLabel: {
-            addressPrefix: 'Address prefix',
+        detailsFields: [{
+            label: 'Address Prefix',
+            entityFieldName: 'addressPrefix'
+        }, {
             label: 'Label',
-        },
+            entityFieldName: 'label'
+        }],
         editableFields: [{
-            name: 'label',
+            entityFieldName: 'label',
             rules: [rules.required, rules.minLength(4)]
         }],
-        tileSlotConfig: {
-            tagName: 'entity-tile',
-            detailsType: TXN_FAMILY,
-            getterName: TXN_FAMILIES_GETTER_NAME,
-            propNameToSearchConfig: {
-                entity: {
-                    [STATE_ELEMENT]: {
-                        entityKey: 'addressPrefix',
-                        searchedEntityKey: 'addressPrefix',
-                    }
-                }
-            },
-        }
     }
 }
 
@@ -239,3 +316,18 @@ export const routePathToStoreNamespace = {
     [TXN_FAMILIES_PATH]: TXN_FAMILIES,
     [STATE_PATH]: STATE_ELEMENTS,
 }
+
+export const protoRulesConfig = {
+    [ADDRESS_SLICE]: {
+        number: 0,
+        label: 'Address Slice Matching'
+    },
+    [DATA_BYTE]: {
+        number: 1,
+        label: 'Data Byte Matching'
+    },
+}
+
+export const RAW_REPRESENTATION_NAME = 'raw'
+export const JSON_REPRESENTATION_NAME = 'json'
+export const CBOR_REPRESENTATION_NAME = 'cbor'

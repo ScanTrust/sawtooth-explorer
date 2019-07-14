@@ -12,7 +12,7 @@
                         <span class="unselectable color-grey">{{field.label}}</span>
                     </v-flex>
                     <v-flex xs11 mx-auto :key="`${field.name}-value`">
-                        <span class="subheading">{{data[field.name] || 'Unknown'}}</span>
+                        <span class="subheading">{{data[field.name] != undefined ? data[field.name] : 'Unknown'}}</span>
                     </v-flex>
                 </template>
             </v-layout>
@@ -20,9 +20,9 @@
                 <v-flex xs12>
                     <v-form v-model="dataIsCorrect" ref="form">
                         <v-flex xs12 v-for="field in editableFields" :key="field.name">
-                            <v-text-field @keyup.enter="edit" 
+                            <v-text-field @keyup.enter="edit"
                                         :label="field.label"
-                                        v-model="editedData[field.name]"
+                                        v-model="entity[field.name]"
                                         :rules="field.rules">
                             </v-text-field>
                         </v-flex>
@@ -46,7 +46,7 @@
     export default {
         name: 'edit-dialog',
         data: () => ({
-            editedData: {},
+            entity: {},
             dataIsCorrect: false,
         }),
         props: {
@@ -54,13 +54,17 @@
                 type: String,
                 default: 'Unknown'
             },
+            type: {
+                type: String,
+                required: true
+            },
             shown: {
                 type: Boolean,
                 default: false
             },
             data: {
                 type: Object,
-                default: null
+                default: () => {}
             },
             uneditableFields: {
                 type: Array,
@@ -69,7 +73,7 @@
             editableFields: {
                 type: Array,
                 default: () => []
-            }
+            },
         },
         watch: {
             shown () {
@@ -78,44 +82,18 @@
             },
             uneditableFields () {
                 this.uneditableFields.forEach(field => {
-                    this.editedData[field.name] = this.data[field.name]
+                    this.entity[field.name] = this.data[field.name]
                 })
             },
             editableFields () {
                 this.editableFields.forEach(field => {
-                    this.editedData[field.name] = this.data[field.name]
+                    this.entity[field.name] = this.data[field.name]
                 })
-            }
-        },
-        computed: {
-            displayedFields () {
-                const result = []
-                for (const field in this.fieldNameToContent) {
-                    if (!this.detailsData) {
-                        result.push({
-                            label: this.fieldNameToContent[field],
-                            value: 'Unknown'
-                        })
-                        continue
-                    }
-                    if (typeof this.fieldNameToContent[field] === 'string') {
-                        result.push({
-                            label: this.fieldNameToContent[field],
-                            value: this.detailsData[field]
-                        })
-                    } else {
-                        result.push({
-                            label: this.fieldNameToContent[field].label,
-                            tagName: this.fieldNameToContent[field].tagName
-                        })
-                    }
-                }
-                return result
             }
         },
         methods: {
             edit () {
-                this.$emit('edit', this.editedData)
+                this.$emit('edit', { type: this.type, entity: this.entity })
                 this.close()
             },
             close () {

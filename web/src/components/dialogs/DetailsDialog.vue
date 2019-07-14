@@ -1,5 +1,5 @@
 <template>
-    <v-dialog v-model="shown" persistent max-width="500px">
+    <v-dialog v-model="shown" persistent max-width="650px">
         <v-card>
             <v-card-title>
                 <span class="headline">{{ title }}</span>
@@ -12,7 +12,7 @@
                                 <span class="unselectable color-grey">{{field.label}}</span>
                             </v-flex>
                             <v-flex xs11 mx-auto :key="`${field.label}-value`">
-                                <slot v-if="field.tagName" :name="field.detailsType"></slot>
+                                <slot v-if="field.tagName" :name="field.slotName"></slot>
                                 <span v-else class="subheading">{{field.value != undefined ? field.value : 'Unknown'}}</span>
                             </v-flex>
                         </template>
@@ -26,7 +26,7 @@
             </v-card-text>
             <v-card-actions>
                 <template v-if="changeable">
-                    <v-btn v-if="dataPresent" color="blue darken-1" flat @click.native="edit">Edit</v-btn>
+                    <v-btn v-if="displayedFields.length > 1" color="blue darken-1" flat @click.native="edit">Edit</v-btn>
                     <v-btn v-else color="blue darken-1" flat @click.native="add">Add</v-btn>
                 </template>
                 <v-spacer></v-spacer>
@@ -63,55 +63,25 @@
                 type: Boolean,
                 default: false
             },
-            detailsData: {
+            detailedEntity: {
                 type: Object,
                 default: null
             },
-            fieldNameToLabel: {
-                type: Object,
-                default: () => ({})
+            detailsType: {
+                type: String,
+                required: true
             },
-            fieldNameToEntityName: {
-                type: Object,
-                default: () => ({})
-            }
-        },
-        computed: {
-            displayedFields () {
-                const result = []
-                for (const field in this.fieldNameToLabel) {
-                    if (!this.detailsData) {
-                        result.push({
-                            label: this.fieldNameToLabel[field],
-                            value: 'Unknown'
-                        })
-                        continue
-                    }
-                    const label = this.fieldNameToLabel[field]
-                    const slotEntityName = this.fieldNameToEntityName[field]
-                    if (slotEntityName) {
-                        const slotConfig = entityNameToConfig[slotEntityName].tileSlotConfig
-                        result.push({
-                            label: label,
-                            tagName: slotConfig.tagName,
-                            detailsType: slotConfig.detailsType
-                        })
-                    } else {
-                        result.push({
-                            label: label,
-                            value: this.detailsData[field]
-                        })
-                    }
-                }
-                return result
+            displayedFields: {
+                type: Array,
+                required: true
             }
         },
         methods: {
             edit () {
-                EventBus.$emit(SHOW_EDIT, { data: this.detailsData })
+                EventBus.$emit(SHOW_EDIT, { type: this.detailsType, data: this.detailedEntity })
             },
             add () {
-                EventBus.$emit(SHOW_ADD, { data: this.detailsData })
+                EventBus.$emit(SHOW_ADD, { data: this.detailedEntity })
             }
         }
     }

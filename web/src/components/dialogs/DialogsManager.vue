@@ -7,21 +7,20 @@
         <details-dialog
             :title="details.title"
             :shown="detailsShown"
-            :detailsData="details.data"
-            :fieldNameToLabel="details.fieldNameToLabel"
-            :fieldNameToEntityName="details.fieldNameToEntityName"
-            :dataPresent="detailedDataPresent"
+            :displayedFields="details.displayedFields"
+            :detailsType="details.type"
+            :detailedEntity="details.data"
             :changeable="datailedDataChangeable"
             @close="closeDetails">
                 <template v-if="detailsShown">
-                    <!-- Either entity-tile or entities-list now,
+                    <!-- Either entity-tile or entities-list or payload-section now,
                         depending on what is detailed right now
                         (i.e. what details.slots it has) -->
                     <component
                         v-for="slot in details.slots"
-                        :key="slot.detailsType"
+                        :key="slot.entityFieldLabel"
                         :is="slot.tagName"
-                        :slot="slot.detailsType"
+                        :slot="slot.name"
                         :type="slot.detailsType"
                         v-bind="slot.props"
                         @showDetails="showDetails({
@@ -33,6 +32,7 @@
         </details-dialog>
         <edit-dialog
             :title="editData.title"
+            :type="editData.type"
             :shown="editShown"
             :data="editData.editedEntity"
             :uneditableFields="editData.uneditableFields"
@@ -60,8 +60,6 @@
 </template>
 
 <script>
-    import { mapGetters } from 'vuex'
-
     import DetailsDialog from './DetailsDialog'
     import EditDialog from './EditDialog'
     import FiltersDialog from './FiltersDialog'
@@ -69,6 +67,7 @@
     import TxnFamilyAdd from './TxnFamilyAdd'
     import EntityTile from '@/components/EntityTile'
     import EntitiesList from '@/components/EntitiesList'
+    import PayloadSection from '@/components/PayloadSection'
 
     import { EventBus } from '@/lib/event-bus'
     import {
@@ -87,11 +86,18 @@
         TXN_FAMILY,
         ADD,
         EDIT,
+        SIGNERS_GETTER_NAME,
+        TXN_FAMILIES_GETTER_NAME,
+        BLOCKS_GETTER_NAME,
+        TRANSACTIONS_GETTER_NAME,
+        STATE_ELEMENTS_GETTER_NAME,
+        FETCH_PROP_VALUE,
     } from '@/store/constants'
     import {
         entityNameToConfig,
         typeToStoreNamespace,
     } from '@/lib/display-config'
+    import { isEmptyValue } from '@/lib/common'
 
     export default {
         name: 'dialogs',
@@ -104,17 +110,16 @@
 
             details: {
                 title: 'Unknown',
-                fieldNameToEntityName: {},
+                displayedFields: [],
                 data: {},
-                props: {},
-                slots: []
+                slots: [],
+                type: ''
             },
-            detailedDataPresent: false,
             datailedDataChangeable: false,
-            lastDetailedType: null,
 
             editData: {
                 title: 'Unknown',
+                type: '',
                 editedEntity: {},
                 uneditableFields: [],
                 editableFields: [],
@@ -155,63 +160,96 @@
                 type,
                 data
             }) {
-                this.lastDetailedType = type
+                // filling title, type, data
                 this.details.title = entityNameToConfig[type].title
-                this.datailedDataChangeable = !!entityNameToConfig[type].editableFields
-                this.detailedDataPresent = Object.keys(data).length > 1
+                this.details.type = type
                 this.details.data = data
-                this.details.fieldNameToLabel = entityNameToConfig[type].fieldNameToLabel
-                this.details.fieldNameToEntityName = entityNameToConfig[type].fieldNameToEntityName
+                // helper flag
+                this.datailedDataChangeable = !!entityNameToConfig[type].editableFields
+                // refilling this.details.displayedFields and ..slots
+                this.details.displayedFields.splice(0, this.details.displayedFields.length)
                 this.details.slots.splice(0, this.details.slots.length)
-                for (let slotFieldName in entityNameToConfig[type].fieldNameToEntityName) {
-                    const slotEntityName = entityNameToConfig[type].fieldNameToEntityName[slotFieldName]
-                    const slot = entityNameToConfig[slotEntityName].tileSlotConfig
-                    slot.props = {}
-                    slot.type = type
-                    for (let propName in slot.propNameToSearchConfig) {
-                        slot.props[propName] = this.fetchPropValue(propName, slot, data)
+                // creating 2 references:
+                const displayedFields = this.details.displayedFields
+                const slots = this.details.slots
+                entityNameToConfig[type].detailsFields.forEach(async (field, i) => {
+                    const displayedField = { label: field.label }
+                    let fieldShouldBeIncluded = true
+                    if (field.entityFieldName) {
+                        displayedField.value = data[field.entityFieldName]
+                    } else if (field.slotConfig) {
+                        const slotConfig = field.slotConfig
+                        const slot = {
+                            name: `${slotConfig.tagName}-${i}`,
+                            tagName: slotConfig.tagName,
+                            detailsType: slotConfig.detailsType,
+                            props: {},
+                        }
+                        displayedField.slotName = slot.name
+                        displayedField.tagName = slot.tagName
+                        displayedField.detailsType = slot.detailsType
+                        // filling slot's props
+                        let slotHasData = false
+                        if (slotConfig.propNameToEntityField) {
+                            for (const propName in slotConfig.propNameToEntityField) {
+                                const entityFieldName = slotConfig.propNameToEntityField[propName]
+                                slot.props[propName] = data[entityFieldName]
+                                slotHasData = slotHasData || !isEmptyValue(slot.props[propName])
+                            }
+                        } else if (slotConfig.propNameToStoreSearchConfig) {
+                            for (const propName in slotConfig.propNameToStoreSearchConfig) {
+                                const searchConfig = slotConfig.propNameToStoreSearchConfig[propName]
+                                slot.props[propName] = await this.$store.dispatch(
+                                    FETCH_PROP_VALUE,
+                                    {
+                                        searchedEntityStoreNameSpace: typeToStoreNamespace[slotConfig.detailsType],
+                                        searchConfig, data
+                                    }
+                                )
+                                slotHasData = slotHasData || !isEmptyValue(slot.props[propName])
+                            }
+                        }
+                        if (slotHasData)
+                            slots.push(slot)
+                        fieldShouldBeIncluded = slotHasData
                     }
-                    this.details.slots.push(slot)
-                }
+                    if (fieldShouldBeIncluded)
+                        displayedFields.push(displayedField)
+                })
+                // showing
                 this.detailsShown = true
             },
-            fetchPropValue (propName, slot, data) {
-                // Need to fetch prop-value for this propName
-                // from store using slot config and
-                // passed data argument.
-                const entities = this[slot.getterName]
-                let searchConfig = slot.propNameToSearchConfig[propName][slot.type]
-                return entities[searchConfig.multiple ? 'filter' : 'find'](entity => {
-                    return entity[searchConfig.searchedEntityKey] == data[searchConfig.entityKey]
-                }) || { [searchConfig.searchedEntityKey]: data[searchConfig.entityKey] }
-                // Example of possible call above when
-                // some values are substituted is
-                // slot.props['signer'] = this.signers.find(
-                //     signer => signer.puplicKey == data.signerPublicKey)
-                // (data variable can contain a block or a transaction here)
-            },
-            showEdit ({data}) {
-                const config = entityNameToConfig[this.lastDetailedType]
+            showEdit ({
+                type,
+                data
+            }) {
+                const config = entityNameToConfig[type]
+                // filling title, type, editedEntity
                 this.editData.title = `Edit ${config.title}`
+                this.editData.type = type
                 this.editData.editedEntity = data
+                // refilling editableFields and uneditableFields
                 this.editData.editableFields.splice(0, this.editData.editableFields.length)
                 this.editData.uneditableFields.splice(0, this.editData.uneditableFields.length)
-                for (let fieldName in entityNameToConfig[this.lastDetailedType].fieldNameToLabel) { // populating this.editData.editableFields and ..uneditableFields
-                    const editableField = config.editableFields.find(field => field.name == fieldName)
-                    const accordingFieldsArray = this.editData[ // it's by ref. to fill either one or the other
-                        editableField ? 'editableFields' : 'uneditableFields'
-                    ]
-                    const label = entityNameToConfig[this.lastDetailedType].fieldNameToLabel[fieldName]
-                    accordingFieldsArray.push({
-                        label: label,
-                        name: fieldName,
-                        rules: editableField ? editableField.rules : null
-                    })
-                }
+                config.detailsFields.forEach(field => {
+                    if (field.entityFieldName) {
+                        const editableField = config.editableFields.find(
+                            editableField => editableField.entityFieldName == field.entityFieldName)
+                        // it's by ref. to fill either one or the other
+                        const accordingFieldsArray = this.editData[
+                            editableField ? 'editableFields' : 'uneditableFields'
+                        ]
+                        accordingFieldsArray.push({
+                            label: field.label,
+                            name: field.entityFieldName,
+                            rules: editableField ? editableField.rules : null
+                        })
+                    }
+                })
                 this.editShown = true
             },
             showAdd ({data}) {
-                const entityName = this.typeToEntityName[this.lastDetailedType]
+                const entityName = this.typeToEntityName[this.details.type]
                 this.addData[entityName] = data
                 this[`${entityName}AddShown`] = true
             },
@@ -221,9 +259,9 @@
             closeEdit () {
                 this.editShown = false
             },
-            editEntity (entity) {
+            editEntity ({type, entity}) {
                 this.$store
-                    .dispatch(typeToStoreNamespace[this.lastDetailedType] + EDIT, entity)
+                    .dispatch(typeToStoreNamespace[type] + EDIT, entity)
                     .then(this.closeDetails)
                     .catch(this.closeDetails)
             },
@@ -239,13 +277,6 @@
                     .then(this.closeDetails)
                     .catch(this.closeDetails)
             }
-        },
-        computed: {
-            ...mapGetters(SIGNERS, ['signers']),
-            ...mapGetters(BLOCKS, ['blocks']),
-            ...mapGetters(TRANSACTIONS, ['transactions']),
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
-            ...mapGetters(STATE_ELEMENTS, ['stateElements']),
         },
         beforeDestroy () {
             [SHOW_DETAILS,
@@ -265,6 +296,7 @@
             TxnFamilyAdd,
             EntityTile,
             EntitiesList,
+            PayloadSection,
         }
     }
 </script>
