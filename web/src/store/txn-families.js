@@ -13,6 +13,7 @@ import {
     TXN_FAMILIES,
     UPDATE_FILTERS,
     UPDATE_QUERY,
+    TXN_FAMILIES_GETTER_NAME,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
@@ -23,7 +24,7 @@ export default {
         query: JSON.parse(localStorage.getItem(`${TXN_FAMILIES}query`) || '{}'),
     },
     getters: {
-        txnFamilies: state => state.txnFamilies,
+        [TXN_FAMILIES_GETTER_NAME]: state => state.txnFamilies,
         query: state => state.query,
     },
     mutations: {
@@ -61,7 +62,6 @@ export default {
                         resolve(resp)
                     })
                     .catch(err => {
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })
@@ -75,7 +75,6 @@ export default {
                         resolve(resp)
                     })
                     .catch(err => {
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })

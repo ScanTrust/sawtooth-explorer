@@ -2,7 +2,8 @@ import axios from 'axios'
 
 import store from '@/store'
 import messageCodes from './message-codes'
-import { AUTH, LOGOUT } from '@/store/constants';
+import { AUTH, LOGOUT, SNACKBAR } from '@/store/constants';
+import { EventBus } from '@/lib/event-bus';
 
 const axiosInstance = axios.create({
   baseURL: process.env.VUE_APP_API_URL || 'http://localhost:3000',
@@ -13,7 +14,7 @@ axiosInstance.interceptors.response.use(
         return new Promise(function (resolve, reject) {
             const data = res.data
             if (data && data.message)
-                res.data.message = messageCodes[data.message] || messageCodes['unknown_error']
+                res.data.message = messageCodes[data.message] || messageCodes['unknown_message_type']
             resolve(res)
         })
     },
@@ -30,6 +31,7 @@ axiosInstance.interceptors.response.use(
                 const data = resp.data
                 err.response.data.message = messageCodes[data.message] || messageCodes['unknown_error']
             }
+            EventBus.$emit(SNACKBAR, err.response.data)
             throw err;
         })
     }

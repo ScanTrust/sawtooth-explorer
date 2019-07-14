@@ -9,7 +9,9 @@ import {
     UPDATE_FILTERS,
 
     STATE_ELEMENTS,
-    RESET_FILTERS,
+    STATE_ELEMENTS_GETTER_NAME,
+    PROTO,
+    DECODE,
 } from './constants'
 
 export default {
@@ -19,7 +21,7 @@ export default {
         query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS}query`) || '{}'),
     },
     getters: {
-        stateElements: state => state.stateElements,
+        [STATE_ELEMENTS_GETTER_NAME]: state => state.stateElements,
         query: state => state.query,
     },
     mutations: {
@@ -34,19 +36,24 @@ export default {
         }
     },
     actions: {
-        [LOAD]: ({commit, getters}, query) => {
+        [LOAD]: ({commit, dispatch, getters}, query) => {
             return new Promise((resolve, reject) => {
                 http({ url: '/stateElements', params: query || getters.query, method: 'GET' })
-                    .then(resp => {
+                    .then(async resp => {
                         const stateElements = resp.data.map(stateElement => {
-                            stateElement.data = Buffer(stateElement.data).toString('base64')
-                            stateElement.createdAt = moment(stateElement.createdAt).format('LLL')
+                            if (stateElement.createdAt)
+                                stateElement.createdAt = moment(stateElement.createdAt).format('LLL')
                             stateElement.addressPrefix = stateElement.address.slice(0, 6)
                             return stateElement
                         })
-                        Vue.storage.set('stateElements', JSON.stringify(stateElements))
-                        commit(LOAD, stateElements)
-                        resolve(stateElements)
+                        const decodedStateElements = await dispatch(
+                            PROTO + DECODE,
+                            {isTransaction: false, entities: stateElements},
+                            {root: true}
+                        )
+                        Vue.storage.set('stateElements', JSON.stringify(decodedStateElements))
+                        commit(LOAD, decodedStateElements)
+                        resolve(decodedStateElements)
                     })
                     .catch(err => {
                         reject(err)

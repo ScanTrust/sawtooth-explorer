@@ -11,6 +11,7 @@ import {
     EDIT,
 
     SIGNERS,
+    SIGNERS_GETTER_NAME,
     UPDATE_FILTERS,
     UPDATE_QUERY,
 } from './constants'
@@ -23,7 +24,7 @@ export default {
         query: JSON.parse(localStorage.getItem(`${SIGNERS}query`) || '{}'),
     },
     getters: {
-        signers: state => state.signers,
+        [SIGNERS_GETTER_NAME]: state => state.signers,
         query: state => state.query,
     },
     mutations: {
@@ -61,7 +62,6 @@ export default {
                         resolve(resp)
                     })
                     .catch(err => {
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })
@@ -75,7 +75,6 @@ export default {
                         resolve(resp)
                     })
                     .catch(err => {
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })

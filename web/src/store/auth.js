@@ -16,13 +16,13 @@ import {
     BLOCKS,
     TRANSACTIONS,
 } from './constants'
-import { EventBus } from '@/lib/event-bus.js';
 import router from '@/router';
 
 export default {
     namespaced: true,
     state: {
-        token: localStorage.getItem('userToken'), // Vue.storage is not there yet and VueLocalStorage (if imported) is not usable here for some reason
+        // Vue.storage is not there yet and VueLocalStorage (if imported) is not usable here for some reason
+        token: localStorage.getItem('userToken'),
         username: localStorage.getItem('username'),
         status: ''
     },
@@ -64,7 +64,6 @@ export default {
                     })
                     .catch(err => {
                         commit(ERROR, err)
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })
@@ -76,7 +75,6 @@ export default {
                         resolve(resp)
                     })
                     .catch(err => {
-                        EventBus.$emit(SNACKBAR, err.response.data)
                         reject(err)
                     })
             })

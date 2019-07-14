@@ -1,6 +1,7 @@
 export default {
     'default_error': 'Unknown error.',
     'unknown_error': 'Unknown error.',
+    'unknown_message_type': 'Unknown message type.',
     'no_response_from_server': 'No response from server.',
     'registration_successful': 'Registration successful!',
     'no_user_with_such_username': 'No user with such username.',
@@ -17,4 +18,7 @@ export default {
     'updated_signer': 'Updated signer!',
     'action_unallowed': 'Action is unallowed.',
     'no_session_try_to_sign_in_again': 'No session. Try signing in again.',
+    'invalid_protos_set': 'Invalid protos set.',
+    'protos_uploaded_and_processed_successfully': 'Protos uploaded and processed successfully!',
+    'no_files_received': 'No files received.',
 }
