@@ -42,7 +42,6 @@ export default {
     EventBus.$on(SNACKBAR, data => {
       this.showSnackbar(data)
     })
-    this.$store.dispatch(LOAD)
   },
   beforeDestroy () {
     EventBus.$off(SNACKBAR)
