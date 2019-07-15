@@ -38,7 +38,7 @@
             </v-list-tile-content>
           </v-list-tile>
           <v-list-tile
-            :disabled="isRootPath" v-else-if="item.event" :key="i"
+            :disabled="filtersUnallowed" v-else-if="item.event" :key="i"
             @click="emitEvent(item.event, item.eventPayload)">
             <v-list-tile-action>
               <v-icon>{{ item.iconName }}</v-icon>
@@ -157,8 +157,14 @@
     },
     computed: {
       ...mapState(AUTH, ['username']),
-      isRootPath () {
-        return this.$route.path === ROOT_PATH
+      filtersUnallowed () {
+        return ![
+          STATE_PATH,
+          BLOCKS_PATH,
+          TRANSACTIONS_PATH,
+          SIGNERS_PATH,
+          TXN_FAMILIES_PATH
+        ].includes(this.$route.path)
       }
     },
     methods: {
