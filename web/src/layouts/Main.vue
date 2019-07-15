@@ -20,35 +20,16 @@
       clipped
       app
     >
-      <v-list dense>
-        <template v-for="(item, i) in menuItems">
-          <v-flex v-if="item.heading" :key="i" xs6>
-            <v-subheader v-if="item.heading">
-              {{ item.heading }}
-            </v-subheader>
-          </v-flex>
-          <v-divider
-            v-else-if="item.divider" class="my-3" :key="i" />
-          <v-list-tile v-else-if="item.to" :key="i" :to="item.to">
-            <v-list-tile-action>
-              <v-icon>{{ item.iconName }}</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.label }}</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-          <v-list-tile
-            :disabled="filtersUnallowed" v-else-if="item.event" :key="i"
-            @click="emitEvent(item.event, item.eventPayload)">
-            <v-list-tile-action>
-              <v-icon>{{ item.iconName }}</v-icon>
-            </v-list-tile-action>
-            <v-list-tile-content>
-              <v-list-tile-title>{{ item.label }}</v-list-tile-title>
-            </v-list-tile-content>
-          </v-list-tile>
-        </template>
-      </v-list>
+      <menu-items :items="menuItems" />
+    </v-navigation-drawer>
+    <v-navigation-drawer
+      fixed
+      v-model="isSettings"
+      right
+      clipped
+      app
+    >
+      <menu-items :items="settingsMenuItems" />
     </v-navigation-drawer>
     <v-content>
 
@@ -82,6 +63,7 @@
   import { mapState } from 'vuex'
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
+  import MenuItems from '@/components/MenuItems'
   import { EventBus } from '@/lib/event-bus'
   import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS, SNACKBAR } from '@/store/constants'
   import {
@@ -89,7 +71,8 @@
     BLOCKS_PATH, SIGNERS_PATH,
     TXN_FAMILIES_PATH,
     TRANSACTIONS_PATH,
-    STATE_PATH, SETTINGS_PATH
+    STATE_PATH, SETTINGS_PATH,
+    PROTO_SETTINGS_PATH
   } from '@/router/constants'
 
   export default {
@@ -97,6 +80,7 @@
     data: () => ({
       drawer: true,
       storeReady: false,
+      isSettings: false,
       menuItems: [
         {
           to: ROOT_PATH,
@@ -142,8 +126,14 @@
           label: 'Settings'
         }
       ],
+      settingsMenuItems: [{
+        to: SETTINGS_PATH + '/' + PROTO_SETTINGS_PATH,
+        iconName: 'file_copy',
+        label: 'Protocol Buffers'
+      }]
     }),
     created () {
+      this.isSettings = this.isSettingsRoute(this.$route)
       this.sockets.subscribe('txns', txns => {
         this.$store.dispatch(LOAD)
         txns.forEach(txn => {
@@ -157,26 +147,23 @@
     },
     computed: {
       ...mapState(AUTH, ['username']),
-      filtersUnallowed () {
-        return ![
-          STATE_PATH,
-          BLOCKS_PATH,
-          TRANSACTIONS_PATH,
-          SIGNERS_PATH,
-          TXN_FAMILIES_PATH
-        ].includes(this.$route.path)
+    },
+    watch: {
+      $route (to, from){
+        this.isSettings = this.isSettingsRoute(to)
       }
     },
     methods: {
       logout () {
         this.$store.dispatch(AUTH + LOGOUT)
       },
-      emitEvent (event, eventPayload) {
-        EventBus.$emit(event, eventPayload)
+      isSettingsRoute (route) {
+        return route.path.startsWith(SETTINGS_PATH)
       }
     },
     components: {
       DialogsManager,
+      MenuItems,
     }
   }
 </script>

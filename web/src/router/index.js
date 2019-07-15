@@ -9,6 +9,7 @@ import StateElements from '@/views/StateElements.vue'
 import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import Settings from '@/views/Settings.vue'
+import ProtoSettings from '@/views/ProtoSettings.vue'
 import store from '@/store'
 import { AUTH } from '@/store/constants'
 import {
@@ -20,6 +21,7 @@ import {
   TRANSACTIONS_PATH,
   STATE_PATH,
   SETTINGS_PATH,
+  PROTO_SETTINGS_PATH,
 } from './constants'
 
 Vue.use(Router)
@@ -70,7 +72,11 @@ export default new Router({
           component: StateElements
         }, {
           path: SETTINGS_PATH,
-          component: Settings
+          component: Settings,
+          children: [{
+            path: PROTO_SETTINGS_PATH,
+            component: ProtoSettings
+          }]
         }
       ]
     }
