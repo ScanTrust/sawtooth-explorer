@@ -13,6 +13,8 @@ import {
     PROTO_MESSAGES_GETTER_NAME,
     TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME,
     TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME,
+    TRANSACTIONS,
+    STATE_ELEMENTS,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
@@ -86,7 +88,7 @@ export default {
                 resolve(res)
             })
         },
-        [LOAD]: ({commit}) => {
+        [LOAD]: ({commit, dispatch}) => {
             return new Promise(async (resolve, reject) => {
                 const messagesRes = await http({ url: '/proto/messages', method: 'GET' }).catch(err => reject(err))
                 Vue.storage.set('protoMessages', JSON.stringify(messagesRes.data))
@@ -100,8 +102,13 @@ export default {
                     if (protoFromJSON[protoName])
                         protoToDecoder[protoName] = protoFromJSON[protoName]
                 })
-                commit(LOAD, {protoToDecoder, txnFamilyPrefixToFileNames, txnFamilyPrefixToRulesConfig, protoMessages: messagesRes.data})
-                resolve({protoToDecoder, txnFamilyPrefixToFileNames, txnFamilyPrefixToRulesConfig, protoMessages: messagesRes.data})
+                const res = {protoToDecoder, txnFamilyPrefixToFileNames, txnFamilyPrefixToRulesConfig, protoMessages: messagesRes.data}
+                commit(LOAD, res)
+                await Promise.all([
+                    dispatch(TRANSACTIONS + LOAD, null, { root: true }),
+                    dispatch(STATE_ELEMENTS + LOAD, null, { root: true })
+                ])
+                resolve(res)
             })
         },
         [DECODE]: ({getters}, {isTransaction, entities}) => {
@@ -126,8 +133,14 @@ export default {
                         }
                         if (protoName) {
                             const protoDecoder = protoToDecoder[protoName]
-                            const encodedBuffer = base64ToBinarySegment(entity[entityEncodedField])
-                            entity[entityDecodedField] = protoDecoder.decode(encodedBuffer)
+                            if (protoDecoder) {
+                                const encodedBuffer = base64ToBinarySegment(entity[entityEncodedField])
+                                try {
+                                    entity[entityDecodedField] = protoDecoder.decode(encodedBuffer)                                    
+                                } catch (error) {
+                                    console.log("Cannot decode entity:", error)
+                                }
+                            }
                         }
                     }
                     return entity
