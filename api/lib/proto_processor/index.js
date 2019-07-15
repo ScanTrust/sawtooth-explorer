@@ -110,7 +110,12 @@ function getMessages () {
 async function getJSONDescriptor () {
   return new Promise(resolve => {
     fs.readFile(protosJSONDescriptorPath, (err, file) => {
-      if (err) throw err
+      if (err) {
+        if (err.code === 'ENOENT')
+          return resolve({ nested: {} })
+        else
+          throw err
+      }
       resolve(JSON.parse(file))
     })
   })
