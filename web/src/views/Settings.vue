@@ -5,13 +5,13 @@
                 <v-flex xs12>
                     <v-layout wrap>
                         <v-flex xs12>
-                            <span class="unselectable headline">Setup Transaction Family</span>
+                            <span class="unselectable headline">Transaction Family</span>
                         </v-flex>
                         <v-flex xs12 ml-4>
                             <v-select
                                 :items="txnFamilyLabels"
                                 v-model="txnFamilyLabel"
-                                label="Select a transaction family to setup decoder"
+                                label="Choose transaction family"
                                 @change="txnFamilyChanged">
                             </v-select>
                         </v-flex>
@@ -20,7 +20,7 @@
                 <v-flex xs12 v-show="setupStep >= 1">
                     <v-layout wrap>
                         <v-flex xs12>
-                            <span class="unselectable headline">Upload Protos</span>
+                            <span class="unselectable headline">Upload Protobuf Files</span>
                         </v-flex>
                         <v-flex xs10 ml-4>
                             <files-uploader
@@ -43,12 +43,12 @@
                 <v-flex xs12 v-show="setupStep >= 2">
                     <v-layout wrap>
                         <v-flex xs12>
-                            <span class="unselectable headline">Transaction Payload</span>
+                            <span class="unselectable headline">Transaction Payload Protobuf</span>
                         </v-flex>
                         <v-flex xs12 ml-4>
                             <v-select
                                 :items="protoMessages"
-                                label="Select transaction payload proto message"
+                                label="Choose protobuf"
                                 v-model="transactionPayloadProtoName">
                             </v-select>
                         </v-flex>
