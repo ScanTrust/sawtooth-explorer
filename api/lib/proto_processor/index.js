@@ -107,8 +107,18 @@ function getMessages () {
   return Object.keys(protos)
 }
 
+async function getJSONDescriptor () {
+  return new Promise(resolve => {
+    fs.readFile(protosJSONDescriptorPath, (err, file) => {
+      if (err) throw err
+      resolve(JSON.parse(file))
+    })
+  })
+}
+
 module.exports = { loadProtos,
                    saveAndReloadProtos,
                    listDirProtoFiles,
                    protosDirectoryPath,
-                   getMessages }
+                   getMessages,
+                   getJSONDescriptor, }

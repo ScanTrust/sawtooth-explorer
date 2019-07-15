@@ -5,7 +5,7 @@ const fileUpload = require('express-fileupload')
 
 const Message = require('@root/models/message')
 const { isAdmin } = require('@root/authentication')
-const { saveAndReloadProtos, listDirProtoFiles, protosDirectoryPath, getMessages } = require('@root/lib/proto_processor')
+const { saveAndReloadProtos, listDirProtoFiles, protosDirectoryPath, getMessages, getJSONDescriptor } = require('@root/lib/proto_processor')
 
 router.get('/', async function(req, res, next) {
     const filePaths = await listDirProtoFiles(protosDirectoryPath)
@@ -17,16 +17,7 @@ router.get('/', async function(req, res, next) {
         txnFamilyPrefixToFileNames[txnFamilyPrefix] = txnFamilyPrefixToFileNames[txnFamilyPrefix] || []
         txnFamilyPrefixToFileNames[txnFamilyPrefix].push(fileName)
     })
-    let descriptorJSON
-    try {
-        descriptorJSON = require('@root/lib/proto_processor/descriptor.json')
-    } catch (error) {
-        if (error.code === 'MODULE_NOT_FOUND') {
-            descriptorJSON = { nested: {} }
-        } else {
-            return next(error)
-        }
-    }
+    const descriptorJSON = await getJSONDescriptor()
     txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
     res.status(200).json({
         descriptor: descriptorJSON,
