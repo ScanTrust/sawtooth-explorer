@@ -18,7 +18,7 @@ router.get('/', async function(req, res, next) {
         txnFamilyPrefixToFileNames[txnFamilyPrefix].push(fileName)
     })
     const descriptorJSON = await getJSONDescriptor()
-    txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
+    const txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
     res.status(200).json({
         descriptor: descriptorJSON,
         txnFamilyPrefixToFileNames,
