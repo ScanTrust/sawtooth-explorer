@@ -28,11 +28,12 @@ export default new Vuex.Store({
     actions: {
         async [LOAD] ({dispatch}) {
             await dispatch(PROTO + LOAD),
+            // PROTO LOAD also loads stateEls and txns because it needs to re-decode them
+            // dispatch(STATE_ELEMENTS + LOAD)
+            // dispatch(TRANSACTIONS + LOAD)
             dispatch(SIGNERS + LOAD),
             dispatch(TXN_FAMILIES + LOAD),
-            dispatch(BLOCKS + LOAD),
-            dispatch(STATE_ELEMENTS + LOAD)
-            dispatch(TRANSACTIONS + LOAD)
+            dispatch(BLOCKS + LOAD)
         },
         [FETCH_PROP_VALUE] ({getters}, {searchedEntityStoreNameSpace, searchConfig, data}) {
             // Need to fetch prop-value from store
