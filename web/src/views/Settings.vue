@@ -174,7 +174,7 @@
                         if (rule[field] === null)
                             delete rule[field]
                     }
-                    return rule
+                    return Object.assign({}, rule)
                 })
                 this.$store.dispatch(PROTO + SAVE_RULES, {
                     txnFamilyPrefix: this.txnFamilyPrefix,
