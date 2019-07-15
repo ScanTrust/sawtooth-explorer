@@ -29,11 +29,6 @@ let Schema = mongoose.Schema;
     }
 */
 
-const RuleTypes = {
-    ADDRESS_SLICE: 0,
-    DATA_BYTE: 1,
-}
-
 const Rule = new Schema({
     type: Number, // RuleType enum
     begin: Number,
@@ -140,16 +135,18 @@ Message._updateRules = ({
         console.log(messageToRules[message], updateParams[i++])
     }
     updateParams.push([{
-        name: { $nin: allMessagesNames }
+        txnFamilyPrefix,
+        name: { $nin: allMessagesNames },
+        rules: { $ne: [] }
     }, {
         $set: { rules: [] }
-    }])
+    }, { multi: true }])
     updateParams.push([{
         txnFamilyPrefix,
         name: { $ne: transactionPayloadProtoName }
     }, {
         $set: { isTransactionPayload: false }
-    }, { multiple: true }])
+    }, { multi: true }])
     updateParams.push([{
         txnFamilyPrefix,
         name: transactionPayloadProtoName
