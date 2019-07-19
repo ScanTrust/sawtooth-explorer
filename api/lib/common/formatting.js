@@ -14,21 +14,12 @@ const errToMessage = {
 
 function normalizeError (err) {
   console.log({err})
-  let normalizedMessage = error.message
+  let normalizedMessage = err.message
   if (!Object.values(errToMessage).includes(err.message)) // if normalized
     normalizedMessage = errToMessage[err.message] || 'unknown_error'
-  err.message = normalizedMessage
   err.status = errToStatus[err.message] || 500
+  err.message = normalizedMessage
   return err
-/* 
-  console.log({err})
-  console.log(err.message)
-  if (Object.values(errToMessage).includes(err.message)) // if normalized
-    return err
-  const error = new Error()
-  error.message = errToMessage[err.message] || 'unknown_error'
-  error.status = errToStatus[err.message] || 500
-  return error */
 }
 
 function deleteEmptyArrayFields (query) {
