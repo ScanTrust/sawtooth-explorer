@@ -50,6 +50,10 @@ export default {
             type: Object,
             default: {}
         },
+        txnFamilyPrefixToSettings: {
+            type: Object,
+            default: {}
+        },
         protoMessages: {
             type: Array,
             default: []
