@@ -3,29 +3,27 @@
         <v-layout wrap class="box-shadow">
             <v-flex xs12 pt-3>
                 <v-layout justify-end>
-                    <template v-for="(name, i) in representationsNames">
-                        <v-flex
-                            xs1
-                            class="representation-label subheading"
-                            :class="{
-                                'selected-representation': name == currentRepresentationName,
-                                'border-right': i < representationsNames.length - 1,
-                            }"
-                            @click="selectRepresentation(name)"
-                            :key="name">
-                            {{name}}
-                        </v-flex>
-                    </template>
+                    <v-flex
+                        xs1 class="representation-label subheading border-right"
+                        :class="{'selected-representation': !isJSONCurrently}"
+                        @click="isJSONCurrently = false">
+                        raw
+                    </v-flex>
+                    <v-flex
+                        v-if="hasJSON"
+                        xs1 class="representation-label subheading"
+                        :class="{'selected-representation': isJSONCurrently}"
+                        @click="isJSONCurrently = true">
+                        json
+                    </v-flex>
                 </v-layout>
             </v-flex>
             <v-flex xs12>
-                <v-flex
-                    v-if="rawlyShownRepresentations.includes(currentRepresentationName)"
-                    xs12 class="raw-representation">
-                    {{currentRepresentation}}
+                <v-flex xs12 v-show="!isJSONCurrently" class="raw-representation">
+                    {{raw}}
                 </v-flex>
-                <v-flex v-if="currentRepresentationName == JSON_REPRESENTATION_NAME" xs12>
-                    <json-viewer :value="currentRepresentation" :expand-depth="5"></json-viewer>
+                <v-flex xs12 v-show="isJSONCurrently">
+                    <json-viewer :value="json" :expand-depth="5"></json-viewer>
                 </v-flex>
             </v-flex>
         </v-layout>
@@ -36,68 +34,35 @@
     import JsonViewer from 'vue-json-viewer'
     import 'vue-json-viewer/style.css'
 
-    import {
-        RAW_REPRESENTATION_NAME,
-        JSON_REPRESENTATION_NAME,
-        CBOR_REPRESENTATION_NAME,
-    } from '@/lib/display-config'
-
-    const representationNameToLabel = {
-        [RAW_REPRESENTATION_NAME]: 'raw',
-        [JSON_REPRESENTATION_NAME]: 'JSON',
-        [CBOR_REPRESENTATION_NAME]: 'cbor',
-    }
-
     export default {
         name: 'payload-section',
         data: () => ({
-            rawlyShownRepresentations: [
-                RAW_REPRESENTATION_NAME,
-                CBOR_REPRESENTATION_NAME
-            ],
-            currentRepresentation: null,
-            currentRepresentationName: null,
-
-            RAW_REPRESENTATION_NAME,
-            JSON_REPRESENTATION_NAME,
-            CBOR_REPRESENTATION_NAME,
+            isJSONCurrently: false,
         }),
         props: {
-            [RAW_REPRESENTATION_NAME]: {
+            raw: {
                 type: String,
                 required: true,
             },
-            [JSON_REPRESENTATION_NAME]: {
-                type: Object,
-                default: null,
-            },
-            [CBOR_REPRESENTATION_NAME]: {
+            json: {
                 type: Object,
                 default: null,
             },
         },
-        created () {
-            this.selectRepresentation(RAW_REPRESENTATION_NAME)
-        },
-        methods: {
-            selectRepresentation (name) {
-                this.currentRepresentation = this.representations[name]
-                this.currentRepresentationName = name
-            }
+        mounted () {
+            if (this.hasJSON)
+                this.isJSONCurrently = true
         },
         computed: {
-            // non empty repr-props
-            representations () {
-                const res = {}
-                Object.keys(representationNameToLabel).forEach(reprName => {
-                    if (this[reprName])
-                        res[reprName] = this[reprName]
-                })
-                return res
+            hasJSON () {
+                return !!this.json
             },
-            representationsNames () {
-                return Object.keys(this.representations)
-            },
+        },
+        watch: {
+            json () {
+                if (this.hasJSON)
+                    this.isJSONCurrently = true
+            }
         },
         components: {
             JsonViewer

@@ -18,7 +18,7 @@
                         (i.e. what details.slots it has) -->
                     <component
                         v-for="slot in details.slots"
-                        :key="slot.entityFieldLabel"
+                        :key="slot.id"
                         :is="slot.tagName"
                         :slot="slot.name"
                         :type="slot.detailsType"
@@ -102,6 +102,7 @@
     export default {
         name: 'dialogs',
         data: () => ({
+            lastSlotId: 0,
             detailsShown: false,
             editShown: false,
             signerAddShown: false,
@@ -180,6 +181,7 @@
                     } else if (field.slotConfig) {
                         const slotConfig = field.slotConfig
                         const slot = {
+                            id: ++this.lastSlotId,
                             name: `${slotConfig.tagName}-${i}`,
                             tagName: slotConfig.tagName,
                             detailsType: slotConfig.detailsType,
