@@ -1,6 +1,8 @@
 let mongoose = require('mongoose');
 let Schema = mongoose.Schema;
 
+const TxnFamilySetting = require('./txnFamilySetting')
+
 /*
     Rule {
         // at this point two rule types are possible:
@@ -96,27 +98,32 @@ Message._getNames = () => new Promise(resolve => {
 })
 
 Message._getTxnFamilyPrefixToRulesConfig = () => new Promise(resolve => {
-    Message.find({}, (err, msgs) => {
+    Message.find({}, async (err, msgs) => {
         if (err) {
             console.log(err)
             throw err
         }
         const txnFamilyPrefixToRulesConfig = {}
-        msgs.forEach(message => {
+        await Promise.all(msgs.map(async message => {
             message = message.toJSON()
-            let rulesConfig = txnFamilyPrefixToRulesConfig[message.txnFamilyPrefix]
+            const txnFamilyPrefix = message.txnFamilyPrefix
+            let rulesConfig = txnFamilyPrefixToRulesConfig[txnFamilyPrefix]
             if (!rulesConfig) {
-                txnFamilyPrefixToRulesConfig[message.txnFamilyPrefix] = {
+                txnFamilyPrefixToRulesConfig[txnFamilyPrefix] = {
                     protoNameToRules: {},
                     transactionPayloadProtoName: null
                 }
-                rulesConfig = txnFamilyPrefixToRulesConfig[message.txnFamilyPrefix]
+                rulesConfig = txnFamilyPrefixToRulesConfig[txnFamilyPrefix]
             }
             rulesConfig.protoNameToRules[message.name] = message.rules
-            if (message.isTransactionPayload) {
+            const txnFamilySetting = await TxnFamilySetting._getByPrefix(txnFamilyPrefix) || {}
+            rulesConfig.txnPayloadEncodingType = txnFamilySetting.txnPayloadEncodingType
+            rulesConfig.stateElementsEncodingType = txnFamilySetting.stateElementsEncodingType
+            const isTxnPayloadProtoEncoded = txnFamilySetting.txnPayloadEncodingType == TxnFamilySetting._EncodingType.PROTO
+            if (isTxnPayloadProtoEncoded && message.isTransactionPayload) {
                 rulesConfig.transactionPayloadProtoName = message.name
             }
-        })
+        }))
         resolve(txnFamilyPrefixToRulesConfig)
     })
 })

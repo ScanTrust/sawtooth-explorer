@@ -4,6 +4,7 @@ const fileUpload = require('express-fileupload')
 // const { check, validationResult } = require('express-validator/check')
 
 const Message = require('@root/models/message')
+const TxnFamilySettings = require('@root/models/txnFamilySetting')
 const { isAdmin } = require('@root/authentication')
 const { saveAndReloadProtos, listDirProtoFiles, protosDirectoryPath, getMessages, getJSONDescriptor } = require('@root/lib/proto_processor')
 
@@ -19,10 +20,20 @@ router.get('/', async function(req, res, next) {
     })
     const descriptorJSON = await getJSONDescriptor()
     const txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
+    const txnFamilySettings = await TxnFamilySettings._get()
+    const txnFamilyPrefixToSettings = {}
+    txnFamilySettings.forEach(setting => {
+        const { txnPayloadEncodingType, stateElementsEncodingType } = setting
+        txnFamilyPrefixToSettings[setting.txnFamilyPrefix] = {
+            txnPayloadEncodingType,
+            stateElementsEncodingType
+        }
+    })
     res.status(200).json({
         descriptor: descriptorJSON,
         txnFamilyPrefixToFileNames,
         txnFamilyPrefixToRulesConfig,
+        txnFamilyPrefixToSettings,
     })
 })
 
@@ -36,12 +47,11 @@ router.use([isAdmin, fileUpload()])
 router.post('/', async function(req, res, next) {
     const txnFamilyPrefix = req.body.txnFamilyPrefix
     if (!req.files)
-        res.status(400).json({ok: false, message: 'no_files_received'})
-    const files = Object.entries(req.files)
-                        .map(file => file[1])
+        return res.status(400).json({ok: false, message: 'no_files_received'})
+    const files = Object.values(req.files)
                         .filter(file => file.name.endsWith('.proto'))
     // saveAndReloadProtos saves them as files and generates and writes new JSON descriptor
-    // and also fills it's scope's variable protos one is able to get with getMessages()
+    // and also fills it's scope's variable protos, which one is able to get with getMessages()
     try {
         await saveAndReloadProtos({txnFamilyPrefix, files})
     } catch (error) {
@@ -61,9 +71,15 @@ router.post('/', async function(req, res, next) {
 })
 
 router.post('/messages', async function(req, res, next) {
-    const { txnFamilyPrefix, transactionPayloadProtoName } = req.body
-    const messageToRules = req.body.messages
-    await Message._updateRules({txnFamilyPrefix, messageToRules, transactionPayloadProtoName})
+    const {
+        txnFamilyPrefix,
+        txnPayloadEncodingType,
+        transactionPayloadProtoName,
+        stateElementsEncodingType,
+        messages,
+    } = req.body
+    await TxnFamilySettings._upsert({txnFamilyPrefix, txnPayloadEncodingType, stateElementsEncodingType})
+    await Message._updateRules({txnFamilyPrefix, messageToRules: messages, transactionPayloadProtoName})
     res.status(200).json({ok: true, message: 'updated_rules_successfully'})
 })
 
