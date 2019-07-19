@@ -1,5 +1,8 @@
 <template>
-    <v-dialog v-model="shown" persistent max-width="650px">
+    <v-dialog
+        v-model="shown" persistent max-width="650px"
+        @keydown.right="showNextEntityDetails(1)"
+        @keydown.left="showNextEntityDetails(-1)">
         <v-card>
             <v-card-title>
                 <span class="headline">{{ title }}</span>
@@ -38,7 +41,7 @@
 
 <script>
     import { EventBus } from '@/lib/event-bus'
-    import { SHOW_EDIT, SHOW_ADD } from '@/store/constants'
+    import { SHOW_EDIT, SHOW_ADD, DETAILS_NEXT } from '@/store/constants'
     import { entityNameToConfig } from '@/lib/display-config'
 
     export default {
@@ -82,6 +85,9 @@
             },
             add () {
                 EventBus.$emit(SHOW_ADD, { data: this.detailedEntity })
+            },
+            showNextEntityDetails (shiftSize) {
+                EventBus.$emit(DETAILS_NEXT, shiftSize)
             }
         }
     }
