@@ -1,16 +1,16 @@
 let express = require('express'),
-  path = require('path'),
-  logger = require('morgan'),
-  cookieParser = require('cookie-parser'),
-  bodyParser = require('body-parser'),
-  mongoose = require('mongoose'),
-  { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
-  blockchainEventHandlers = require('./lib/events/handlers'),
-  proxy = require('http-proxy-middleware'),
-  config = require('./config'),
-  { authenticateJwt } = require('./authentication'),
-  { normalizeError } = require('./lib/common/formatting')
-  //  { syncDB } = require('./lib/syncDBHTTP') // looks like this file could be removed bc we never request /state or /blocks (except /blocks/<blockId> in block-commit handler)
+    path = require('path'),
+    logger = require('morgan'),
+    cookieParser = require('cookie-parser'),
+    bodyParser = require('body-parser'),
+    mongoose = require('mongoose'),
+    proxy = require('http-proxy-middleware'),
+
+    config = require('./config'),
+    { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
+    blockchainEventHandlers = require('./lib/events/handlers'),
+    { authenticateJwt } = require('./authentication'),
+    { normalizeError } = require('./lib/common/formatting');
 
 let app = express();
 
@@ -18,7 +18,7 @@ app.use(
   config.SAWTOOTH_PROXY_PATH,
   proxy({
     target: config.blockchain.REST_API_URL,
-    pathRewrite: { ['^' + config.SAWTOOTH_PROXY_PATH]: '/' },
+    pathRewrite: { ['^' + config.SAWTOOTH_PROXY_PATH]: '' },
     changeOrigin: true
   })
 );
@@ -123,5 +123,6 @@ app.use(function(err, req, res, next) {
 });
 
 subscribeToBlockchainEvents(blockchainEventHandlers)
+
 
 module.exports = app;
