@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import protobufjs from 'protobufjs'
+import cbor from 'cbor'
 
 import http from '@/lib/http'
 import {
@@ -15,6 +16,8 @@ import {
     TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME,
     TRANSACTIONS,
     STATE_ELEMENTS,
+    ENCODING_TYPES,
+    TXN_FAMILY_PREFIX_TO_SETTING,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
@@ -26,25 +29,35 @@ const RuleTypes = {
 export default {
     namespaced: true,
     state: {
+        txnFamilyPrefixToSettings: JSON.parse(localStorage.getItem('txnFamilyPrefixToSettings') || '{}'),
         protoToDecoder: null,
         txnFamilyPrefixToFileNames: JSON.parse(localStorage.getItem('txnFamilyPrefixToFileNames') || '{}'),
         txnFamilyPrefixToRulesConfig: JSON.parse(localStorage.getItem('txnFamilyPrefixToRulesConfig') || '{}'),
         protoMessages: JSON.parse(localStorage.getItem('protoMessages') || '[]'),
     },
     getters: {
+        [TXN_FAMILY_PREFIX_TO_SETTING]: state => state.txnFamilyPrefixToSettings,
         [TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME]: state => state.txnFamilyPrefixToFileNames,
         [PROTO_TO_DECODER_GETTER_NAME]: state => state.protoToDecoder,
         [PROTO_MESSAGES_GETTER_NAME]: state => state.protoMessages,
         [TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME]: state => state.txnFamilyPrefixToRulesConfig,
     },
     mutations: {
-        [LOAD]: (state, {protoToDecoder, txnFamilyPrefixToFileNames, protoMessages, txnFamilyPrefixToRulesConfig}) => {
+        [LOAD]: (state, {
+            txnFamilyPrefixToSettings,
+            protoToDecoder,
+            txnFamilyPrefixToFileNames,
+            protoMessages,
+            txnFamilyPrefixToRulesConfig
+        }) => {
+            state.txnFamilyPrefixToSettings = txnFamilyPrefixToSettings
             state.protoToDecoder = protoToDecoder
             state.txnFamilyPrefixToFileNames = txnFamilyPrefixToFileNames
             state.txnFamilyPrefixToRulesConfig = txnFamilyPrefixToRulesConfig
             state.protoMessages = protoMessages
         },
         [LOGOUT]: (state) => {
+            state.txnFamilyPrefixToSettings = null
             state.protoToDecoder = null
             state.txnFamilyPrefixToFileNames = null
             state.txnFamilyPrefixToRulesConfig = null
@@ -70,7 +83,13 @@ export default {
                 })
             })
         },
-        [SAVE_RULES]: ({dispatch}, {txnFamilyPrefix, rules, transactionPayloadProtoName}) => {
+        [SAVE_RULES]: ({dispatch}, {
+            txnFamilyPrefix,
+            rules,
+            transactionPayloadProtoName,
+            txnPayloadEncodingType,
+            stateElementsEncodingType,
+        }) => {
             return new Promise(async (resolve, reject) => {
                 const messages = {}
                 rules.forEach(rule => {
@@ -82,18 +101,27 @@ export default {
                 const res = await http.post('/proto/messages', {
                     txnFamilyPrefix,
                     messages,
-                    transactionPayloadProtoName
+                    transactionPayloadProtoName,
+                    txnPayloadEncodingType,
+                    stateElementsEncodingType,
                 })
+                EventBus.$emit(SNACKBAR, res.data)
                 await dispatch(LOAD)
                 resolve(res)
             })
         },
         [LOAD]: ({commit, dispatch}) => {
             return new Promise(async (resolve, reject) => {
-                const messagesRes = await http({ url: '/proto/messages', method: 'GET' }).catch(err => reject(err))
+                const messagesRes = await http({ url: '/proto/messages', method: 'GET' })
                 Vue.storage.set('protoMessages', JSON.stringify(messagesRes.data))
-                const protosRes = await http({ url: '/proto', method: 'GET' }).catch(err => reject(err))
-                const { txnFamilyPrefixToFileNames, descriptor, txnFamilyPrefixToRulesConfig } = protosRes.data
+                const protosRes = await http({ url: '/proto', method: 'GET' })
+                const {
+                    descriptor,
+                    txnFamilyPrefixToFileNames,
+                    txnFamilyPrefixToRulesConfig,
+                    txnFamilyPrefixToSettings,
+                } = protosRes.data
+                Vue.storage.set('txnFamilyPrefixToSettings', JSON.stringify(txnFamilyPrefixToSettings))
                 Vue.storage.set('txnFamilyPrefixToFileNames', JSON.stringify(txnFamilyPrefixToFileNames))
                 Vue.storage.set('txnFamilyPrefixToRulesConfig', JSON.stringify(txnFamilyPrefixToRulesConfig))
                 const protoFromJSON = protobufjs.Root.fromJSON(descriptor)
@@ -102,7 +130,13 @@ export default {
                     if (protoFromJSON[protoName])
                         protoToDecoder[protoName] = protoFromJSON[protoName]
                 })
-                const res = {protoToDecoder, txnFamilyPrefixToFileNames, txnFamilyPrefixToRulesConfig, protoMessages: messagesRes.data}
+                const res = {
+                    txnFamilyPrefixToSettings,
+                    protoToDecoder,
+                    txnFamilyPrefixToFileNames,
+                    txnFamilyPrefixToRulesConfig,
+                    protoMessages: messagesRes.data
+                }
                 commit(LOAD, res)
                 await Promise.all([
                     dispatch(TRANSACTIONS + LOAD, null, { root: true }),
@@ -112,10 +146,13 @@ export default {
             })
         },
         [DECODE]: ({getters}, {isTransaction, entities}) => {
-            return new Promise((resolve, reject) => {
-                const { protoToDecoder, txnFamilyPrefixToRulesConfig } = getters
+            return new Promise(resolve => {
+                const { protoToDecoder,
+                        txnFamilyPrefixToRulesConfig,
+                        txnFamilyPrefixToSettings } = getters
                 if (!Array.isArray(entities))
                     entities = [entities]
+                let decodedEntitiesAmount = 0
                 const decodedEntities = entities.map(entity => {
                     let familyPrefix = entity.familyPrefix
                     let entityDecodedField = "payloadDecoded"
@@ -125,30 +162,69 @@ export default {
                         entityDecodedField = "decodedData"
                         entityEncodedField = "data"
                     }
-                    const rulesConfig = txnFamilyPrefixToRulesConfig[familyPrefix]
-                    if (rulesConfig) {
-                        let protoName = rulesConfig.transactionPayloadProtoName
-                        if (!isTransaction) {
-                            protoName = getProtoNameByRules(rulesConfig, entity)
-                        }
-                        if (protoName) {
-                            const protoDecoder = protoToDecoder[protoName]
-                            if (protoDecoder) {
-                                const encodedBuffer = base64ToBinarySegment(entity[entityEncodedField])
-                                try {
-                                    entity[entityDecodedField] = protoDecoder.decode(encodedBuffer)                                    
-                                } catch (error) {
-                                    console.log("Cannot decode entity:", error)
-                                }
-                            }
-                        }
+                    const txnFamilySetting = txnFamilyPrefixToSettings[familyPrefix]
+                    if (!txnFamilySetting)
+                        return entity
+                    let entityEncodingType = txnFamilySetting.txnPayloadEncodingType
+                    if (!isTransaction)
+                        entityEncodingType = txnFamilySetting.stateElementsEncodingType
+                    if (entityEncodingType === ENCODING_TYPES.PROTO) {
+                        entity = decodeProto(
+                            entity,
+                            { entityDecodedField, entityEncodedField, familyPrefix, isTransaction },
+                            protoToDecoder,
+                            txnFamilyPrefixToRulesConfig
+                        )
+                    } else if (entityEncodingType === ENCODING_TYPES.CBOR) {
+                        entity = decodeCBOR(entity)
                     }
+                    if (entity[entityDecodedField])
+                        decodedEntitiesAmount++
                     return entity
                 })
+                if (decodedEntitiesAmount > 0) {
+                    const entitiesLabel = isTransaction ? 'transactions' : 'state elements'
+                    EventBus.$emit(SNACKBAR, {
+                        message: `Just finished decoding ${decodedEntitiesAmount} ${entitiesLabel}`
+                    })
+                }
                 return resolve(decodedEntities)
             })
         },
     }
+}
+
+function decodeProto (entity, entityInfo, protoToDecoder, txnFamilyPrefixToRulesConfig) {
+    const {entityDecodedField, entityEncodedField, familyPrefix, isTransaction} = entityInfo
+    const rulesConfig = txnFamilyPrefixToRulesConfig[familyPrefix]
+    if (rulesConfig) {
+        let protoName = rulesConfig.transactionPayloadProtoName
+        if (!isTransaction) {
+            protoName = getProtoNameByRules(rulesConfig, entity)
+        }
+        if (protoName) {
+            const protoDecoder = protoToDecoder[protoName]
+            if (protoDecoder) {
+                const encodedBuffer = base64ToBinarySegment(entity[entityEncodedField])
+                try {
+                    entity[entityDecodedField] = protoDecoder.decode(encodedBuffer)
+                } catch (error) {
+                    console.log("Cannot decode entity:", error)
+                }
+            }
+        }
+    }
+    return entity
+}
+
+function decodeCBOR (entity) {
+    const encodedBuffer = base64ToBinarySegment(entity[entityEncodedField])
+    try {
+        entity[entityDecodedField] = cbor.decode(encodedBuffer)                                    
+    } catch (error) {
+        console.log("Cannot decode entity:", error)
+    }
+    return entity
 }
 
 function getProtoNameByRules (rulesConfig, stateElement) {
