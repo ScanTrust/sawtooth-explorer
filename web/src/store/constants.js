@@ -30,6 +30,7 @@ export const DATA_BYTE = 'DATA_BYTE'
 export const SNACKBAR = 'SNACKBAR'
 
 export const SHOW_DETAILS = 'SHOW_DETAILS'
+export const DETAILS_NEXT = 'DETAILS_NEXT'
 export const SHOW_EDIT = 'SHOW_EDIT'
 export const SHOW_ADD = 'SHOW_ADD'
 export const SHOW_SIGNER_ADD = 'SHOW_SIGNER_ADD'
@@ -37,12 +38,15 @@ export const SHOW_TXN_FAMILY_ADD = 'SHOW_TXN_FAMILY_ADD'
 export const SHOW_FILTERS = 'SHOW_FILTERS'
 export const RESET_FILTERS = 'RESET_FILTERS'
 
-// types for SHOW_DETAILS
+// entities types for SHOW_DETAILS
 export const TRANSACTION = 'TRANSACTION'
 export const BLOCK = 'BLOCK'
 export const STATE_ELEMENT = 'STATE_ELEMENT'
 export const SIGNER = 'SIGNER'
 export const TXN_FAMILY = 'TXN_FAMILY'
+
+// other entities types
+export const DECODING_RULE = 'DECODING_RULE' 
 
 // store getters names
 export const SIGNERS_GETTER_NAME = 'signers'
@@ -54,6 +58,7 @@ export const PROTO_TO_DECODER_GETTER_NAME = 'protoToDecoder'
 export const PROTO_MESSAGES_GETTER_NAME = 'protoMessages'
 export const TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME = 'txnFamilyPrefixToRulesConfig'
 export const TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME = 'txnFamilyPrefixToFileNames'
+export const TXN_FAMILY_PREFIX_TO_SETTING = 'txnFamilyPrefixToSettings'
 
 // filters' components' names
 export const BLOCKS_FILTERS_COMPONENT = 'blocks-filters'
@@ -61,3 +66,10 @@ export const SIGNERS_FILTERS_COMPONENT = 'signers-filters'
 export const TXN_FAMILIES_FILTERS_COMPONENT = 'txn-families-filters'
 export const TRANSACTIONS_FILTERS_COMPONENT = 'transactions-filters'
 export const STATE_ELEMENTS_FILTERS_COMPONENT = 'state-elements-filters'
+
+// userd in store/proto.js DECODE action
+export const ENCODING_TYPES = {
+    RAW: 'RAW',
+    PROTO: 'PROTO',
+    CBOR: 'CBOR',
+}

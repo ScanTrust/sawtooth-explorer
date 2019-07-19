@@ -1,7 +1,14 @@
 import Identicon from 'identicon.js'
+import crypto from 'crypto'
 
 function makeAvatarBase64 (publicKey) {
     return "data:image/png;base64," + (new Identicon(publicKey, 40).toString())
+}
+
+export function sha512 (string) {
+    return crypto.createHash('sha512')
+                 .update(string)
+                 .digest('hex')
 }
 
 export default makeAvatarBase64

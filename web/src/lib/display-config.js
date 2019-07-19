@@ -9,6 +9,7 @@ import {
     BLOCKS,
     STATE_ELEMENT,
     STATE_ELEMENTS,
+    DECODING_RULE,
 
     SIGNERS_GETTER_NAME,
     TXN_FAMILIES_GETTER_NAME,
@@ -65,6 +66,10 @@ export const tilesConfig = {
         avatar: 'address',
         title: 'data'
     },
+    [DECODING_RULE]: {
+        avatar: 'hash',
+        title: 'protoName'
+    }
 }
 
 /**
@@ -327,7 +332,3 @@ export const protoRulesConfig = {
         label: 'Data Byte Matching'
     },
 }
-
-export const RAW_REPRESENTATION_NAME = 'raw'
-export const JSON_REPRESENTATION_NAME = 'json'
-export const CBOR_REPRESENTATION_NAME = 'cbor'
