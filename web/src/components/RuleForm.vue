@@ -3,7 +3,7 @@
         <v-select
             :items="protoMessages"
             v-model="protoName"
-            :label="'Select a proto which this rule is used to determine'"
+            :label="'Proto Message'"
             @change="updateRule({protoName})">
         </v-select>
         <v-select
@@ -12,7 +12,7 @@
             :item-text="'label'"
             :item-value="'number'"
             v-model="ruleType"
-            :label="'Select rule type'"
+            :label="'Rule Type'"
             @change="ruleTypeChanged">
         </v-select>
         <div v-show="fillingStep >= 2 && ruleTypeCode == ADDRESS_SLICE">
@@ -20,7 +20,7 @@
                 :items="matchingMethods"
                 :item-text="'label'"
                 :item-value="'type'"
-                :label="'Select matching method'"
+                :label="'Matching Method'"
                 v-model="matchingMethodType"
                 @change="cleanRuleParams">
             </v-select>
@@ -147,7 +147,7 @@ export default {
         },
         ruleTypeChanged (type) {
             this.updateRule({type})
-            this.matchingMethodType = null // see watch.matchingMethodType
+            this.matchingMethodType = null
         },
         cleanRuleParams () {
             this.updateRule({

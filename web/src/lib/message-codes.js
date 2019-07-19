@@ -21,4 +21,5 @@ export default {
     'invalid_protos_set': 'Invalid protos set.',
     'protos_uploaded_and_processed_successfully': 'Protos uploaded and processed successfully!',
     'no_files_received': 'No files received.',
+    'updated_rules_successfully': 'Updated rules successfully!',
 }

@@ -7,6 +7,9 @@
             <v-list-tile-title v-html="entity[title] || 'Unknown'"></v-list-tile-title>
             <v-list-tile-sub-title v-if="entity[subTitle]" v-html="entity[subTitle]"></v-list-tile-sub-title>
         </v-list-tile-content>
+        <v-list-tile-action v-if="$slots.action">
+            <slot name="action"></slot>
+        </v-list-tile-action>
     </v-list-tile>
 </template>
 
@@ -27,7 +30,11 @@
             type: {
                 type: String,
                 required: true
-            }
+            },
+            clickEvent: {
+                type: String,
+                default: 'showDetails'
+            },
         },
         computed: {
             avatar () { return tilesConfig[this.type].avatar },
@@ -36,7 +43,7 @@
         },
         methods: {
             clicked () {
-                this.$emit('showDetails', this.entity)
+                this.$emit(this.clickEvent, this.entity)
             },
             makeAvatar: makeAvatarBase64
         },
