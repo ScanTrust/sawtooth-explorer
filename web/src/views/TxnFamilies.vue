@@ -2,11 +2,11 @@
     <div class="pos-relative height-85-prc">
         <v-container fluid pa-5 grid-list-xl>
             <v-layout wrap>
-                <v-flex shrink xs12 sm6 md4 lg2 v-for="txnFamily in txnFamilies" :key="txnFamily.addressPrefix">
+                <v-flex shrink xs12 sm6 md4 lg2 v-for="(txnFamily, i) in txnFamilies" :key="txnFamily.addressPrefix">
                     <entity-tile
                         :entity="txnFamily"
                         :type="TXN_FAMILY"
-                        @showDetails="showDetails">
+                        @showDetails="showDetails(txnFamily, i)">
                     </entity-tile>
                 </v-flex>
             </v-layout>
@@ -30,15 +30,30 @@
         LOAD, ADD,
         TXN_FAMILY,
         SHOW_DETAILS,
+        DETAILS_NEXT,
         SHOW_TXN_FAMILY_ADD,
     } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
     export default {
         name: 'TxnFamilies',
-        data: () => ({ TXN_FAMILY }),
+        data: () => ({
+            detailedTxnFamilyIndex: null,
+            
+            TXN_FAMILY
+        }),
         created () {
             this.load()
+        },
+        mounted () {
+            EventBus.$on(DETAILS_NEXT, shiftSize => {
+                const txnFamily = this.txnFamilies[this.detailedTxnFamilyIndex + shiftSize]
+                if (txnFamily)
+                    this.showDetails(txnFamily, this.detailedTxnFamilyIndex + shiftSize)
+            })
+        },
+        beforeDestroy () {
+            EventBus.$off(DETAILS_NEXT)
         },
         computed: {
             ...mapGetters(TXN_FAMILIES, ['txnFamilies'])
@@ -47,7 +62,8 @@
             load () {
                 this.$store.dispatch(TXN_FAMILIES + LOAD)
             },
-            showDetails (txnFamily) {
+            showDetails (txnFamily, i) {
+                this.detailedTxnFamilyIndex = i
                 EventBus.$emit(SHOW_DETAILS, {
                     type: TXN_FAMILY,
                     data: txnFamily
