@@ -1,7 +1,7 @@
 <template>
     <v-flex>
         <v-text-field
-            label="Select Protos"
+            label="Protobuf Files"
             @click="pickFiles"
             v-model="fileNames"
             prepend-icon="attach_file">
