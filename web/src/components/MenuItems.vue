@@ -1,13 +1,12 @@
 <template>
     <v-list dense>
-        <template v-for="(item, i) in items">
+        <template v-for="(item, i) in allowedItems">
             <v-flex v-if="item.heading" :key="i" xs6>
                 <v-subheader v-if="item.heading">
                     {{ item.heading }}
                 </v-subheader>
             </v-flex>
-            <v-divider
-                v-else-if="item.divider" class="my-3" :key="i" />
+            <v-divider v-else-if="item.divider" class="my-3" :key="i" />
             <v-list-tile v-else-if="item.to" :key="i" :to="item.to">
                 <v-list-tile-action>
                     <v-icon>{{ item.iconName }}</v-icon>
@@ -37,8 +36,10 @@ import {
     SIGNERS_PATH,
     TXN_FAMILIES_PATH,
     TRANSACTIONS_PATH,
-    STATE_PATH, 
+    STATE_PATH,
 } from '@/router/constants'
+import { AUTH_NAMESPACE } from '@/store/constants'
+import { mapGetters } from 'vuex';
 
 export default {
     name: 'menu-items',
@@ -54,6 +55,9 @@ export default {
         }
     },
     computed: {
+        allowedItems () {
+            return this.items.filter(item => (!item.adminOnly || this.isAdmin))
+        },
         filtersUnallowed () {
             return ![
                 STATE_PATH,
@@ -63,6 +67,7 @@ export default {
                 TXN_FAMILIES_PATH
             ].includes(this.$route.path)
         },
+        ...mapGetters(AUTH_NAMESPACE, ['isAdmin']),
     }
 }
 </script>

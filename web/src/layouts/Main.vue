@@ -60,19 +60,20 @@
 </template>
 
 <script>
-  import { mapState } from 'vuex'
+  import { mapGetters } from 'vuex'
   
   import DialogsManager from '@/components/dialogs/DialogsManager'
   import MenuItems from '@/components/MenuItems'
   import { EventBus } from '@/lib/event-bus'
-  import { AUTH, LOGOUT, SIGNERS, LOAD, SHOW_FILTERS, RESET_FILTERS, SNACKBAR } from '@/store/constants'
+  import { AUTH_NAMESPACE, LOGOUT, SIGNERS_NAMESPACE, LOAD, SHOW_FILTERS, RESET_FILTERS, SNACKBAR } from '@/store/constants'
   import {
     AUTH_PATH, ROOT_PATH,
     BLOCKS_PATH, SIGNERS_PATH,
     TXN_FAMILIES_PATH,
     TRANSACTIONS_PATH,
     STATE_PATH, SETTINGS_PATH,
-    PROTO_SETTINGS_PATH
+    PROTO_SETTINGS_PATH,
+    ACCOUNTS_SETTINGS_PATH,
   } from '@/router/constants'
 
   export default {
@@ -119,8 +120,10 @@
           iconName: 'close',
           label: 'Reset'
         }, {
+          adminOnly: true,
           divider: true
         }, {
+          adminOnly: true,
           to: SETTINGS_PATH,
           iconName: 'settings',
           label: 'Settings'
@@ -130,6 +133,10 @@
         to: SETTINGS_PATH + '/' + PROTO_SETTINGS_PATH,
         iconName: 'file_copy',
         label: 'Protocol Buffers'
+      }, {
+        to: SETTINGS_PATH + '/' + ACCOUNTS_SETTINGS_PATH,
+        iconName: 'people',
+        label: 'Accounts'
       }]
     }),
     created () {
@@ -146,7 +153,7 @@
       this.storeReady = true
     },
     computed: {
-      ...mapState(AUTH, ['username']),
+      ...mapGetters(AUTH_NAMESPACE, ['username']),
     },
     watch: {
       $route (to, from){
@@ -155,7 +162,7 @@
     },
     methods: {
       logout () {
-        this.$store.dispatch(AUTH + LOGOUT)
+        this.$store.dispatch(AUTH_NAMESPACE + LOGOUT)
       },
       isSettingsRoute (route) {
         return route.path.startsWith(SETTINGS_PATH)
