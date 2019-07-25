@@ -36,13 +36,12 @@ router.post('/add', function(req, res, next) {
     })
 });
 
-router.post('/edit', function(req, res, next) {
-  TxnFamily._upsert({
-    addressPrefix: req.body.addressPrefix,
-    label: req.body.label
-  }, (ok, msg) => {
+router.post('/edit', async function(req, res, next) {
+    const { ok, msg } = await TxnFamily._upsert({
+        addressPrefix: req.body.addressPrefix,
+        label: req.body.label
+    })
     return res.status(ok ? 200 : 500).json({ ok, message: msg })
-  })
 });
 
 module.exports = router;

@@ -1,5 +1,4 @@
 const http = require('@root/lib/common/http')
-
 const { decodeStateChangeList } = require('./encoding')
 const { blockchain } = require('@root/config')
 const { requestEventCatchUp } = require('./subscriber')
@@ -9,6 +8,7 @@ const { familyNameToAddressPrefix } = require('@root/lib/common/hashing')
 const Block = require('@root/models/block');
 const Transaction = require('@root/models/transaction');
 const StateElement = require('@root/models/stateElement');
+const TxnFamily = require('@root/models/txnFamily');
 
 /*
 let lastBlocksTree = {}
@@ -69,18 +69,46 @@ function handleBlockCommit (blockchainId, blockCommit) {
     applyDeltasToDB(blockchainId, stateDeltas[topBlock.block_id])
 }*/
 
-function handleDelta (stateDelta, correspondingBlockId, isFresh) {
+let stateElementsQueue = []
+const blocksQueue = []
+const isBlockFresh = {}
+
+async function fetchInitialSettingsStateElementAndAddToQueue () {
+  const stateElements = await StateElement._get()
+  if (stateElements.length === 0) {
+    const {ok, body: stateRes} = await http.get(`${blockchain.REST_API_URL}${blockchain.STATE_PATH}?address=000000`)
+    if (!ok) return;
+    const initialSettingsStateElement = JSON.parse(stateRes)["data"][0]
+    stateElementsQueue.push({
+      ...initialSettingsStateElement,
+      createdAt: null,
+      blockId: '0000000000000000'
+    })
+  }
+}
+
+function extractStateElementsAndAddToQueue (stateDelta, correspondingBlockId, isFresh) {
   const stateChangeList = decodeStateChangeList(stateDelta.data).stateChanges
-  const stateElements = stateChangeList.map(delta => ({ // delta = {value: .., address: .., type: ..}
+  const stateElements = stateChangeList.map(delta => ({ // delta = {value: .., address: .., type: ...}
     address: delta.address,
     data: delta.type == 1 ? delta.value.toString('base64') : null,
     createdAt: isFresh ? new Date() : null,
     blockId: correspondingBlockId
   }))
-  StateElement._create(stateElements)
+  stateElementsQueue = stateElementsQueue.concat(stateElements)
 }
 
-// it's a separate func bc it's used in handling POST on /blocks
+async function processNextStateElementsBatch () {
+  const stateElements = stateElementsQueue.slice()
+  stateElementsQueue = []
+  await Promise.all(stateElements.map(el => TxnFamily._upsert({
+    addressPrefix: el.address.slice(0, 6)
+  })))
+  if (stateElements.length)
+    StateElement._create(stateElements)
+}
+
+// it's a separate func bc it's used in handling POST on /blocks 
 function transformBlockDataBeforeDB (blockData) {
   const transactions = []
   const block = {
@@ -94,8 +122,12 @@ function transformBlockDataBeforeDB (blockData) {
   blockData["batches"].forEach((batch) => {
     batch["transactions"].forEach((txn) => {
       const txnFamilyName = txn["header"]["family_name"]
-      if (!familyNameToPrefix[txnFamilyName])
-        familyNameToPrefix[txnFamilyName] = familyNameToAddressPrefix(txnFamilyName)
+      if (!familyNameToPrefix[txnFamilyName]) {
+        if (txnFamilyName === 'sawtooth_settings')
+          familyNameToPrefix[txnFamilyName] = '000000'
+        else
+          familyNameToPrefix[txnFamilyName] = familyNameToAddressPrefix(txnFamilyName)
+      }
       transactions.push({
         id: txn["header_signature"],
         blockId: blockData["header_signature"],
@@ -109,53 +141,55 @@ function transformBlockDataBeforeDB (blockData) {
   return { block, transactions }
 }
 
-const blocksProcessesQueue = []
-
-function getAndHandleActualBlock (blockCommit, isFresh) {
+function extractBlockAndAddToQueue (blockCommit, isFresh) {
   let block = {}
   blockCommit.attributes.forEach(attr => {
     block[attr.key] = attr.value
   })
   console.log('before handling', block['block_num'])
-  blocksProcessesQueue.push(function (hasUnprocessedBlocks) {
-    Block._getWithMaxNumber(function (maxNumberBlock) {
-      Block._getById(block["block_id"], function (receivedBlockFromDB) {
-        console.log('handling', block['block_num'])
-        const receivedBlockIsSequent = maxNumberBlock && maxNumberBlock.id != block["previous_block_id"]
-        if ((receivedBlockFromDB || receivedBlockIsSequent) && !hasUnprocessedBlocks) {
-          console.log('catching up on received block')
-          return requestEventCatchUp([maxNumberBlock.id])
-        }
-        const url = blockchain.REST_API_URL + blockchain.BLOCKS_PATH + "/" + block["block_id"]
-        http.get(url, function (ok, blockInfoJSON) {
-          if (!ok) return;
-          const blockInfo = JSON.parse(blockInfoJSON)["data"]
-          const {block, transactions} = transformBlockDataBeforeDB(blockInfo)
-          Block._upsert(block, () => {
-            Transaction._upsertAll(transactions.slice(), (errs) => {
-              // errs: {txnId1: mongoErr1, ...}
-              if (isFresh)
-                notifyer.notifyOn(transactions.filter(txn => !errs[txn.id]))
-            })
-          })
-        })
-      })
+  isBlockFresh[block["block_id"]] = isFresh
+  blocksQueue.push(block)
+}
+
+async function getAndHandleActualBlock (blockData, hasUnprocessedBlocks) {
+  const maxNumberBlock = await Block._getWithMaxNumber()
+  const receivedBlockFromDB = await Block._getById(blockData["block_id"])
+  console.log('handling', blockData['block_num'])
+  const receivedBlockIsSequent = maxNumberBlock && maxNumberBlock.id != blockData["previous_block_id"]
+  if ((receivedBlockFromDB || receivedBlockIsSequent) && !hasUnprocessedBlocks) {
+    console.log(`(receivedBlockFromDB || receivedBlockIsSequent) && !hasUnprocessedBlocks`)
+    console.log(`(${receivedBlockFromDB} || ${receivedBlockIsSequent}) && !${hasUnprocessedBlocks}`)
+    console.log('catching up on received block')
+    return requestEventCatchUp([maxNumberBlock.id])
+  }
+  const url = blockchain.REST_API_URL + blockchain.BLOCKS_PATH + "/" + blockData["block_id"]
+  const { ok, body: blockInfoJSON } = await http.get(url)
+  if (!ok) return;
+  const blockInfo = JSON.parse(blockInfoJSON)["data"]
+  const { block, transactions } = transformBlockDataBeforeDB(blockInfo)
+  Block._upsert(block, () => {
+    Transaction._create(transactions.slice(), (errs) => {
+      // errs: {txnId1: mongoErr1, ...}
+      if (isBlockFresh[block["block_id"]])
+        notifyer.notifyOn(transactions.filter(txn => !errs[txn.id]))
     })
   })
 }
 
-function processNextInQueue () {
-  const processFunc = blocksProcessesQueue.shift()
-  if (processFunc)
-    processFunc(blocksProcessesQueue.length > 0)
+function processNextBlock () {
+  const block = blocksQueue.shift()
+  if (block)
+    getAndHandleActualBlock(block, blocksQueue.length > 0)
 }
 
-setInterval(processNextInQueue, 100)
+setInterval(processNextStateElementsBatch, 300)
+setInterval(processNextBlock, 300)
 
 module.exports = {
   // stateDelta: saveStateDelta,
-  // blockCommit: handleBlockCommit
-  stateDelta: handleDelta,
-  blockCommit: getAndHandleActualBlock,
-  transformBlockDataBeforeDB
+  // blockCommit: handleBlockCommit,
+  stateDelta: extractStateElementsAndAddToQueue,
+  blockCommit: extractBlockAndAddToQueue,
+  transformBlockDataBeforeDB,
+  fetchInitialSettingsStateElementAndAddToQueue,
 }
