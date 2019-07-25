@@ -9,7 +9,7 @@
                 <v-toolbar dark color="indigo">
                   <v-toolbar-title :style="{opacity: signInOpacity, cursor: 'pointer'}" @click="isSignIn = true">Sign In</v-toolbar-title>
                   <v-spacer></v-spacer>
-                  <v-toolbar-title :style="{opacity: signUpOpacity, cursor: 'pointer'}" @click="isSignIn = false">Sign Up</v-toolbar-title>
+                  <v-toolbar-title v-show="isRegistrationPublic" :style="{opacity: signUpOpacity, cursor: 'pointer'}" @click="isSignIn = false">Sign Up</v-toolbar-title>
                 </v-toolbar>
                 <v-card-text>
                   <v-form>
@@ -33,7 +33,16 @@
 </template>
 
 <script>
-  import { AUTH, LOGIN, REGISTER, ERROR } from '@/store/constants'
+  import { mapGetters } from 'vuex'
+
+  import {
+    AUTH_NAMESPACE,
+    LOGIN,
+    REGISTER,
+    ERROR,
+    SETTINGS_NAMESPACE,
+    LOAD,
+  } from '@/store/constants'
 
   export default {
     name: 'Auth',
@@ -43,30 +52,33 @@
       username: '',
       password: '',
     }),
-    props: {
-      
-    },
     computed: {
+      ...mapGetters(SETTINGS_NAMESPACE, ['isRegistrationPublic']),
       signInOpacity: function () {
         return this.isSignIn ? 1 : 0.3
       },
       signUpOpacity: function () {
         return this.isSignIn ? 0.3 : 1
-      }
+      },
     },
     methods: {
+      async load () {
+        await this.$store.dispatch(SETTINGS_NAMESPACE + LOAD)
+        if (!this.isRegistrationPublic)
+          this.isSignIn = true
+      },
       login: function () {
         const {username, password} = this
-        this.$store.dispatch(AUTH + LOGIN, {username, password}).then(() => {
+        this.$store.dispatch(AUTH_NAMESPACE + LOGIN, {username, password}).then(() => {
           this.$router.push('/')
         })
       },
       register: function () {
         const {username, password} = this
-        this.$store.dispatch(AUTH + REGISTER, {username, password}).then(() => {
+        this.$store.dispatch(AUTH_NAMESPACE + REGISTER, {username, password}).then(() => {
           this.isSignIn = true
         })
       }
-    }
+    },
   }
 </script>
