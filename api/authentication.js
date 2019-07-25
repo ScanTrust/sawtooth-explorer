@@ -52,19 +52,19 @@ passport.use(new JWTStrategy(
 ));
 
 function authenticateJwt(req, res, next) {
-  passport.authenticate('jwt', { session: false }, function(info, user, err) {
-    if (err) return next(err);
-    if (!user) return next(Error('Unauthorized'));
-    req.user = user;
-    next();
-  })(req, res, next);
+    passport.authenticate('jwt', { session: false }, function(info, user, err) {
+        if (err) return next(err);
+        if (!user) return next(Error('Unauthorized'));
+        req.user = user;
+        next();
+    })(req, res, next);
 }
 
 function isAdmin (req, res, next) {
-    if (req.user.role != 1) { // checking undefined == 1 is also fine
-        return res.status(403).json({ ok: false, message: 'action_unallowed' });
+    if (req.user && req.user.isAdmin) {
+        return next()
     }
-    next()
+    return res.status(403).json({ ok: false, message: 'action_unallowed' });
 }
 
 module.exports = { authenticateJwt, isAdmin }
