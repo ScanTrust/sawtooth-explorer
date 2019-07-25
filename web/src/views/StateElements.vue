@@ -1,18 +1,16 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <v-container fluid pa-5 grid-list-xl>
-            <v-layout wrap>
-                <v-flex shrink xs12 sm4 md2 xl1 v-for="(stateElement, i) in stateElements"
-                        :key="stateElement.address + stateElement.blockId">
-                    <entity-tile
-                        :entity="stateElement"
-                        :type="STATE_ELEMENT"
-                        @showDetails="showDetails(stateElement, i)">
-                    </entity-tile>
-                </v-flex>
-            </v-layout>
-        </v-container>
-    </div>
+    <v-container fluid pa-5 grid-list-xl>
+        <v-layout wrap>
+            <v-flex shrink xs12 sm4 md2 xl1 v-for="(stateElement, i) in stateElementsSorted"
+                    :key="stateElement.address + stateElement.blockId">
+                <entity-tile
+                    :entity="stateElement"
+                    :type="STATE_ELEMENT"
+                    @showDetails="showDetails(stateElement, i)">
+                </entity-tile>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
@@ -22,7 +20,7 @@
 
     import {
         STATE_ELEMENT,
-        STATE_ELEMENTS,
+        STATE_ELEMENTS_NAMESPACE,
         LOAD,
         SHOW_DETAILS,
         DETAILS_NEXT,
@@ -51,7 +49,7 @@
         },
         methods: {
             load () {
-                this.$store.dispatch(STATE_ELEMENTS + LOAD)
+                this.$store.dispatch(STATE_ELEMENTS_NAMESPACE+ LOAD)
             },
             showDetails (stateElement, i) {
                 this.detailedStateElementIndex = i
@@ -62,7 +60,10 @@
             },
         },
         computed: {
-            ...mapGetters(STATE_ELEMENTS, ['stateElements']),
+            ...mapGetters(STATE_ELEMENTS_NAMESPACE, ['stateElements']),
+            stateElementsSorted () {
+                return this.stateElements.sort((a, b) => a.num - b.num)
+            },
         },
         components: {
             EntityTile,
