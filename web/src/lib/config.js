@@ -1,4 +1,10 @@
-import { TXN_FAMILIES, TRANSACTIONS, SIGNERS, BLOCKS, STATE_ELEMENTS } from "../store/constants";
+import {
+    TXN_FAMILIES_NAMESPACE,
+    TRANSACTIONS_NAMESPACE,
+    SIGNERS_NAMESPACE,
+    BLOCKS_NAMESPACE,
+    STATE_ELEMENTS_NAMESPACE
+} from "@/store/constants";
 
 export default {
     LOCAL_STORAGE: {
@@ -30,23 +36,27 @@ export default {
             type: Array,
             default: []
         },
-        [`${TRANSACTIONS}query`]: {
+        accounts: {
+            type: Array,
+            default: []
+        },
+        [`${TRANSACTIONS_NAMESPACE}query`]: {
             type: Object,
             default: {}
         },
-        [`${TXN_FAMILIES}query`]: {
+        [`${TXN_FAMILIES_NAMESPACE}query`]: {
             type: Object,
             default: {}
         },
-        [`${SIGNERS}query`]: {
+        [`${SIGNERS_NAMESPACE}query`]: {
             type: Object,
             default: {}
         },
-        [`${BLOCKS}query`]: {
+        [`${BLOCKS_NAMESPACE}query`]: {
             type: Object,
             default: {}
         },
-        [`${STATE_ELEMENTS}query`]: {
+        [`${STATE_ELEMENTS_NAMESPACE}query`]: {
             type: Object,
             default: {}
         },
@@ -65,6 +75,14 @@ export default {
         txnFamilyPrefixToFileNames: {
             type: Object,
             default: {}
+        },
+        settings: {
+            type: Object,
+            default: {}
+        },
+        isAdmin: {
+            type: Boolean,
+            default: false
         },
     }
 }

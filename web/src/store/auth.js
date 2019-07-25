@@ -4,17 +4,16 @@ import http from '@/lib/http'
 import {
     SNACKBAR,
 
-    AUTH,
     LOGIN,
     REGISTER,
     SUCCESS,
     ERROR,
     LOGOUT,
     
-    SIGNERS,
-    TXN_FAMILIES,
-    BLOCKS,
-    TRANSACTIONS,
+    SIGNERS_NAMESPACE,
+    TXN_FAMILIES_NAMESPACE,
+    BLOCKS_NAMESPACE,
+    TRANSACTIONS_NAMESPACE,
 } from './constants'
 import router from '@/router';
 
@@ -24,42 +23,37 @@ export default {
         // Vue.storage is not there yet and VueLocalStorage (if imported) is not usable here for some reason
         token: localStorage.getItem('userToken'),
         username: localStorage.getItem('username'),
-        status: ''
+        isAdmin: localStorage.getItem('isAdmin') === 'true' || false
     },
     getters: {
         isAuthenticated: state => !!state.token,
-        authStatus: state => state.status,
+        isAdmin: state => state.isAdmin,
+        username: state => state.username,
     },
     mutations: {
-        [LOGIN]: (state) => {
-            state.status = 'loading'
-        },
-        [SUCCESS]: (state, {token, username}) => {
-            state.status = 'success'
+        [SUCCESS]: (state, {token, username, isAdmin}) => {
+            state.isAdmin = isAdmin
             state.token = token
             state.username = username
-        },
-        [ERROR]: (state) => {
-            state.status = 'error'
         },
         [LOGOUT]: (state) => {
             state.token = ''
             state.username = ''
-            state.status = ''
+            state.isAdmin = false
         }
     },
     actions: {
         [LOGIN]: ({commit, dispatch}, user) => {
             return new Promise((resolve, reject) => {
-                commit(LOGIN)
                 http({url: '/auth/login', data: user, method: 'POST' })
                     .then(resp => {
-                        let {token, username} = resp.data
+                        let {token, username, isAdmin} = resp.data
                         token = "Bearer " + token
                         Vue.storage.set('userToken', token)
                         Vue.storage.set('username', username)
+                        Vue.storage.set('isAdmin', isAdmin)
                         http.defaults.headers.common['Authorization'] = token
-                        commit(SUCCESS, {token, username})
+                        commit(SUCCESS, {token, username, isAdmin})
                         resolve(resp)
                     })
                     .catch(err => {
@@ -82,10 +76,10 @@ export default {
         [LOGOUT]: ({commit, dispatch}) => {
             return new Promise((resolve, reject) => {
                 commit(LOGOUT)
-                commit(SIGNERS + LOGOUT, null, { root: true })
-                commit(TXN_FAMILIES + LOGOUT, null, { root: true })
-                commit(BLOCKS + LOGOUT, null, { root: true })
-                commit(TRANSACTIONS + LOGOUT, null, { root: true })
+                commit(SIGNERS_NAMESPACE + LOGOUT, null, { root: true })
+                commit(TXN_FAMILIES_NAMESPACE + LOGOUT, null, { root: true })
+                commit(BLOCKS_NAMESPACE + LOGOUT, null, { root: true })
+                commit(TRANSACTIONS_NAMESPACE + LOGOUT, null, { root: true })
                 Vue.storage.set('userToken', '')
                 delete http.defaults.headers.common['Authorization']
                 router.push('/auth')

@@ -1,24 +1,15 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <v-container fluid pa-5 grid-list-xl>
-            <v-layout wrap>
-                <v-flex shrink xs12 sm6 md4 lg2 v-for="(txnFamily, i) in txnFamilies" :key="txnFamily.addressPrefix">
-                    <entity-tile
-                        :entity="txnFamily"
-                        :type="TXN_FAMILY"
-                        @showDetails="showDetails(txnFamily, i)">
-                    </entity-tile>
-                </v-flex>
-            </v-layout>
-        </v-container>
-        <v-btn absolute
-                dark fab
-                bottom right
-                color="indigo accent-2"
-                @click="showAdd">
-            <v-icon>add</v-icon>
-        </v-btn>
-    </div>
+    <v-container fluid pa-5 grid-list-xl>
+        <v-layout wrap>
+            <v-flex shrink xs12 sm6 md4 lg2 v-for="(txnFamily, i) in txnFamilies" :key="txnFamily.addressPrefix">
+                <entity-tile
+                    :entity="txnFamily"
+                    :type="TXN_FAMILY"
+                    @showDetails="showDetails(txnFamily, i)">
+                </entity-tile>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
@@ -26,12 +17,11 @@
 
     import EntityTile from '@/components/EntityTile'
     import {
-        TXN_FAMILIES,
+        TXN_FAMILIES_NAMESPACE,
         LOAD, ADD,
         TXN_FAMILY,
         SHOW_DETAILS,
         DETAILS_NEXT,
-        SHOW_TXN_FAMILY_ADD,
     } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
@@ -56,11 +46,11 @@
             EventBus.$off(DETAILS_NEXT)
         },
         computed: {
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies'])
+            ...mapGetters(TXN_FAMILIES_NAMESPACE, ['txnFamilies'])
         },
         methods: {
             load () {
-                this.$store.dispatch(TXN_FAMILIES + LOAD)
+                this.$store.dispatch(TXN_FAMILIES_NAMESPACE + LOAD)
             },
             showDetails (txnFamily, i) {
                 this.detailedTxnFamilyIndex = i
@@ -69,9 +59,6 @@
                     data: txnFamily
                 })
             },
-            showAdd () {
-                EventBus.$emit(SHOW_TXN_FAMILY_ADD)
-            }
         },
         components: {
             EntityTile,

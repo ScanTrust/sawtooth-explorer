@@ -8,28 +8,29 @@ import {
     UPDATE_QUERY,
     UPDATE_FILTERS,
 
+    STATE_ELEMENTS_NAMESPACE,
     STATE_ELEMENTS,
-    STATE_ELEMENTS_GETTER_NAME,
-    PROTO,
+    PROTO_NAMESPACE,
     DECODE,
 } from './constants'
 
 export default {
     namespaced: true,
     state: {
-        stateElements: JSON.parse(localStorage.getItem('stateElements') || '[]'),
-        query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS}query`) || '{}'),
+        [STATE_ELEMENTS]: JSON.parse(localStorage.getItem(STATE_ELEMENTS) || '[]'),
+        query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS_NAMESPACE}query`) || '{}'),
     },
     getters: {
-        [STATE_ELEMENTS_GETTER_NAME]: state => state.stateElements,
+        [STATE_ELEMENTS]: state => state[STATE_ELEMENTS],
         query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, stateElements) => {
-            state.stateElements = stateElements
+            state[STATE_ELEMENTS] = stateElements
         },
         [LOGOUT]: (state) => {
-            state.stateElements = []
+            state[STATE_ELEMENTS] = []
+            state.query = {}
         },
         [UPDATE_QUERY]: (state, query) => {
             state.query = query
@@ -47,11 +48,11 @@ export default {
                             return stateElement
                         })
                         const decodedStateElements = await dispatch(
-                            PROTO + DECODE,
+                            PROTO_NAMESPACE + DECODE,
                             {isTransaction: false, entities: stateElements},
                             {root: true}
                         )
-                        Vue.storage.set('stateElements', JSON.stringify(decodedStateElements))
+                        Vue.storage.set(STATE_ELEMENTS, JSON.stringify(decodedStateElements))
                         commit(LOAD, decodedStateElements)
                         resolve(decodedStateElements)
                     })
@@ -61,7 +62,7 @@ export default {
             })
         },
         [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
-            Vue.storage.set(`${STATE_ELEMENTS}query`, JSON.stringify(filters))
+            Vue.storage.set(`${STATE_ELEMENTS_NAMESPACE}query`, JSON.stringify(filters))
             commit(UPDATE_QUERY, filters)
             dispatch(LOAD)
         }

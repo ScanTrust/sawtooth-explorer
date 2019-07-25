@@ -1,11 +1,13 @@
 // vuex store events
-export const AUTH = 'auth/'
-export const SIGNERS = 'signers/'
-export const TXN_FAMILIES = 'txnFamilies/'
-export const BLOCKS = 'blocks/'
-export const STATE_ELEMENTS = 'stateElements/'
-export const TRANSACTIONS = 'transactions/'
-export const PROTO = 'proto/'
+export const AUTH_NAMESPACE = 'auth/'
+export const SIGNERS_NAMESPACE = 'signers/'
+export const TXN_FAMILIES_NAMESPACE = 'txnFamilies/'
+export const BLOCKS_NAMESPACE = 'blocks/'
+export const STATE_ELEMENTS_NAMESPACE = 'stateElements/'
+export const TRANSACTIONS_NAMESPACE = 'transactions/'
+export const PROTO_NAMESPACE = 'proto/'
+export const ACCOUNTS_NAMESPACE = 'accounts/'
+export const SETTINGS_NAMESPACE = 'settings/'
 
 export const LOGIN = 'LOGIN'
 export const REGISTER = 'REGISTER'
@@ -21,6 +23,7 @@ export const UPDATE_QUERY = 'UPDATE_QUERY'
 export const UPDATE_FILTERS = 'UPDATE_FILTERS'
 export const SAVE_RULES = 'SAVE_RULES'
 export const FETCH_PROP_VALUE = 'FETCH_PROP_VALUE'
+export const SET = 'SET'
 
 // proto decoding rules' types
 export const ADDRESS_SLICE = 'ADDRESS_SLICE'
@@ -33,8 +36,6 @@ export const SHOW_DETAILS = 'SHOW_DETAILS'
 export const DETAILS_NEXT = 'DETAILS_NEXT'
 export const SHOW_EDIT = 'SHOW_EDIT'
 export const SHOW_ADD = 'SHOW_ADD'
-export const SHOW_SIGNER_ADD = 'SHOW_SIGNER_ADD'
-export const SHOW_TXN_FAMILY_ADD = 'SHOW_TXN_FAMILY_ADD'
 export const SHOW_FILTERS = 'SHOW_FILTERS'
 export const RESET_FILTERS = 'RESET_FILTERS'
 
@@ -45,19 +46,24 @@ export const STATE_ELEMENT = 'STATE_ELEMENT'
 export const SIGNER = 'SIGNER'
 export const TXN_FAMILY = 'TXN_FAMILY'
 
+export const INITIAL_BLOCK_ID = '0000000000000000'
+
 // other entities types
-export const DECODING_RULE = 'DECODING_RULE' 
+export const DECODING_RULE = 'DECODING_RULE'
+export const ACCOUNT = 'ACCOUNT'
 
 // store getters names
-export const SIGNERS_GETTER_NAME = 'signers'
-export const TXN_FAMILIES_GETTER_NAME = 'txnFamilies'
-export const BLOCKS_GETTER_NAME = 'blocks'
-export const TRANSACTIONS_GETTER_NAME = 'transactions'
-export const STATE_ELEMENTS_GETTER_NAME = 'stateElements'
-export const PROTO_TO_DECODER_GETTER_NAME = 'protoToDecoder'
-export const PROTO_MESSAGES_GETTER_NAME = 'protoMessages'
-export const TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME = 'txnFamilyPrefixToRulesConfig'
-export const TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME = 'txnFamilyPrefixToFileNames'
+export const SIGNERS = 'signers'
+export const TXN_FAMILIES = 'txnFamilies'
+export const BLOCKS = 'blocks'
+export const TRANSACTIONS = 'transactions'
+export const STATE_ELEMENTS = 'stateElements'
+export const PROTO_TO_DECODER = 'protoToDecoder'
+export const PROTO_MESSAGES = 'protoMessages'
+export const ACCOUNTS = 'accounts'
+export const SETTINGS = 'settings'
+export const TXN_FAMILY_PREFIX_TO_RULES_CONFIG = 'txnFamilyPrefixToRulesConfig'
+export const TXN_FAMILY_PREFIX_TO_FILE_NAMES = 'txnFamilyPrefixToFileNames'
 export const TXN_FAMILY_PREFIX_TO_SETTING = 'txnFamilyPrefixToSettings'
 
 // filters' components' names
@@ -69,7 +75,7 @@ export const STATE_ELEMENTS_FILTERS_COMPONENT = 'state-elements-filters'
 
 // userd in store/proto.js DECODE action
 export const ENCODING_TYPES = {
-    RAW: 'RAW',
+    NONE: 'NONE',
     PROTO: 'PROTO',
     CBOR: 'CBOR',
 }

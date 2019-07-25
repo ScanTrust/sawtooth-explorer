@@ -1,17 +1,15 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <v-container fluid pa-5 grid-list-xl>
-            <v-layout wrap>
-                <v-flex shrink xs12 sm4 md2 xl1 v-for="(block, i) in blocks" :key="block.id">
-                    <entity-tile
-                        :entity="block"
-                        :type="BLOCK"
-                        @showDetails="showDetails(block, i)">
-                    </entity-tile>
-                </v-flex>
-            </v-layout>
-        </v-container>
-    </div>
+    <v-container fluid pa-5 grid-list-xl>
+        <v-layout wrap>
+            <v-flex shrink xs12 sm4 md2 xl1 v-for="(block, i) in blocksSorted" :key="block.id">
+                <entity-tile
+                    :entity="block"
+                    :type="BLOCK"
+                    @showDetails="showDetails(block, i)">
+                </entity-tile>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
@@ -20,7 +18,7 @@
     import EntityTile from '@/components/EntityTile'
     import {
         BLOCK,
-        BLOCKS,
+        BLOCKS_NAMESPACE,
         LOAD,
         SHOW_DETAILS,
         DETAILS_NEXT,
@@ -49,7 +47,7 @@
         },
         methods: {
             load () {
-                this.$store.dispatch(BLOCKS + LOAD)
+                this.$store.dispatch(BLOCKS_NAMESPACE + LOAD)
             },
             showDetails (block, i) {
                 this.detailedBlockIndex = i
@@ -60,7 +58,10 @@
             },
         },
         computed: {
-            ...mapGetters(BLOCKS, ['blocks']),
+            ...mapGetters(BLOCKS_NAMESPACE, ['blocks']),
+            blocksSorted () {
+                return this.blocks.sort((a, b) => a.num - b.num)
+            },
         },
         components: {
             EntityTile,

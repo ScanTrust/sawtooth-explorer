@@ -4,28 +4,29 @@ import http from '@/lib/http'
 import {
     LOGOUT,
     LOAD,
-    BLOCKS,
+    BLOCKS_NAMESPACE,
     UPDATE_FILTERS,
     UPDATE_QUERY,
-    BLOCKS_GETTER_NAME,
+    BLOCKS,
 } from './constants'
 
 export default {
     namespaced: true,
     state: {
-        blocks: JSON.parse(localStorage.getItem('blocks') || '[]'),
-        query: JSON.parse(localStorage.getItem(`${BLOCKS}query`) || '{}'),
+        blocks: JSON.parse(localStorage.getItem(BLOCKS) || '[]'),
+        query: JSON.parse(localStorage.getItem(`${BLOCKS_NAMESPACE}query`) || '{}'),
     },
     getters: {
-        [BLOCKS_GETTER_NAME]: state => state.blocks,
+        [BLOCKS]: state => state[BLOCKS],
         query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, blocks) => {
-            state.blocks = blocks
+            state[BLOCKS] = blocks
         },
         [LOGOUT]: (state) => {
-            state.blocks = []
+            state[BLOCKS] = []
+            state.query = {}
         },
         [UPDATE_QUERY]: (state, query) => {
             state.query = query
@@ -37,7 +38,7 @@ export default {
                 http({ url: '/blocks', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const blocks = resp.data.reverse()
-                        Vue.storage.set('blocks', JSON.stringify(blocks))
+                        Vue.storage.set(BLOCKS, JSON.stringify(blocks))
                         commit(LOAD, blocks)
                         resolve(blocks)
                     })
@@ -47,7 +48,7 @@ export default {
             })
         },
         [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
-            Vue.storage.set(`${BLOCKS}query`, JSON.stringify(filters))
+            Vue.storage.set(`${BLOCKS_NAMESPACE}query`, JSON.stringify(filters))
             commit(UPDATE_QUERY, filters)
             dispatch(LOAD)
         }

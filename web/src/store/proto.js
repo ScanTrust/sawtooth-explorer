@@ -10,12 +10,12 @@ import {
     LOGOUT,
     SNACKBAR,
     SAVE_RULES,
-    PROTO_TO_DECODER_GETTER_NAME,
-    PROTO_MESSAGES_GETTER_NAME,
-    TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME,
-    TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME,
-    TRANSACTIONS,
-    STATE_ELEMENTS,
+    PROTO_TO_DECODER,
+    PROTO_MESSAGES,
+    TXN_FAMILY_PREFIX_TO_RULES_CONFIG,
+    TXN_FAMILY_PREFIX_TO_FILE_NAMES,
+    TRANSACTIONS_NAMESPACE,
+    STATE_ELEMENTS_NAMESPACE,
     ENCODING_TYPES,
     TXN_FAMILY_PREFIX_TO_SETTING,
 } from './constants'
@@ -29,18 +29,18 @@ const RuleTypes = {
 export default {
     namespaced: true,
     state: {
-        txnFamilyPrefixToSettings: JSON.parse(localStorage.getItem('txnFamilyPrefixToSettings') || '{}'),
+        txnFamilyPrefixToSettings: JSON.parse(localStorage.getItem(TXN_FAMILY_PREFIX_TO_SETTING) || '{}'),
         protoToDecoder: null,
-        txnFamilyPrefixToFileNames: JSON.parse(localStorage.getItem('txnFamilyPrefixToFileNames') || '{}'),
-        txnFamilyPrefixToRulesConfig: JSON.parse(localStorage.getItem('txnFamilyPrefixToRulesConfig') || '{}'),
-        protoMessages: JSON.parse(localStorage.getItem('protoMessages') || '[]'),
+        txnFamilyPrefixToFileNames: JSON.parse(localStorage.getItem(TXN_FAMILY_PREFIX_TO_FILE_NAMES) || '{}'),
+        txnFamilyPrefixToRulesConfig: JSON.parse(localStorage.getItem(TXN_FAMILY_PREFIX_TO_RULES_CONFIG) || '{}'),
+        protoMessages: JSON.parse(localStorage.getItem(PROTO_MESSAGES) || '[]'),
     },
     getters: {
-        [TXN_FAMILY_PREFIX_TO_SETTING]: state => state.txnFamilyPrefixToSettings,
-        [TXN_FAMILY_PREFIX_TO_FILE_NAMES_GETTER_NAME]: state => state.txnFamilyPrefixToFileNames,
-        [PROTO_TO_DECODER_GETTER_NAME]: state => state.protoToDecoder,
-        [PROTO_MESSAGES_GETTER_NAME]: state => state.protoMessages,
-        [TXN_FAMILY_PREFIX_TO_RULES_CONFIG_GETTER_NAME]: state => state.txnFamilyPrefixToRulesConfig,
+        [TXN_FAMILY_PREFIX_TO_SETTING]: state => state[TXN_FAMILY_PREFIX_TO_SETTING],
+        [TXN_FAMILY_PREFIX_TO_FILE_NAMES]: state => state[TXN_FAMILY_PREFIX_TO_FILE_NAMES],
+        [PROTO_TO_DECODER]: state => state[PROTO_TO_DECODER],
+        [PROTO_MESSAGES]: state => state[PROTO_MESSAGES],
+        [TXN_FAMILY_PREFIX_TO_RULES_CONFIG]: state => state[TXN_FAMILY_PREFIX_TO_RULES_CONFIG],
     },
     mutations: {
         [LOAD]: (state, {
@@ -50,18 +50,18 @@ export default {
             protoMessages,
             txnFamilyPrefixToRulesConfig
         }) => {
-            state.txnFamilyPrefixToSettings = txnFamilyPrefixToSettings
-            state.protoToDecoder = protoToDecoder
-            state.txnFamilyPrefixToFileNames = txnFamilyPrefixToFileNames
-            state.txnFamilyPrefixToRulesConfig = txnFamilyPrefixToRulesConfig
-            state.protoMessages = protoMessages
+            state[TXN_FAMILY_PREFIX_TO_SETTING] = txnFamilyPrefixToSettings
+            state[TXN_FAMILY_PREFIX_TO_FILE_NAMES] = txnFamilyPrefixToFileNames
+            state[PROTO_TO_DECODER] = protoToDecoder
+            state[PROTO_MESSAGES] = protoMessages
+            state[TXN_FAMILY_PREFIX_TO_RULES_CONFIG] = txnFamilyPrefixToRulesConfig
         },
         [LOGOUT]: (state) => {
-            state.txnFamilyPrefixToSettings = null
-            state.protoToDecoder = null
-            state.txnFamilyPrefixToFileNames = null
-            state.txnFamilyPrefixToRulesConfig = null
-            state.protoMessages = null
+            state[TXN_FAMILY_PREFIX_TO_SETTING] = null
+            state[TXN_FAMILY_PREFIX_TO_FILE_NAMES] = null
+            state[PROTO_TO_DECODER] = null
+            state[PROTO_MESSAGES] = null
+            state[TXN_FAMILY_PREFIX_TO_RULES_CONFIG] = null
         },
     },
     actions: {
@@ -113,7 +113,7 @@ export default {
         [LOAD]: ({commit, dispatch}) => {
             return new Promise(async (resolve, reject) => {
                 const messagesRes = await http({ url: '/proto/messages', method: 'GET' })
-                Vue.storage.set('protoMessages', JSON.stringify(messagesRes.data))
+                Vue.storage.set(PROTO_MESSAGES, JSON.stringify(messagesRes.data))
                 const protosRes = await http({ url: '/proto', method: 'GET' })
                 const {
                     descriptor,
@@ -121,9 +121,9 @@ export default {
                     txnFamilyPrefixToRulesConfig,
                     txnFamilyPrefixToSettings,
                 } = protosRes.data
-                Vue.storage.set('txnFamilyPrefixToSettings', JSON.stringify(txnFamilyPrefixToSettings))
-                Vue.storage.set('txnFamilyPrefixToFileNames', JSON.stringify(txnFamilyPrefixToFileNames))
-                Vue.storage.set('txnFamilyPrefixToRulesConfig', JSON.stringify(txnFamilyPrefixToRulesConfig))
+                Vue.storage.set(TXN_FAMILY_PREFIX_TO_SETTING, JSON.stringify(txnFamilyPrefixToSettings))
+                Vue.storage.set(TXN_FAMILY_PREFIX_TO_FILE_NAMES, JSON.stringify(txnFamilyPrefixToFileNames))
+                Vue.storage.set(TXN_FAMILY_PREFIX_TO_RULES_CONFIG, JSON.stringify(txnFamilyPrefixToRulesConfig))
                 const protoFromJSON = protobufjs.Root.fromJSON(descriptor)
                 const protoToDecoder = {}
                 Object.keys(descriptor.nested).forEach(protoName => {
@@ -139,8 +139,8 @@ export default {
                 }
                 commit(LOAD, res)
                 await Promise.all([
-                    dispatch(TRANSACTIONS + LOAD, null, { root: true }),
-                    dispatch(STATE_ELEMENTS + LOAD, null, { root: true })
+                    dispatch(TRANSACTIONS_NAMESPACE + LOAD, null, { root: true }),
+                    dispatch(STATE_ELEMENTS_NAMESPACE + LOAD, null, { root: true })
                 ])
                 resolve(res)
             })

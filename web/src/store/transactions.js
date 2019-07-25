@@ -4,30 +4,31 @@ import http from '@/lib/http'
 import {
     LOGOUT,
     LOAD,
-    TRANSACTIONS,
+    TRANSACTIONS_NAMESPACE,
     UPDATE_FILTERS,
     UPDATE_QUERY,
-    TRANSACTIONS_GETTER_NAME,
-    PROTO,
+    TRANSACTIONS,
+    PROTO_NAMESPACE,
     DECODE,
 } from './constants'
 
 export default {
     namespaced: true,
     state: {
-        transactions: JSON.parse(localStorage.getItem('transactions') || '[]'),
-        query: JSON.parse(localStorage.getItem(`${TRANSACTIONS}query`) || '{}'),
+        [TRANSACTIONS]: JSON.parse(localStorage.getItem(TRANSACTIONS) || '[]'),
+        query: JSON.parse(localStorage.getItem(`${TRANSACTIONS_NAMESPACE}query`) || '{}'),
     },
     getters: {
-        [TRANSACTIONS_GETTER_NAME]: state => state.transactions,
+        [TRANSACTIONS]: state => state[TRANSACTIONS],
         query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, transactions) => {
-            state.transactions = transactions
+            state[TRANSACTIONS] = transactions
         },
         [LOGOUT]: (state) => {
-            state.transactions = []
+            state[TRANSACTIONS] = []
+            state.query = {}
         },
         [UPDATE_QUERY]: (state, query) => {
             state.query = query
@@ -40,11 +41,11 @@ export default {
                     .then(async resp => {
                         const transactions = resp.data.reverse()
                         const decodedTransactions = await dispatch(
-                            PROTO + DECODE,
+                            PROTO_NAMESPACE + DECODE,
                             {isTransaction: true, entities: transactions},
                             {root: true}
                         )
-                        Vue.storage.set('transactions', JSON.stringify(decodedTransactions))
+                        Vue.storage.set(TRANSACTIONS, JSON.stringify(decodedTransactions))
                         commit(LOAD, decodedTransactions)
                         resolve(decodedTransactions)
                     })
@@ -54,7 +55,7 @@ export default {
             })
         },
         [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
-            Vue.storage.set(`${TRANSACTIONS}query`, JSON.stringify(filters))
+            Vue.storage.set(`${TRANSACTIONS_NAMESPACE}query`, JSON.stringify(filters))
             commit(UPDATE_QUERY, filters)
             dispatch(LOAD)
         }
