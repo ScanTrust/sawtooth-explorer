@@ -49,11 +49,19 @@
                     </v-layout>
                     <v-layout wrap>
                         <v-flex xs12>
+                            <v-alert
+                                outline type="info"
+                                transition="slide-x-transition"
+                                :value="hasUnsavedChanges">
+                                Don't forget to save changes below.
+                            </v-alert>
+                        </v-flex>
+                        <v-flex xs12>
                             <span class="unselectable headline">Transaction Payload</span>
                         </v-flex>
                         <v-flex xs12 ml-4>
                             <p class="unselectable subheading">Choose encoding type:</p>
-                            <v-radio-group v-model="transactionPayloadEncodingType">
+                            <v-radio-group v-model="transactionPayloadEncodingType" @change="hasUnsavedChanges = true">
                                 <v-radio
                                     v-for="encodingType in encodingTypes"
                                     :key="encodingType"
@@ -65,7 +73,8 @@
                                 v-show="transactionPayloadEncodingType === ENCODING_TYPES.PROTO"
                                 :items="protoMessages"
                                 label="Protobuf Message"
-                                v-model="transactionPayloadProtoName">
+                                v-model="transactionPayloadProtoName"
+                                @change="hasUnsavedChanges = true">
                             </v-select>
                         </v-flex>
                         <v-flex xs12>
@@ -73,7 +82,7 @@
                         </v-flex>
                         <v-flex xs12 ml-4>
                             <p class="unselectable subheading">Choose encoding type:</p>
-                            <v-radio-group v-model="stateElementsEncodingType">
+                            <v-radio-group v-model="stateElementsEncodingType" @change="hasUnsavedChanges = true">
                                 <v-radio
                                     v-for="encodingType in encodingTypes"
                                     :key="encodingType"
@@ -120,10 +129,10 @@
     import ManageRuleDialog from '@/components/dialogs/ManageRuleDialog.vue'
     import FilesUploader from '@/components/FilesUploader.vue'
     import {
-        PROTO,
+        PROTO_NAMESPACE,
         UPLOAD,
         SAVE_RULES,
-        TXN_FAMILIES,
+        TXN_FAMILIES_NAMESPACE,
         ENCODING_TYPES,
         DECODING_RULE,
     } from '@/store/constants'
@@ -135,6 +144,7 @@
             files: null,
             canUpload: false,
             txnFamilyLabel: null,
+            hasUnsavedChanges: false,
             transactionPayloadEncodingType: 'NONE',
             stateElementsEncodingType: 'NONE',
             transactionPayloadProtoName: null,
@@ -151,36 +161,42 @@
         methods: {
             loadTxnFamilySettings (txnFamilyLabel) {
                 const fileNames = this.txnFamilyPrefixToFileNames[this.txnFamilyPrefix]
-                if (Array.isArray(fileNames) && fileNames.length > 0) {
-                    this.uploadedFileNames = fileNames
-                    const txnFamilySettings = this.txnFamilyPrefixToSettings[this.txnFamilyPrefix]
-                    if (txnFamilySettings) {
-                        const { txnPayloadEncodingType, stateElementsEncodingType } = txnFamilySettings
-                        this.transactionPayloadEncodingType = txnPayloadEncodingType
-                        this.stateElementsEncodingType = stateElementsEncodingType
-                    }
-                    // deal with the rest of the txn-family related settings in rulesConfig
-                    if (!this.rulesConfig)
-                        return this.rules = []
-                    const txnPayloadProto = this.rulesConfig.transactionPayloadProtoName
-                    if (txnPayloadProto) {
-                        this.transactionPayloadProtoName = txnPayloadProto
-                    }
-                    const protoNameToRules = this.rulesConfig.protoNameToRules
-                    if (protoNameToRules) {
-                        this.rules = []
-                        for (let protoName in protoNameToRules) {
-                            this.rules.push(
-                                ...protoNameToRules[protoName].map(rule => {
-                                    const hash = sha512(protoName)
-                                    return {
-                                        hash,
-                                        protoName,
-                                        ...rule
-                                    }
-                                })
-                            )
-                        }
+                if (!Array.isArray(fileNames) || fileNames.length === 0) {
+                    this.uploadedFileNames = []
+                    this.rules = []
+                    this.transactionPayloadProtoName = null
+                    this.transactionPayloadEncodingType = ENCODING_TYPES.NONE
+                    this.stateElementsEncodingType = ENCODING_TYPES.NONE
+                    return
+                }
+                this.uploadedFileNames = fileNames
+                const txnFamilySettings = this.txnFamilyPrefixToSettings[this.txnFamilyPrefix]
+                if (txnFamilySettings) {
+                    const { txnPayloadEncodingType, stateElementsEncodingType } = txnFamilySettings
+                    this.transactionPayloadEncodingType = txnPayloadEncodingType
+                    this.stateElementsEncodingType = stateElementsEncodingType
+                }
+                // deal with the rest of the txn-family related settings in rulesConfig
+                if (!this.rulesConfig)
+                    return this.rules = []
+                const txnPayloadProto = this.rulesConfig.transactionPayloadProtoName
+                if (txnPayloadProto) {
+                    this.transactionPayloadProtoName = txnPayloadProto
+                }
+                const protoNameToRules = this.rulesConfig.protoNameToRules
+                if (protoNameToRules) {
+                    this.rules = []
+                    for (let protoName in protoNameToRules) {
+                        this.rules.push(
+                            ...protoNameToRules[protoName].map(rule => {
+                                const hash = sha512(protoName)
+                                return {
+                                    hash,
+                                    protoName,
+                                    ...rule
+                                }
+                            })
+                        )
                     }
                 }
             },
@@ -192,7 +208,7 @@
                 this.canUpload = files.length > 0
             },
             async uploadFiles () {
-                await this.$store.dispatch(PROTO + UPLOAD, {
+                await this.$store.dispatch(PROTO_NAMESPACE + UPLOAD, {
                     files: this.files,
                     txnFamilyPrefix: this.txnFamilyPrefix
                 })
@@ -217,8 +233,9 @@
                     return Vue.set(this.rules, index, null)
                 rule.hash = sha512(rule.protoName)
                 Vue.set(this.rules, index, rule)
+                this.hasUnsavedChanges = true
             },
-            saveRules () {
+            async saveRules () {
                 let transactionPayloadProtoName
                 if (this.transactionPayloadEncodingType === ENCODING_TYPES.PROTO) {
                     transactionPayloadProtoName = this.transactionPayloadProtoName
@@ -233,18 +250,19 @@
                         return Object.assign({}, rule)
                     })
                 }
-                this.$store.dispatch(PROTO + SAVE_RULES, {
+                await this.$store.dispatch(PROTO_NAMESPACE + SAVE_RULES, {
                     txnFamilyPrefix: this.txnFamilyPrefix,
                     rules,
                     transactionPayloadProtoName,
                     txnPayloadEncodingType: this.transactionPayloadEncodingType,
                     stateElementsEncodingType: this.stateElementsEncodingType,
                 })
-            }
+                this.hasUnsavedChanges = false
+            },
         },
         computed: {
-            ...mapGetters(TXN_FAMILIES, ['txnFamilies']),
-            ...mapGetters(PROTO, [
+            ...mapGetters(TXN_FAMILIES_NAMESPACE, ['txnFamilies']),
+            ...mapGetters(PROTO_NAMESPACE, [
                 'txnFamilyPrefixToSettings',
                 'protoMessages',
                 'txnFamilyPrefixToRulesConfig',
@@ -276,6 +294,7 @@
 
 <style scoped>
     span {
-        color:#8091d8
+        color: #4385b9;
+        font-weight: 500;
     }
 </style>
