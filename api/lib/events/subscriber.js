@@ -22,7 +22,7 @@ let handlingCatchUp = false;
 let catchUpStartDate = null;
 let lastEventHandleDate = null;
 
-function subscribeToBlockchainEvents (handlers, callback) {
+async function subscribeToBlockchainEvents (handlers, callback) {
 	blockchainSocket = zmq.socket('dealer')
 	const validatorUrl = blockchain.VALIDATOR_URL
 	blockchainSocket.connect(validatorUrl)
@@ -65,11 +65,9 @@ function subscribeToBlockchainEvents (handlers, callback) {
 			}
 		}
 	})
-	Block._getWithMaxNumber(function (maxNumberBlock) {
-		maxNumberBlock = maxNumberBlock || {id: '0000000000000000'} // initial block id
-		console.log(`subscribing for ${validatorUrl} block-commit events and requesting event catch-up since block`, maxNumberBlock)
-		requestEventCatchUp([maxNumberBlock.id], callback)
-	})
+	const maxNumberBlock = await Block._getWithMaxNumber() || {id: '0000000000000000'}
+	console.log(`subscribing for ${validatorUrl} block-commit events and requesting event catch-up since block`, maxNumberBlock)
+	requestEventCatchUp([maxNumberBlock.id], callback)
 }
 
 function requestEventCatchUp (lastKnownBlockIds, callback) {

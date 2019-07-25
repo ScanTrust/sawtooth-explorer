@@ -37,13 +37,12 @@ router.get('/', function(req, res, next) {
     }
 })
 
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
     if (req.query.recentN) {
         const amountOfBlocks = parseInt(req.query.recentN)
-        Block._getWithMaxNumber(maxNumBlock => {
-            req._dbQuery["num"] = {$gt: maxNumBlock.num - amountOfBlocks}
-            next()
-        })
+        const maxNumBlock = await Block._getWithMaxNumber()
+        req._dbQuery["num"] = {$gt: maxNumBlock.num - amountOfBlocks}
+        next()
     } else {
         next()
     }

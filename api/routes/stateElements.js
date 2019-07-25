@@ -2,7 +2,7 @@ let express = require('express');
 let router = express.Router();
 let StateElement = require('@root/models/stateElement')
 
-router.get('/', function(req, res, next) {
+router.get('/', async function(req, res, next) {
     const dbQuery = {}
     const options = {}
     if (req.query.addresses) {
@@ -23,9 +23,8 @@ router.get('/', function(req, res, next) {
         dbQuery["$and"].push({createdAt: {$ne: null}})  
         options.sort = {createdAt: 1}
 	}
-    StateElement._get(dbQuery, options, stateElemets => {
-        res.send(stateElemets)
-    })
+    const stateElements = await StateElement._get(dbQuery, options)
+    res.send(stateElements)
 });
 
 module.exports = router;
