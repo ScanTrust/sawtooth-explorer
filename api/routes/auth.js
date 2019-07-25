@@ -4,9 +4,11 @@ const jwt      = require('jsonwebtoken');
 const passport = require('passport')
 const { check, validationResult } = require('express-validator/check')
 
-const User     = require('@root/models/user')
-const config   = require('@root/config')
+const User    = require('@root/models/user')
+const Setting = require('@root/models/setting')
+const config  = require('@root/config')
 const { saltHashPassword } = require('@root/lib/common/hashing')
+const { isAdmin } = require('@root/authentication')
 
 router.post(['/register', '/login'], [
     check('username').exists(),
@@ -19,35 +21,11 @@ router.post(['/register', '/login'], [
     next()
 })
 
-router.post('/register', function(req, res, next) {
-    User._getLastId(lastId => {
-        const { salt, passwordHash } = saltHashPassword(req.body.password)
-        User._create({
-            id: lastId + 1,
-            username: req.body.username,
-            passHash: passwordHash,
-            salt,
-        }, function (ok, err) {
-            if (err)
-                return res.status(400).json({ ok, message: err })
-            return res.status(200).json({ ok, message: 'registration_successful' })
-        })
-    })
-})
-
-router.post('/login', function (req, res, next) {
-    User._getByUsername(req.body.username, user => {
-        if (!user) {
-            return res.status(400).json({
-                ok: false,
-                message: 'no_user_with_such_username'
-            })
-        }
-        const { passwordHash } = saltHashPassword(req.body.password, user.salt)
-        req.body.passHash = passwordHash
-        req.body.password = null
-        next()
-    })
+router.post('/login', async function (req, res, next) {
+    const {username, password} = req.body
+    req.body.passHash = await User._login({username, password})
+    req.body.password = null
+    next()
 })
 
 router.post('/login', function (req, res, next) {
@@ -66,9 +44,22 @@ router.post('/login', function (req, res, next) {
                     message: err
                 });
             const token = jwt.sign(user.toJSON(), config.JWT_SECRET);
-            return res.json({ok: true, token, username: user.username});
+            return res.json({ok: true, token, username: user.username, isAdmin: user.isAdmin});
         });
     })(req, res);
+})
+
+router.post('/register', async function (req, res, next) {
+    const isRegistrationPublic = await Setting._getByKey('isRegistrationPublic')
+    if (isRegistrationPublic)
+        return next()
+    return isAdmin(req, res, next)
+})
+
+router.post('/register', async function(req, res, next) {
+    const {username, password} = req.body
+    await User._register({username, password})
+    res.status(200).json({ok: true, message: 'registration_successful'})
 })
 
 module.exports = router

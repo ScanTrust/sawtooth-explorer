@@ -8,7 +8,9 @@ let express = require('express'),
 
     config = require('./config'),
     { subscribeToBlockchainEvents } = require('./lib/events/subscriber'),
-    blockchainEventHandlers = require('./lib/events/handlers'),
+    { blockCommit,
+      stateDelta,
+      fetchInitialSettingsStateElementAndAddToQueue } = require('./lib/events/handlers'),
     { authenticateJwt } = require('./authentication'),
     { normalizeError } = require('./lib/common/formatting');
 
@@ -38,6 +40,8 @@ let blocks = require('./routes/blocks');
 let signers = require('./routes/signers');
 let txnFamilies = require('./routes/txnFamilies');
 let proto = require('./routes/proto');
+let accounts = require('./routes/accounts');
+let settings = require('./routes/settings');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -66,7 +70,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use([
   '/signers/*',
   '/txnFamilies/*',
-  '/proto'
+  '/proto',
+  '/accounts',
+  '/settings',
 ], authenticateJwt)
 
 app.use('/', routes);
@@ -77,6 +83,15 @@ app.use('/blocks', blocks);
 app.use('/signers', signers);
 app.use('/txnFamilies', txnFamilies);
 app.use('/proto', proto);
+app.use('/accounts', accounts);
+app.use('/settings', settings);
+
+// catch 404 and forward to error handler
+app.use(function(req, res, next) {
+  let err = new Error('Not Found');
+  err.status = 404;
+  next(err);
+});
 
 app.use([
   '/auth',
@@ -85,17 +100,11 @@ app.use([
   '/blocks',
   '/signers',
   '/txnFamilies',
-  '/proto'
+  '/proto',
+  '/accounts',
 ], function (err, req, res, next) {
   next(normalizeError(err))
 })
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  let err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
 
 // error handlers
 // development error handler
@@ -122,7 +131,8 @@ app.use(function(err, req, res, next) {
   });
 });
 
-subscribeToBlockchainEvents(blockchainEventHandlers)
-
+fetchInitialSettingsStateElementAndAddToQueue().then(() => {
+  subscribeToBlockchainEvents({blockCommit, stateDelta})
+})
 
 module.exports = app;
