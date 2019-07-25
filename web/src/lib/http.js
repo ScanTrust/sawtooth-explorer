@@ -2,7 +2,7 @@ import axios from 'axios'
 
 import store from '@/store'
 import messageCodes from './message-codes'
-import { AUTH, LOGOUT, SNACKBAR } from '@/store/constants';
+import { AUTH_NAMESPACE, LOGOUT, SNACKBAR } from '@/store/constants';
 import { EventBus } from '@/lib/event-bus';
 
 const axiosInstance = axios.create({
@@ -25,7 +25,7 @@ axiosInstance.interceptors.response.use(
             }
             const resp = err.response
             if (resp.status === 401) {
-                store.dispatch(AUTH + LOGOUT)
+                store.dispatch(AUTH_NAMESPACE + LOGOUT)
             }
             if (resp.data && resp.data.message) {
                 const data = resp.data

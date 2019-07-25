@@ -95,7 +95,7 @@
 <script>
 import { mapGetters } from 'vuex'
 
-import { PROTO, ADDRESS_SLICE, DATA_BYTE } from '@/store/constants'
+import { PROTO_NAMESPACE, ADDRESS_SLICE, DATA_BYTE } from '@/store/constants'
 import { protoRulesConfig } from '@/lib/display-config'
 
 const DECIMAL_BOUNDING = 'DECIMAL_BOUNDING'
@@ -181,7 +181,7 @@ export default {
         },
     },
     computed: {
-        ...mapGetters(PROTO, ['protoMessages']),
+        ...mapGetters(PROTO_NAMESPACE, ['protoMessages']),
         ruleCodes: () => Object.keys(protoRulesConfig),
         ruleTypes: () => Object.values(protoRulesConfig),
         matchingMethod () {

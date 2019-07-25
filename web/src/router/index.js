@@ -10,8 +10,9 @@ import Signers from '@/views/Signers.vue'
 import TxnFamilies from '@/views/TxnFamilies.vue'
 import Settings from '@/views/Settings.vue'
 import ProtoSettings from '@/views/ProtoSettings.vue'
+import AccountsSettings from '@/views/AccountsSettings.vue'
 import store from '@/store'
-import { AUTH } from '@/store/constants'
+import { AUTH_NAMESPACE } from '@/store/constants'
 import {
   AUTH_PATH,
   ROOT_PATH,
@@ -22,12 +23,13 @@ import {
   STATE_PATH,
   SETTINGS_PATH,
   PROTO_SETTINGS_PATH,
+  ACCOUNTS_SETTINGS_PATH,
 } from './constants'
 
 Vue.use(Router)
 
 const ifNotAuthenticated = (to, from, next) => {
-  if (!store.getters[AUTH + 'isAuthenticated']) {
+  if (!store.getters[AUTH_NAMESPACE + 'isAuthenticated']) {
     next()
     return
   }
@@ -35,7 +37,7 @@ const ifNotAuthenticated = (to, from, next) => {
 }
 
 const ifAuthenticated = (to, from, next) => {
-  if (store.getters[AUTH + 'isAuthenticated']) {
+  if (store.getters[AUTH_NAMESPACE + 'isAuthenticated']) {
     next()
     return
   }
@@ -75,7 +77,10 @@ export default new Router({
           component: Settings,
           children: [{
             path: PROTO_SETTINGS_PATH,
-            component: ProtoSettings
+            component: ProtoSettings,
+          }, {
+            path: ACCOUNTS_SETTINGS_PATH,
+            component: AccountsSettings,
           }]
         }
       ]

@@ -8,13 +8,17 @@ import blocks from './blocks'
 import transactions from './transactions'
 import stateElements from './state-elements'
 import proto from './proto'
+import accounts from './accounts'
+import settings from './settings'
+
 import {
-    SIGNERS,
-    TXN_FAMILIES,
-    BLOCKS,
-    STATE_ELEMENTS,
-    TRANSACTIONS,
-    PROTO,
+    SIGNERS_NAMESPACE,
+    TXN_FAMILIES_NAMESPACE,
+    BLOCKS_NAMESPACE,
+    STATE_ELEMENTS_NAMESPACE,
+    TRANSACTIONS_NAMESPACE,
+    PROTO_NAMESPACE,
+    ACCOUNTS_NAMESPACE,
     LOAD,
     FETCH_PROP_VALUE,
 } from './constants'
@@ -26,14 +30,16 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
     actions: {
-        async [LOAD] ({dispatch}) {
-            await dispatch(PROTO + LOAD),
-            // PROTO LOAD also loads stateEls and txns because it needs to re-decode them
-            // dispatch(STATE_ELEMENTS + LOAD)
-            // dispatch(TRANSACTIONS + LOAD)
-            dispatch(SIGNERS + LOAD),
-            dispatch(TXN_FAMILIES + LOAD),
-            dispatch(BLOCKS + LOAD)
+        async [LOAD] ({dispatch, getters}) {
+            await dispatch(PROTO_NAMESPACE + LOAD)
+            // PROTO_NAMESPACE LOAD also loads stateEls and txns because it needs to re-decode them
+            // dispatch(STATE_ELEMENTS_NAMESPACE + LOAD)
+            // dispatch(TRANSACTIONS_NAMESPACE + LOAD)
+            dispatch(SIGNERS_NAMESPACE + LOAD)
+            dispatch(TXN_FAMILIES_NAMESPACE + LOAD)
+            dispatch(BLOCKS_NAMESPACE + LOAD)
+            if (getters['auth/isAdmin'])
+                dispatch(ACCOUNTS_NAMESPACE + LOAD)
         },
         [FETCH_PROP_VALUE] ({getters}, {searchedEntityStoreNameSpace, searchConfig, data}) {
             // Need to fetch prop-value from store
@@ -59,6 +65,8 @@ export default new Vuex.Store({
         blocks,
         transactions,
         stateElements,
-        proto
+        proto,
+        accounts,
+        settings,
     }
 })

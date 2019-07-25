@@ -10,29 +10,30 @@ import {
     ADD,
     EDIT,
 
-    TXN_FAMILIES,
+    TXN_FAMILIES_NAMESPACE,
     UPDATE_FILTERS,
     UPDATE_QUERY,
-    TXN_FAMILIES_GETTER_NAME,
+    TXN_FAMILIES,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
 
 export default {
     namespaced: true,
     state: {
-        txnFamilies: JSON.parse(localStorage.getItem('txnFamilies') || '[]'),
-        query: JSON.parse(localStorage.getItem(`${TXN_FAMILIES}query`) || '{}'),
+        [TXN_FAMILIES]: JSON.parse(localStorage.getItem(TXN_FAMILIES) || '[]'),
+        query: JSON.parse(localStorage.getItem(`${TXN_FAMILIES_NAMESPACE}query`) || '{}'),
     },
     getters: {
-        [TXN_FAMILIES_GETTER_NAME]: state => state.txnFamilies,
+        [TXN_FAMILIES]: state => state[TXN_FAMILIES],
         query: state => state.query,
     },
     mutations: {
         [LOAD]: (state, txnFamilies) => {
-            state.txnFamilies = txnFamilies
+            state[TXN_FAMILIES] = txnFamilies
         },
         [LOGOUT]: (state) => {
-            state.txnFamilies = []
+            state[TXN_FAMILIES] = []
+            state.query = {}
         },
         [UPDATE_QUERY]: (state, query) => {
             state.query = query
@@ -44,7 +45,7 @@ export default {
                 http({ url: '/txnFamilies', params: query || getters.query, method: 'GET' })
                     .then(resp => {
                         const txnFamilies = resp.data
-                        Vue.storage.set('txnFamilies', JSON.stringify(txnFamilies))
+                        Vue.storage.set(TXN_FAMILIES, JSON.stringify(txnFamilies))
                         commit(LOAD, txnFamilies)
                         resolve(txnFamilies)
                     })
@@ -80,7 +81,7 @@ export default {
             })
         },
         [UPDATE_FILTERS]: ({commit, dispatch}, filters) => {
-            Vue.storage.set(`${TXN_FAMILIES}query`, JSON.stringify(filters))
+            Vue.storage.set(`${TXN_FAMILIES_NAMESPACE}query`, JSON.stringify(filters))
             commit(UPDATE_QUERY, filters)
             dispatch(LOAD)
         }

@@ -1,24 +1,15 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <v-container fluid pa-5 grid-list-xl>
-            <v-layout wrap>
-                <v-flex shrink xs12 sm6 md4 lg2 v-for="(signer, i) in signers" :key="signer.publicKey">
-                    <entity-tile
-                        :entity="signer"
-                        :type="SIGNER"
-                        @showDetails="showDetails(signer, i)">
-                    </entity-tile>
-                </v-flex>
-            </v-layout>
-        </v-container>
-        <v-btn absolute
-                dark fab
-                bottom right
-                color="indigo accent-2"
-                @click="showAdd">
-            <v-icon>add</v-icon>
-        </v-btn>
-    </div>
+    <v-container fluid pa-5 grid-list-xl>
+        <v-layout wrap>
+            <v-flex shrink xs12 sm6 md4 lg2 v-for="(signer, i) in signers" :key="signer.publicKey">
+                <entity-tile
+                    :entity="signer"
+                    :type="SIGNER"
+                    @showDetails="showDetails(signer, i)">
+                </entity-tile>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
@@ -27,11 +18,10 @@
     import EntityTile from '@/components/EntityTile'
     import {
         SIGNER,
-        SIGNERS,
+        SIGNERS_NAMESPACE,
         LOAD, ADD,
         SHOW_DETAILS,
         DETAILS_NEXT,
-        SHOW_SIGNER_ADD,
     } from '@/store/constants'
     import { EventBus } from '@/lib/event-bus'
 
@@ -56,11 +46,11 @@
             EventBus.$off(DETAILS_NEXT)
         },
         computed: {
-            ...mapGetters(SIGNERS, ['signers'])
+            ...mapGetters(SIGNERS_NAMESPACE, ['signers'])
         },
         methods: {
             load () {
-                this.$store.dispatch(SIGNERS + LOAD)
+                this.$store.dispatch(SIGNERS_NAMESPACE + LOAD)
             },
             showDetails (signer, i) {
                 this.detailedSignerIndex = i
@@ -69,9 +59,6 @@
                     data: signer
                 })
             },
-            showAdd () {
-                EventBus.$emit(SHOW_SIGNER_ADD)
-            }
         },
         components: {
             EntityTile,

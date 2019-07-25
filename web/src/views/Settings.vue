@@ -1,7 +1,5 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <router-view></router-view>
-    </div>
+    <router-view></router-view>
 </template>
 
 <script>

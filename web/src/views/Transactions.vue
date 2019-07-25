@@ -1,17 +1,15 @@
 <template>
-    <div class="pos-relative height-85-prc">
-        <v-container fluid pa-5 grid-list-xl>
-            <v-layout wrap>
-                <v-flex shrink xs12 sm4 md2 xl1 v-for="(transaction, i) in transactions" :key="transaction.id">
-                    <entity-tile
-                        :entity="transaction"
-                        :type="TRANSACTION"
-                        @showDetails="showDetails(transaction, i)">
-                    </entity-tile>
-                </v-flex>
-            </v-layout>
-        </v-container>
-    </div>
+    <v-container fluid pa-5 grid-list-xl>
+        <v-layout wrap>
+            <v-flex shrink xs12 sm4 md2 xl1 v-for="(transaction, i) in transactionsSorted" :key="transaction.id">
+                <entity-tile
+                    :entity="transaction"
+                    :type="TRANSACTION"
+                    @showDetails="showDetails(transaction, i)">
+                </entity-tile>
+            </v-flex>
+        </v-layout>
+    </v-container>
 </template>
 
 <script>
@@ -19,7 +17,7 @@
 
     import EntityTile from '@/components/EntityTile'
     import {
-        TRANSACTIONS,
+        TRANSACTIONS_NAMESPACE,
         LOAD,
         SHOW_DETAILS,
         DETAILS_NEXT,
@@ -49,7 +47,7 @@
         },
         methods: {
             load () {
-                this.$store.dispatch(TRANSACTIONS + LOAD)
+                this.$store.dispatch(TRANSACTIONS_NAMESPACE + LOAD)
             },
             showDetails (transaction, i) {
                 this.detailedTransactionIndex = i
@@ -60,7 +58,10 @@
             }
         },
         computed: {
-            ...mapGetters(TRANSACTIONS, ['transactions']),
+            ...mapGetters(TRANSACTIONS_NAMESPACE, ['transactions']),
+            transactionsSorted () {
+                return this.transactions.sort((a, b) => a.num - b.num)
+            },
         },
         components: {
             EntityTile,

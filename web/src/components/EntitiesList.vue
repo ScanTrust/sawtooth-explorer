@@ -1,12 +1,14 @@
 <template>
     <v-list>
-        <entity-tile
+        <v-flex
             v-for="entity in entities"
-            :key="entity._id"
-            :entity="entity"
-            :type="type"
-            @showDetails="showDetails">
-        </entity-tile>
+            pb-2 :key="entity._id">
+            <entity-tile
+                :entity="entity"
+                :type="type"
+                @showDetails="showDetails">
+            </entity-tile>
+        </v-flex>
     </v-list>
 </template>
 
