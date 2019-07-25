@@ -21,5 +21,8 @@ export default {
     'invalid_protos_set': 'Invalid protos set.',
     'protos_uploaded_and_processed_successfully': 'Protos uploaded and processed successfully!',
     'no_files_received': 'No files received.',
-    'updated_rules_successfully': 'Updated rules successfully!',
+    'updated_rules_successfully': 'Rules updated!',
+    'modified_setting_successfully': 'Settings modified!',
+    'user_modified_successfully': 'Account modified!',
+    'added_account': 'Account added!',
 }
