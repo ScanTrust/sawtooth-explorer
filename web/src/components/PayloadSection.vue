@@ -4,8 +4,11 @@
             <v-flex xs12 pt-3>
                 <v-layout justify-end>
                     <v-flex
-                        xs1 class="representation-label subheading border-right"
-                        :class="{'selected-representation': !isJSONCurrently}"
+                        xs1 class="representation-label subheading"
+                        :class="{
+                            'selected-representation': !isJSONCurrently,
+                            'border-right': hasJSON
+                        }"
                         @click="isJSONCurrently = false">
                         raw
                     </v-flex>
@@ -22,7 +25,7 @@
                 <v-flex xs12 v-show="!isJSONCurrently" class="raw-representation">
                     {{raw}}
                 </v-flex>
-                <v-flex xs12 v-show="isJSONCurrently">
+                <v-flex xs12 v-if="hasJSON" v-show="isJSONCurrently">
                     <json-viewer :value="json" :expand-depth="5"></json-viewer>
                 </v-flex>
             </v-flex>
