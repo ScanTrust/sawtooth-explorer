@@ -1,8 +1,8 @@
 <template>
-    <v-dialog v-model="shown" persistent max-width="500px">
+    <v-dialog v-model="shown" max-width="500px">
         <v-card>
             <v-card-title>
-                <span class="headline">{{isEditMode ? 'Edit' : 'Add'}}Rule</span>
+                <span class="headline">{{isEditMode ? 'Edit' : 'Add'}} Rule</span>
             </v-card-title>
             <v-card-text>
                 <rule-form

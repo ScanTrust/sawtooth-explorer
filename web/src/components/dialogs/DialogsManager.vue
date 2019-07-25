@@ -40,22 +40,17 @@
             @close="closeEdit"
             @edit="editEntity">
         </edit-dialog>
-        <signer-add
-            :shown="signerAddShown"
-            :data="addData.signer"
-            @close="signerAddShown = false"
-            @add="addSigner">
-        </signer-add>
-        <txn-family-add
-            :shown="txnFamilyAddShown"
-            :data="addData.txnFamily"
-            @close="txnFamilyAddShown = false"
-            @add="addTxnFamily">
-        </txn-family-add>
         <filters-dialog
             :shown="filtersShown"
             @close="filtersShown = false">
         </filters-dialog>
+        <add-dialog
+            :shown="addShown"
+            :title="addData.title"
+            :fields="addData.fields"
+            @add="addEntity({type: addData.type, entity: $event})"
+            @close="addShown = false">
+        </add-dialog>
     </div>
 </template>
 
@@ -63,8 +58,7 @@
     import DetailsDialog from './DetailsDialog'
     import EditDialog from './EditDialog'
     import FiltersDialog from './FiltersDialog'
-    import SignerAdd from './SignerAdd'
-    import TxnFamilyAdd from './TxnFamilyAdd'
+    import AddDialog from './AddDialog'
     import EntityTile from '@/components/EntityTile'
     import EntitiesList from '@/components/EntitiesList'
     import PayloadSection from '@/components/PayloadSection'
@@ -74,27 +68,29 @@
         SHOW_DETAILS,
         SHOW_EDIT,
         SHOW_ADD,
-        SHOW_SIGNER_ADD,
-        SHOW_TXN_FAMILY_ADD,
         SHOW_FILTERS,
+        SIGNERS_NAMESPACE,
+        TXN_FAMILIES_NAMESPACE,
+        BLOCKS_NAMESPACE,
+        BLOCK,
+        INITIAL_BLOCK_ID,
+        TRANSACTIONS_NAMESPACE,
+        STATE_ELEMENTS_NAMESPACE,
+        STATE_ELEMENT,
+        SIGNER,
+        TXN_FAMILY,
+        ADD,
+        EDIT,
         SIGNERS,
         TXN_FAMILIES,
         BLOCKS,
         TRANSACTIONS,
         STATE_ELEMENTS,
-        SIGNER,
-        TXN_FAMILY,
-        ADD,
-        EDIT,
-        SIGNERS_GETTER_NAME,
-        TXN_FAMILIES_GETTER_NAME,
-        BLOCKS_GETTER_NAME,
-        TRANSACTIONS_GETTER_NAME,
-        STATE_ELEMENTS_GETTER_NAME,
         FETCH_PROP_VALUE,
     } from '@/store/constants'
     import {
         entityNameToConfig,
+        entityNameToAddConfig,
         typeToStoreNamespace,
     } from '@/lib/display-config'
     import { isEmptyValue } from '@/lib/common'
@@ -105,8 +101,7 @@
             lastSlotId: 0,
             detailsShown: false,
             editShown: false,
-            signerAddShown: false,
-            txnFamilyAddShown: false,
+            addShown: false,
             filtersShown: false,
 
             details: {
@@ -127,25 +122,14 @@
             },
 
             addData: {
-                signer: { },
-                txnFamily: { }
+                title: 'Unknown',
+                fields: [],
             },
-
-            typeToEntityName: {
-                [SIGNER]: 'signer',
-                [TXN_FAMILY]: 'txnFamily',
-            }
         }),
         mounted () {
             EventBus.$on(SHOW_DETAILS, this.showDetails)
             EventBus.$on(SHOW_EDIT, this.showEdit)
             EventBus.$on(SHOW_ADD, this.showAdd)
-            EventBus.$on(SHOW_SIGNER_ADD, () => {
-                this.signerAddShown = true
-            })
-            EventBus.$on(SHOW_TXN_FAMILY_ADD, () => {
-                this.txnFamilyAddShown = true
-            })
             EventBus.$on(SHOW_FILTERS, () => {
                 this.filtersShown = true
             })
@@ -157,10 +141,7 @@
              *            initially passed as constant imported from @/store/constants
              *   data  -- for type == "SIGNER" just a signer object
              */
-            showDetails ({
-                type,
-                data
-            }) {
+            showDetails ({type, data}) {
                 // filling title, type, data
                 this.details.title = entityNameToConfig[type].title
                 this.details.type = type
@@ -201,13 +182,17 @@
                         } else if (slotConfig.propNameToStoreSearchConfig) {
                             for (const propName in slotConfig.propNameToStoreSearchConfig) {
                                 const searchConfig = slotConfig.propNameToStoreSearchConfig[propName]
-                                slot.props[propName] = await this.$store.dispatch(
+                                const propValue = await this.$store.dispatch(
                                     FETCH_PROP_VALUE,
                                     {
                                         searchedEntityStoreNameSpace: typeToStoreNamespace[slotConfig.detailsType],
-                                        searchConfig, data
+                                        searchConfig,
+                                        data,
                                     }
                                 )
+                                if ([BLOCK, STATE_ELEMENT].includes(type) && propValue.id === INITIAL_BLOCK_ID)
+                                    continue
+                                slot.props[propName] = propValue
                                 slotHasData = slotHasData || !isEmptyValue(slot.props[propName])
                             }
                         }
@@ -221,10 +206,7 @@
                 // showing
                 this.detailsShown = true
             },
-            showEdit ({
-                type,
-                data
-            }) {
+            showEdit ({type, data}) {
                 const config = entityNameToConfig[type]
                 // filling title, type, editedEntity
                 this.editData.title = `Edit ${config.title}`
@@ -244,16 +226,19 @@
                         accordingFieldsArray.push({
                             label: field.label,
                             name: field.entityFieldName,
-                            rules: editableField ? editableField.rules : null
+                            switch: editableField ? editableField.switch : null,
+                            rules: editableField ? editableField.rules : null,
                         })
                     }
                 })
                 this.editShown = true
             },
-            showAdd ({data}) {
-                const entityName = this.typeToEntityName[this.details.type]
-                this.addData[entityName] = data
-                this[`${entityName}AddShown`] = true
+            showAdd ({type}) {
+                const config = entityNameToAddConfig[type]
+                this.addData.title = "Add " + config.title
+                this.addData.fields = config.fields
+                this.addData.type = type
+                this.addShown = true
             },
             closeDetails () {
                 this.detailsShown = false
@@ -265,27 +250,25 @@
                 this.$store
                     .dispatch(typeToStoreNamespace[type] + EDIT, entity)
                     .then(this.closeDetails)
-                    .catch(this.closeDetails)
+                    .catch(error => {
+                        this.closeDetails()
+                        throw error
+                    })
             },
-            addSigner (signer) {
+            addEntity ({type, entity}) {
                 this.$store
-                    .dispatch(SIGNERS + ADD, signer)
+                    .dispatch(typeToStoreNamespace[type] + ADD, entity)
                     .then(this.closeDetails)
-                    .catch(this.closeDetails)
+                    .catch(error => {
+                        this.closeDetails()
+                        throw error
+                    })
             },
-            addTxnFamily (txnFamily) {
-                this.$store
-                    .dispatch(TXN_FAMILIES + ADD, txnFamily)
-                    .then(this.closeDetails)
-                    .catch(this.closeDetails)
-            }
         },
         beforeDestroy () {
             [SHOW_DETAILS,
             SHOW_EDIT,
             SHOW_ADD,
-            SHOW_SIGNER_ADD,
-            SHOW_TXN_FAMILY_ADD,
             SHOW_FILTERS].forEach(event => {
                 EventBus.$off(event)
             })
@@ -294,8 +277,7 @@
             DetailsDialog,
             EditDialog,
             FiltersDialog,
-            SignerAdd,
-            TxnFamilyAdd,
+            AddDialog,
             EntityTile,
             EntitiesList,
             PayloadSection,

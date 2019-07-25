@@ -1,6 +1,6 @@
 <template>
     <v-dialog
-        v-model="shown" persistent max-width="650px"
+        v-model="shown" max-width="650px"
         @keydown.right="showNextEntityDetails(1)"
         @keydown.left="showNextEntityDetails(-1)">
         <v-card>
@@ -28,10 +28,7 @@
                 </v-container>
             </v-card-text>
             <v-card-actions>
-                <template v-if="changeable">
-                    <v-btn v-if="displayedFields.length > 1" color="blue darken-1" flat @click.native="edit">Edit</v-btn>
-                    <v-btn v-else color="blue darken-1" flat @click.native="add">Add</v-btn>
-                </template>
+                <v-btn v-if="changeable" color="blue darken-1" flat @click.native="edit">Edit</v-btn>
                 <v-spacer></v-spacer>
                 <v-btn color="blue darken-1" flat @click.native="$emit('close')">Close</v-btn>
             </v-card-actions>
@@ -42,7 +39,6 @@
 <script>
     import { EventBus } from '@/lib/event-bus'
     import { SHOW_EDIT, SHOW_ADD, DETAILS_NEXT } from '@/store/constants'
-    import { entityNameToConfig } from '@/lib/display-config'
 
     export default {
         name: 'details-dialog',
