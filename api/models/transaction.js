@@ -6,6 +6,7 @@ const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
 
 let Transaction = new Schema({
     id: String,
+    num: Number,    
     blockId: String,
     batchId: String,
     payload: String,
@@ -15,38 +16,33 @@ let Transaction = new Schema({
 
 Transaction = mongoose.model('Transaction', Transaction);
 
-Transaction._create = (transaction, callback) => {
-    Transaction.create(transaction, err => {
+Transaction._create = async (transactions, callback) => {
+    const maxNumTransaction = await Transaction._getMaxNum();
+    let curNum = 0
+    if (maxNumTransaction)
+        curNum = maxNumTransaction.num + 1
+    transactions = transactions.map(txn => ({
+        num: curNum++,
+        ...txn
+    }))
+    Transaction.create(transactions, err => {
         if (err)
-            console.log("Err on creating transaction:", err);
+            console.log("Err on creating transactions:", err);
         if (callback)
             callback(err)
     });
 };
 
-Transaction._upsert = function (transaction, callback) {
-    Transaction.findOneAndUpdate({
-        id: transaction.id
-    }, transaction, { upsert: true }, (err, doc) => {
-      Signer._upsert({publicKey: transaction.signerPublicKey}, true, () => callback(err, doc))
-    })
-}
-
-function upsertAll(transactions, callback, errs) {
-    errs = errs || {}
-    if (transactions.length > 0) {
-        let transaction = transactions.shift()
-        Transaction._upsert(transaction, (err, doc) => {
+Transaction._getMaxNum = () => new Promise(resolve => {
+    Transaction
+        .findOne({})
+        .sort('-num')
+        .exec(function (err, transaction) {
             if (err)
-                errs[transaction.id] = err
-            upsertAll(transactions, callback, errs)
-        })
-    } else if (callback) {
-        return callback(errs)
-    }
-}
-
-Transaction._upsertAll = upsertAll;
+                console.log("Err on finding max num Transaction:", err)
+            resolve(transaction)
+        });
+})
 
 Transaction._get = function (params, callback) {
     Transaction.find(deleteEmptyArrayFields(params), function (err, transactions) {

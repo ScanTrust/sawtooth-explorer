@@ -50,13 +50,13 @@ Block._get = function (params, callback) {
   });
 }
 
-Block._getById = (id, callback) => {
+Block._getById = id => new Promise(resolve => {
   Block.findOne({id}, (err, block) => {
     if (err)
       console.log('Err on finding block by id:', err);
-    callback(block);
+    resolve(block);
   });
-};
+});
 
 Block._getByNumber = (num, callback) => {
   Block.findOne({num}, (err, block) => {
@@ -78,16 +78,16 @@ Block._remove = (blocks, callback) => {
   })
 }
 
-Block._getWithMaxNumber = (callback) => {
+Block._getWithMaxNumber = () => new Promise(resolve => {
   Block
     .findOne({})
     .sort('-num')
     .exec(function (err, block) {
       if (err)
         console.log(err)
-      callback(block)
+      resolve(block)
     })
-}
+})
 
 Block._getAscSortedByNumber = (callback) => {
   Block.find({}, null, {sort: {num: -1}}, function (err, blocks) {
