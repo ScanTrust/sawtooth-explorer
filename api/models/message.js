@@ -32,7 +32,10 @@ const TxnFamilySetting = require('./txnFamilySetting')
 */
 
 const Rule = new Schema({
-    type: Number, // RuleType enum
+    type: {
+        type: Number,
+        required: true
+    }, // RuleType enum
     begin: Number,
     end: Number,
     minMax: [Number],
@@ -41,8 +44,14 @@ const Rule = new Schema({
 })
 
 let Message = new Schema({
-    txnFamilyPrefix: String,
-    name: String,
+    txnFamilyPrefix: {
+        type: String,
+        required: true,
+    },
+    name: {
+        type: String,
+        required: true,
+    },
     rules: {
         type: [Rule],
         default: [],

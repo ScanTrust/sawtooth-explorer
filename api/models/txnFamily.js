@@ -6,11 +6,12 @@ const { deleteEmptyArrayFields } = require('@root/lib/common/formatting');
 let TxnFamily = new Schema({
     addressPrefix: {
         type: String,
-        unique: true
+        unique: true,
     },
     label: {
         type: String,
-        unique: true
+        unique: true,
+        sparse: true,
     }
 });
 
@@ -28,23 +29,25 @@ TxnFamily._create = (txnFamily, callback) => {
     });
 };
 
-TxnFamily._upsert = function (txnFamily, callback) {
-    callback = callback || (() => {})
-    TxnFamily.findOneAndUpdate({
-        addressPrefix: txnFamily.addressPrefix
-    }, txnFamily, { upsert: true }, err => {
-        if (err) {
-            console.log('Err on upserting txnFamily:', err)
-            return callback(false, 'unknown_error')
-        }
-        callback(true, 'updated_transaction_family')
+TxnFamily._upsert = function (txnFamily) {
+    return new Promise(resolve => {
+        TxnFamily.findOneAndUpdate({
+            addressPrefix: txnFamily.addressPrefix
+        }, txnFamily, { upsert: true }, err => {
+            if (err) {
+                console.log('Err on upserting txnFamily:', err)
+                return resolve({ok: false, message: 'unknown_error'})
+            }
+            return resolve({ok: true, message: 'updated_transaction_family'})
+        })
     })
 }
 
-function upsertAll(txnFamilies, callback) {
+async function upsertAll(txnFamilies, callback) {
     if (txnFamilies.length > 0) {
         let txnFamily = txnFamilies.shift()
-        TxnFamily._upsert(txnFamily, () => upsertAll(txnFamilies, callback))
+        await TxnFamily._upsert(txnFamily)
+        upsertAll(txnFamilies, callback)
     } else if (callback) {
         return callback()
     }
