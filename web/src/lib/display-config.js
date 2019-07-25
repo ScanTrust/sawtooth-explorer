@@ -1,21 +1,23 @@
 import {
     SIGNER,
-    SIGNERS,
+    SIGNERS_NAMESPACE,
     TXN_FAMILY,
-    TXN_FAMILIES,
+    TXN_FAMILIES_NAMESPACE,
     TRANSACTION,
-    TRANSACTIONS,
+    TRANSACTIONS_NAMESPACE,
     BLOCK,
-    BLOCKS,
+    BLOCKS_NAMESPACE,
     STATE_ELEMENT,
-    STATE_ELEMENTS,
+    STATE_ELEMENTS_NAMESPACE,
     DECODING_RULE,
+    ACCOUNT,
+    ACCOUNTS_NAMESPACE,
 
-    SIGNERS_GETTER_NAME,
-    TXN_FAMILIES_GETTER_NAME,
-    BLOCKS_GETTER_NAME,
-    TRANSACTIONS_GETTER_NAME,
-    STATE_ELEMENTS_GETTER_NAME,
+    SIGNERS,
+    TXN_FAMILIES,
+    BLOCKS,
+    TRANSACTIONS,
+    STATE_ELEMENTS,
 
     AUTH_FILTERS_COMPONENT,
     ROOT_FILTERS_COMPONENT,
@@ -38,11 +40,12 @@ import {
 import { rules } from '@/lib/validation-rules'
 
 export const typeToStoreNamespace = {
-    [TRANSACTION]: TRANSACTIONS,
-    [BLOCK]: BLOCKS,
-    [SIGNER]: SIGNERS,
-    [TXN_FAMILY]: TXN_FAMILIES,
-    [STATE_ELEMENT]: STATE_ELEMENTS,
+    [TRANSACTION]: TRANSACTIONS_NAMESPACE,
+    [BLOCK]: BLOCKS_NAMESPACE,
+    [SIGNER]: SIGNERS_NAMESPACE,
+    [TXN_FAMILY]: TXN_FAMILIES_NAMESPACE,
+    [STATE_ELEMENT]: STATE_ELEMENTS_NAMESPACE,
+    [ACCOUNT]: ACCOUNTS_NAMESPACE,
 }
 
 export const tilesConfig = {
@@ -69,6 +72,10 @@ export const tilesConfig = {
     [DECODING_RULE]: {
         avatar: 'hash',
         title: 'protoName'
+    },
+    [ACCOUNT]: {
+        avatar: 'hash',
+        title: 'username'
     }
 }
 
@@ -116,7 +123,7 @@ export const entityNameToConfig = {
                 detailsType: BLOCK,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeGetterName: BLOCKS,
                         storeWhereQuery: 'id == previousBlockId'
                     }
                 },
@@ -131,7 +138,7 @@ export const entityNameToConfig = {
                 detailsType: SIGNER,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: SIGNERS_GETTER_NAME,
+                        storeGetterName: SIGNERS,
                         storeWhereQuery: 'publicKey == signerPublicKey'
                     }
                 },
@@ -143,7 +150,7 @@ export const entityNameToConfig = {
                 detailsType: TRANSACTION,
                 propNameToStoreSearchConfig: {
                     entities: {
-                        storeGetterName: TRANSACTIONS_GETTER_NAME,
+                        storeGetterName: TRANSACTIONS,
                         storeWhereQuery: 'blockId == id',
                         multiple: true,
                     }
@@ -156,7 +163,7 @@ export const entityNameToConfig = {
                 detailsType: STATE_ELEMENT,
                 propNameToStoreSearchConfig: {
                     entities: {
-                        storeGetterName: STATE_ELEMENTS_GETTER_NAME,
+                        storeGetterName: STATE_ELEMENTS,
                         storeWhereQuery: 'blockId == id',
                         multiple: true,
                     }
@@ -188,7 +195,7 @@ export const entityNameToConfig = {
                 detailsType: BLOCK,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeGetterName: BLOCKS,
                         storeWhereQuery: 'id == blockId'
                     }
                 },
@@ -200,7 +207,7 @@ export const entityNameToConfig = {
                 detailsType: SIGNER,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: SIGNERS_GETTER_NAME,
+                        storeGetterName: SIGNERS,
                         storeWhereQuery: 'publicKey == signerPublicKey'
                     }
                 },
@@ -231,7 +238,7 @@ export const entityNameToConfig = {
                 detailsType: BLOCK,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeGetterName: BLOCKS,
                         storeWhereQuery: 'id == blockId',
                     }
                 },
@@ -243,7 +250,7 @@ export const entityNameToConfig = {
                 detailsType: TXN_FAMILY,
                 propNameToStoreSearchConfig: {
                     entity: {
-                        storeGetterName: TXN_FAMILIES_GETTER_NAME,
+                        storeGetterName: TXN_FAMILIES,
                         storeWhereQuery: 'addressPrefix == addressPrefix',
                     },
                 },
@@ -265,7 +272,7 @@ export const entityNameToConfig = {
                 detailsType: TRANSACTION,
                 propNameToStoreSearchConfig: {
                     entities: {
-                        storeGetterName: TRANSACTIONS_GETTER_NAME,
+                        storeGetterName: TRANSACTIONS,
                         storeWhereQuery: 'signerPublicKey == publicKey',
                         multiple: true,
                     },
@@ -278,7 +285,7 @@ export const entityNameToConfig = {
                 detailsType: BLOCK,
                 propNameToStoreSearchConfig: {
                     entities: {
-                        storeGetterName: BLOCKS_GETTER_NAME,
+                        storeGetterName: BLOCKS,
                         storeWhereQuery: 'signerPublicKey == publicKey',
                         multiple: true,
                     },
@@ -303,9 +310,43 @@ export const entityNameToConfig = {
             entityFieldName: 'label',
             rules: [rules.required, rules.minLength(4)]
         }],
-    }
+    },
+    [ACCOUNT]: {
+        title: 'Account',
+        detailsFields: [{
+            label: 'Id',
+            entityFieldName: 'id'
+        }, {
+            label: 'Username',
+            entityFieldName: 'username'
+        }, {
+            label: 'Is Admin',
+            entityFieldName: 'isAdmin'
+        }],
+        editableFields: [{
+            switch: true,
+            entityFieldName: 'isAdmin'
+        }],
+    },
 }
 
+export const entityNameToAddConfig = {
+    [ACCOUNT]: {
+        title: 'Account',
+        fields: [{
+            label: 'Username',
+            entityFieldName: 'username',
+        }, {
+            label: 'Password',
+            entityFieldName: 'password',
+        }, {
+            switch: true,
+            label: 'Is Admin',
+            entityFieldName: 'isAdmin',
+        }]
+    }
+}
+    
 export const routePathToFiltersComponent = {
     [BLOCKS_PATH]: BLOCKS_FILTERS_COMPONENT,
     [SIGNERS_PATH]: SIGNERS_FILTERS_COMPONENT,
@@ -315,11 +356,11 @@ export const routePathToFiltersComponent = {
 }
 
 export const routePathToStoreNamespace = {
-    [TRANSACTIONS_PATH]: TRANSACTIONS,
-    [BLOCKS_PATH]: BLOCKS,
-    [SIGNERS_PATH]: SIGNERS,
-    [TXN_FAMILIES_PATH]: TXN_FAMILIES,
-    [STATE_PATH]: STATE_ELEMENTS,
+    [TRANSACTIONS_PATH]: TRANSACTIONS_NAMESPACE,
+    [BLOCKS_PATH]: BLOCKS_NAMESPACE,
+    [SIGNERS_PATH]: SIGNERS_NAMESPACE,
+    [TXN_FAMILIES_PATH]: TXN_FAMILIES_NAMESPACE,
+    [STATE_PATH]: STATE_ELEMENTS_NAMESPACE,
 }
 
 export const protoRulesConfig = {
