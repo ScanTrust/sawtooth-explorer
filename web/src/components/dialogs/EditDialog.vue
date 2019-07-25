@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="shown" persistent max-width="500px">
+  <v-dialog v-model="shown" max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">{{ title }}</span>
@@ -20,10 +20,18 @@
                 <v-flex xs12>
                     <v-form v-model="dataIsCorrect" ref="form">
                         <v-flex xs12 v-for="field in editableFields" :key="field.name">
-                            <v-text-field @keyup.enter="edit"
-                                        :label="field.label"
-                                        v-model="entity[field.name]"
-                                        :rules="field.rules">
+                            <v-switch
+                                v-if="field.switch"
+                                :label="field.label"
+                                v-model="entity[field.name]">
+                            </v-switch>
+                            <!-- ... -->
+                            <v-text-field
+                                v-else
+                                @keyup.enter="edit"
+                                :label="field.label"
+                                v-model="entity[field.name]"
+                                :rules="field.rules">
                             </v-text-field>
                         </v-flex>
                     </v-form>

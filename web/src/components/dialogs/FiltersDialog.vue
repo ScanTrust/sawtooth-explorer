@@ -1,11 +1,11 @@
 <template>
-  <v-dialog v-model="shown" persistent max-width="500px">
+  <v-dialog v-model="shown" max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">Specify Filters</span>
       </v-card-title>
       <v-card-text>
-        <component v-if="currentFiltersComponent" :is="currentFiltersComponent" v-model="filters"></component>
+        <component v-if="filtersComponent" :is="filtersComponent" v-model="filters"></component>
         <h3 v-else class="unselectable color-grey">No filters :(</h3>
       </v-card-text>
       <v-card-actions>
@@ -48,23 +48,23 @@
       EventBus.$on(RESET_FILTERS, this.resetFilters)
     },
     computed: {
-      currentFiltersComponent () {
+      filtersComponent () {
         return routePathToFiltersComponent[this.$route.path]
       },
-      currentStoreNamespace () {
+      storeNamespace () {
         return routePathToStoreNamespace[this.$route.path]
       },
     },
     methods: {
       apply () {
-        this.$store.dispatch(this.currentStoreNamespace + UPDATE_FILTERS, this.filters)
+        this.$store.dispatch(this.storeNamespace + UPDATE_FILTERS, this.filters)
         this.close()
       },
       close () {
         this.$emit('close')
       },
       resetFilters () {
-        this.$store.dispatch(this.currentStoreNamespace + UPDATE_FILTERS, {})
+        this.$store.dispatch(this.storeNamespace + UPDATE_FILTERS, {})
       }
     },
     beforeDestroy () {
