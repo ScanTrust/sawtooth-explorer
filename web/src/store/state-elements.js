@@ -13,12 +13,13 @@ import {
     PROTO_NAMESPACE,
     DECODE,
 } from './constants'
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
-        [STATE_ELEMENTS]: JSON.parse(localStorage.getItem(STATE_ELEMENTS) || '[]'),
-        query: JSON.parse(localStorage.getItem(`${STATE_ELEMENTS_NAMESPACE}query`) || '{}'),
+        [STATE_ELEMENTS]: getLSItemSafe(STATE_ELEMENTS, []),
+        query: getLSItemSafe(`${STATE_ELEMENTS_NAMESPACE}query`, {}),
     },
     getters: {
         [STATE_ELEMENTS]: state => state[STATE_ELEMENTS],

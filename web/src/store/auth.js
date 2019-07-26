@@ -16,14 +16,15 @@ import {
     TRANSACTIONS_NAMESPACE,
 } from './constants'
 import router from '@/router';
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
         // Vue.storage is not there yet and VueLocalStorage (if imported) is not usable here for some reason
-        token: localStorage.getItem('userToken'),
-        username: localStorage.getItem('username'),
-        isAdmin: localStorage.getItem('isAdmin') === 'true' || false
+        token: getLSItemSafe('userToken'),
+        username: getLSItemSafe('username'),
+        isAdmin: getLSItemSafe('isAdmin', false),
     },
     getters: {
         isAuthenticated: state => !!state.token,

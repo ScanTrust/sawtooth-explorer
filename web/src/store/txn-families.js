@@ -16,12 +16,13 @@ import {
     TXN_FAMILIES,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
-        [TXN_FAMILIES]: JSON.parse(localStorage.getItem(TXN_FAMILIES) || '[]'),
-        query: JSON.parse(localStorage.getItem(`${TXN_FAMILIES_NAMESPACE}query`) || '{}'),
+        [TXN_FAMILIES]: getLSItemSafe(TXN_FAMILIES, []),
+        query: getLSItemSafe(`${TXN_FAMILIES_NAMESPACE}query`, {}),
     },
     getters: {
         [TXN_FAMILIES]: state => state[TXN_FAMILIES],

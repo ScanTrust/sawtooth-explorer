@@ -70,3 +70,16 @@ export default new Vuex.Store({
         settings,
     }
 })
+
+export function getLSItemSafe (key, fallbackValue) {
+    const value = localStorage.getItem(key)
+    if (value == null || value === 'undefined')
+        return fallbackValue
+    if (value === 'true') return true
+    if (value === 'false') return false
+    try {
+        return JSON.parse(value)
+    } catch {
+        return value
+    }
+}
