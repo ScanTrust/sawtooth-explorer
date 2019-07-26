@@ -5,6 +5,7 @@
             :rule="shownRule"
             :ruleIndex="shownRuleIndex"
             :shown="ruleDialogShown"
+            :txnFamilyPrefix="txnFamilyPrefix"
             @ruleChanged="completeAndReplaceRule"
             @close="ruleDialogShown = false">
         </manage-rule-dialog>
@@ -264,10 +265,13 @@
             ...mapGetters(TXN_FAMILIES_NAMESPACE, ['txnFamilies']),
             ...mapGetters(PROTO_NAMESPACE, [
                 'txnFamilyPrefixToSettings',
-                'protoMessages',
+                'txnFamilyPrefixToProtoMessages',
                 'txnFamilyPrefixToRulesConfig',
                 'txnFamilyPrefixToFileNames'
             ]),
+            protoMessages () {
+                return this.txnFamilyPrefixToProtoMessages[this.txnFamilyPrefix]
+            },
             encodingTypes () {
                 return Object.keys(ENCODING_TYPES)
             },
@@ -275,7 +279,10 @@
                 return this.txnFamilies.map(family => family.label)
             },
             txnFamilyPrefix () {
-                return this.txnFamilies.find(family => family.label == this.txnFamilyLabel).addressPrefix
+                const currentTxnFamily = this.txnFamilies.find(family => family.label == this.txnFamilyLabel)
+                if (!currentTxnFamily)
+                    return null
+                return currentTxnFamily.addressPrefix
             },
             rulesConfig () {
                 const res = this.txnFamilyPrefixToRulesConfig[this.txnFamilyPrefix]

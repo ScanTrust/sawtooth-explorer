@@ -9,6 +9,7 @@
                     v-if="modifiedRule"
                     :key="ruleIndex"
                     :rule="modifiedRule"
+                    :txnFamilyPrefix="txnFamilyPrefix"
                     @ruleChanged="modifyRule">
                 </rule-form>
             </v-card-text>
@@ -42,6 +43,10 @@
             ruleIndex: {
                 type: Number,
                 required: true,
+            },
+            txnFamilyPrefix: {
+                type: String,
+                required: true,
             }
         },
         methods: {
@@ -63,6 +68,10 @@
             this.modifyRule(this.rule)
         },
         watch: {
+            shown () {
+                if (!this.shown)
+                    this.modifiedRule = null
+            },
             rule () {
                 this.modifyRule(this.rule)
             }
