@@ -86,8 +86,8 @@ Message._create = messages => new Promise(resolve => {
     });
 });
 
-Message._removeAll = () => new Promise(resolve => {
-    Message.remove({}, (err) => {
+Message._remove = (query) => new Promise(resolve => {
+    Message.remove(query, (err) => {
         if (err) {
             console.log(err)
             throw err
@@ -96,24 +96,29 @@ Message._removeAll = () => new Promise(resolve => {
     })
 })
 
-Message._getNames = () => new Promise(resolve => {
-    Message.find({}, (err, msgs) => {
+Message._getTxnFamilyPrefixToMessageNames = () => new Promise(resolve => {
+    Message.find({}, (err, messages) => {
         if (err) {
             console.log(err)
             throw err
         }
-        resolve(msgs.map(m => m.name))
+        const txnFamilyPrefixToNames = {}
+        messages.forEach(message => {
+            txnFamilyPrefixToNames[message.txnFamilyPrefix] = txnFamilyPrefixToNames[message.txnFamilyPrefix] || []
+            txnFamilyPrefixToNames[message.txnFamilyPrefix].push(message.name)
+        })
+        resolve(txnFamilyPrefixToNames)
     })
 })
 
 Message._getTxnFamilyPrefixToRulesConfig = () => new Promise(resolve => {
-    Message.find({}, async (err, msgs) => {
+    Message.find({}, async (err, messages) => {
         if (err) {
             console.log(err)
             throw err
         }
         const txnFamilyPrefixToRulesConfig = {}
-        await Promise.all(msgs.map(async message => {
+        await Promise.all(messages.map(async message => {
             message = message.toJSON()
             const txnFamilyPrefix = message.txnFamilyPrefix
             let rulesConfig = txnFamilyPrefixToRulesConfig[txnFamilyPrefix]

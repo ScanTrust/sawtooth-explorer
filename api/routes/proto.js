@@ -6,18 +6,10 @@ const fileUpload = require('express-fileupload')
 const Message = require('@root/models/message')
 const TxnFamilySettings = require('@root/models/txnFamilySetting')
 const { isAdmin } = require('@root/authentication')
-const { saveAndReloadProtos, listDirProtoFiles, protosDirectoryPath, getMessages, getJSONDescriptor } = require('@root/lib/proto_processor')
+const { saveAndReloadProtos, getProtoDirStructure, protosDirectoryPath, getJSONDescriptor } = require('@root/lib/proto_processor')
 
 router.get('/', async function(req, res, next) {
-    const filePaths = await listDirProtoFiles(protosDirectoryPath)
-    const txnFamilyPrefixToFileNames = {}
-    filePaths.forEach(path => {
-        const splitted = path.split('/')
-        const txnFamilyPrefix = splitted[splitted.length - 2]
-        const fileName = splitted[splitted.length - 1]
-        txnFamilyPrefixToFileNames[txnFamilyPrefix] = txnFamilyPrefixToFileNames[txnFamilyPrefix] || []
-        txnFamilyPrefixToFileNames[txnFamilyPrefix].push(fileName)
-    })
+    const txnFamilyPrefixToFileNames = await getProtoDirStructure(protosDirectoryPath)
     const descriptorJSON = await getJSONDescriptor()
     const txnFamilyPrefixToRulesConfig = await Message._getTxnFamilyPrefixToRulesConfig()
     const txnFamilySettings = await TxnFamilySettings._get()
@@ -38,8 +30,8 @@ router.get('/', async function(req, res, next) {
 })
 
 router.get('/messages', async function(req, res, next) {
-    const messages = await Message._getNames()
-    res.status(200).json(messages)
+    const txnFamilyPrefixToMessageNames = await Message._getTxnFamilyPrefixToMessageNames()
+    res.status(200).json(txnFamilyPrefixToMessageNames)
 })
 
 router.use([isAdmin, fileUpload()])
@@ -51,22 +43,27 @@ router.post('/', async function(req, res, next) {
     const files = Object.values(req.files)
                         .filter(file => file.name.endsWith('.proto'))
     // saveAndReloadProtos saves them as files and generates and writes new JSON descriptor
-    // and also fills it's scope's variable protos, which one is able to get with getMessages()
+    // and also fills it's scope's variable txnFamilyPrefixToProtos and returns it
+    let protoMessages
     try {
-        await saveAndReloadProtos({txnFamilyPrefix, files})
+        const txnFamilyPrefixToProtos = await saveAndReloadProtos({txnFamilyPrefix, files})
+        protoMessages = Object.keys(txnFamilyPrefixToProtos[txnFamilyPrefix])
     } catch (error) {
         return next(error)
     }
-    const protoMessages = getMessages()
     const messages = protoMessages.map(protoName => ({
         name: protoName,
-        txnFamilyPrefix: protoName == "Setting" ? "000000" : txnFamilyPrefix
+        txnFamilyPrefix,
     }))
-    // saves Messages data to db
-    await Promise.all([
-        Message._removeAll().catch(err => next(err)),
-        Message._create(messages).catch(err => next(err))
-    ]).catch(err => next(err))
+    // rewrite Messages data to db
+    try {
+        await Promise.all([
+            Message._remove({txnFamilyPrefix}).catch(err => next(err)),
+            Message._create(messages).catch(err => next(err))
+        ])
+    } catch (error) {
+        return next(error)
+    }
     res.status(200).json({ok: true, message: 'protos_uploaded_and_processed_successfully'})
 })
 
