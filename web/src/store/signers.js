@@ -16,12 +16,13 @@ import {
     UPDATE_QUERY,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
-        [SIGNERS]: JSON.parse(localStorage.getItem(SIGNERS) || '[]'),
-        query: JSON.parse(localStorage.getItem(`${SIGNERS_NAMESPACE}query`) || '{}'),
+        [SIGNERS]: getLSItemSafe(SIGNERS, []),
+        query: getLSItemSafe(`${SIGNERS_NAMESPACE}query`, {}),
     },
     getters: {
         [SIGNERS]: state => state[SIGNERS],

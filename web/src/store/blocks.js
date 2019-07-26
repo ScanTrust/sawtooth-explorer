@@ -9,12 +9,13 @@ import {
     UPDATE_QUERY,
     BLOCKS,
 } from './constants'
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
-        blocks: JSON.parse(localStorage.getItem(BLOCKS) || '[]'),
-        query: JSON.parse(localStorage.getItem(`${BLOCKS_NAMESPACE}query`) || '{}'),
+        blocks: getLSItemSafe(BLOCKS, []),
+        query: getLSItemSafe(`${BLOCKS_NAMESPACE}query`, {}),
     },
     getters: {
         [BLOCKS]: state => state[BLOCKS],

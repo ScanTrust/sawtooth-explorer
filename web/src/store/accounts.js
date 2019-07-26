@@ -11,11 +11,12 @@ import {
     SNACKBAR,
 } from './constants'
 import { EventBus } from '@/lib/event-bus'
+import { getLSItemSafe } from './index'
 
 export default {
     namespaced: true,
     state: {
-        [ACCOUNTS]: JSON.parse(localStorage.getItem(ACCOUNTS) || '[]'),
+        [ACCOUNTS]: getLSItemSafe(ACCOUNTS, []),
     },
     getters: {
         [ACCOUNTS]: state => state[ACCOUNTS],
