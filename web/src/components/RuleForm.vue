@@ -122,8 +122,12 @@ export default {
     props: {
         rule: {
             type: Object,
-            required: true
+            required: true,
         },
+        txnFamilyPrefix: {
+            type: String,
+            required: true,
+        }
     },
     watch: {
         ruleType () {
@@ -181,7 +185,10 @@ export default {
         },
     },
     computed: {
-        ...mapGetters(PROTO_NAMESPACE, ['protoMessages']),
+        ...mapGetters(PROTO_NAMESPACE, ['txnFamilyPrefixToProtoMessages']),
+        protoMessages () {
+            return this.txnFamilyPrefixToProtoMessages[this.txnFamilyPrefix]
+        },
         ruleCodes: () => Object.keys(protoRulesConfig),
         ruleTypes: () => Object.values(protoRulesConfig),
         matchingMethod () {

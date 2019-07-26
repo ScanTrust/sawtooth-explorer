@@ -28,7 +28,7 @@
                 <v-switch
                     v-model="isRegistrationPublicModel"
                     @change="set('isRegistrationPublic', isRegistrationPublicModel)"
-                    label="Enable Public Registration">
+                    label="Public Registration">
                 </v-switch>
             </v-flex>
         </v-layout>
