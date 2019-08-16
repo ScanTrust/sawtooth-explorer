@@ -14,8 +14,19 @@ let txnFamilyPrefixToProtos = {}
 
 function getProtoDirStructure (dirPath) {
   return new Promise(async resolve => {
+    let files;
+    try {
+      files = fs.readdirSync(dirPath, { withFileTypes: true })      
+    } catch (error) {
+      if (error.code === 'ENOENT')
+        console.log(`${dirPath} does not exist`)
+      else
+        console.log({error})
+    }
+    if (!files)
+      return resolve({})
     const dirToFileNamesList = await Promise.all(
-      fs.readdirSync(dirPath, { withFileTypes: true })
+      files
         .filter(file => file.isDirectory())
         .map(dir => new Promise((resolve, reject) => {
           fs.readdir(path.join(dirPath, dir.name), function (err, dirFileNames) {
