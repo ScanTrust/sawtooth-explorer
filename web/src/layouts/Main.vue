@@ -65,15 +65,26 @@
   import DialogsManager from '@/components/dialogs/DialogsManager'
   import MenuItems from '@/components/MenuItems'
   import { EventBus } from '@/lib/event-bus'
-  import { AUTH_NAMESPACE, LOGOUT, SIGNERS_NAMESPACE, LOAD, SHOW_FILTERS, RESET_FILTERS, SNACKBAR } from '@/store/constants'
+  import {
+    AUTH_NAMESPACE,
+    MENU_NAMESPACE,
+    SIGNERS_NAMESPACE,
+    SHOW_FILTERS,
+    RESET_FILTERS,
+    SNACKBAR,
+    LOGOUT,
+    LOAD,
+  } from '@/store/constants'
   import {
     AUTH_PATH, ROOT_PATH,
     BLOCKS_PATH, SIGNERS_PATH,
     TXN_FAMILIES_PATH,
     TRANSACTIONS_PATH,
     STATE_PATH, SETTINGS_PATH,
-    PROTO_SETTINGS_PATH,
     ACCOUNTS_SETTINGS_PATH,
+    PROTO_SETTINGS_PATH,
+    MENU_SETTINGS_PATH,
+    CUSTOM_ENTITIES_PATH,
   } from '@/router/constants'
 
   export default {
@@ -82,7 +93,7 @@
       drawer: true,
       storeReady: false,
       isSettings: false,
-      menuItems: [
+      initialMenuItems: [
         {
           to: ROOT_PATH,
           iconName: 'public',
@@ -129,14 +140,19 @@
           label: 'Settings'
         }
       ],
+      menuItems: [],
       settingsMenuItems: [{
+        to: SETTINGS_PATH + '/' + ACCOUNTS_SETTINGS_PATH,
+        iconName: 'people',
+        label: 'Accounts'
+      }, {
         to: SETTINGS_PATH + '/' + PROTO_SETTINGS_PATH,
         iconName: 'file_copy',
         label: 'Protocol Buffers'
       }, {
-        to: SETTINGS_PATH + '/' + ACCOUNTS_SETTINGS_PATH,
-        iconName: 'people',
-        label: 'Accounts'
+        to: SETTINGS_PATH + '/' + MENU_SETTINGS_PATH,
+        iconName: 'menu',
+        label: 'Menu'
       }]
     }),
     created () {
@@ -152,12 +168,30 @@
       await this.$store.dispatch(LOAD)
       this.storeReady = true
     },
+    created () {
+      this.menuItems = [...this.initialMenuItems]
+      if (this.customMenuItems.length) {
+        const insertedItems = []
+        insertedItems.push({heading: 'CUSTOM'})
+        insertedItems.splice(1, 0, ...this.customMenuItems.map(item => ({
+          to: CUSTOM_ENTITIES_PATH + '/' + item.id,
+          iconName: 'dns',
+          label: item.label,
+        })))
+        insertedItems.push({divider: true})
+        const insertionIndex = this.menuItems.findIndex(item => item.divider) + 1
+        this.menuItems.splice(insertionIndex, 0, ...insertedItems)
+      }
+    },
     computed: {
       ...mapGetters(AUTH_NAMESPACE, ['username']),
+      ...mapGetters(MENU_NAMESPACE, ['customMenuItems']),
     },
     watch: {
-      $route (to, from){
+      $route (to, from) {
         this.isSettings = this.isSettingsRoute(to)
+      },
+      customMenuItems () {
       }
     },
     methods: {

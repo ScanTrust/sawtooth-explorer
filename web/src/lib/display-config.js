@@ -12,6 +12,9 @@ import {
     DECODING_RULE,
     ACCOUNT,
     ACCOUNTS_NAMESPACE,
+    CUSTOM_MENU_ITEM,
+    MENU_ITEM_DETAILS_FIELD,
+    CUSTOM_ENTITY,
 
     SIGNERS,
     TXN_FAMILIES,
@@ -19,8 +22,6 @@ import {
     TRANSACTIONS,
     STATE_ELEMENTS,
 
-    AUTH_FILTERS_COMPONENT,
-    ROOT_FILTERS_COMPONENT,
     BLOCKS_FILTERS_COMPONENT,
     SIGNERS_FILTERS_COMPONENT,
     TXN_FAMILIES_FILTERS_COMPONENT,
@@ -76,6 +77,17 @@ export const tilesConfig = {
     [ACCOUNT]: {
         avatar: 'hash',
         title: 'username'
+    },
+    [CUSTOM_MENU_ITEM]: {
+        title: 'label'
+    },
+    [MENU_ITEM_DETAILS_FIELD]: {
+        avatar: 'pathHash',
+        title: 'label'
+    },
+    [CUSTOM_ENTITY]: {
+        avatar: 'avatar',
+        title: 'label'
     }
 }
 
@@ -344,7 +356,7 @@ export const entityNameToAddConfig = {
             label: 'Is Admin',
             entityFieldName: 'isAdmin',
         }]
-    }
+    },
 }
     
 export const routePathToFiltersComponent = {
