@@ -1,5 +1,5 @@
 <template>
-    <v-dialog
+    <v-dialog persistent
         v-model="shown" max-width="650px"
         @keydown.right="showNextEntityDetails(1)"
         @keydown.left="showNextEntityDetails(-1)">
