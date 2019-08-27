@@ -42,6 +42,7 @@ let txnFamilies = require('./routes/txnFamilies');
 let proto = require('./routes/proto');
 let accounts = require('./routes/accounts');
 let settings = require('./routes/settings');
+let customMenuItems = require('./routes/customMenuItems');
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -73,6 +74,7 @@ app.use([
   '/proto',
   '/accounts',
   '/settings',
+  '/customMenuItems',
 ], authenticateJwt)
 
 app.use('/', routes);
@@ -85,6 +87,7 @@ app.use('/txnFamilies', txnFamilies);
 app.use('/proto', proto);
 app.use('/accounts', accounts);
 app.use('/settings', settings);
+app.use('/customMenuItems', customMenuItems);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -93,7 +96,7 @@ app.use(function(req, res, next) {
   next(err);
 });
 
-app.use([
+app.use(/* [
   '/auth',
   '/stateElements',
   '/transactions',
@@ -102,7 +105,9 @@ app.use([
   '/txnFamilies',
   '/proto',
   '/accounts',
-], function (err, req, res, next) {
+  '/settings',
+  '/customMenuItems'
+],  */function (err, req, res, next) {
   next(normalizeError(err))
 })
 
