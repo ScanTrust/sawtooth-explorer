@@ -40,6 +40,10 @@ export default {
             type: Array,
             default: []
         },
+        customMenuItems: {
+            type: Array,
+            default: []
+        },
         [`${TRANSACTIONS_NAMESPACE}query`]: {
             type: Object,
             default: {}
@@ -83,6 +87,10 @@ export default {
         isAdmin: {
             type: Boolean,
             default: false
+        },
+        customMenuItems: {
+            type: Array,
+            default: []
         },
     }
 }

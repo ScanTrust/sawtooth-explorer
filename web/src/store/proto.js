@@ -7,6 +7,7 @@ import {
     LOAD,
     UPLOAD,
     DECODE,
+    MAP_TO_PROTO_NAMES,
     LOGOUT,
     SNACKBAR,
     SAVE_RULES,
@@ -185,6 +186,15 @@ export default {
                     })
                 }
                 return resolve(decodedEntities)
+            })
+        },
+        [MAP_TO_PROTO_NAMES]: ({getters}, {stateElements}) => {
+            return new Promise(resolve => {
+                const { txnFamilyPrefixToRulesConfig } = getters
+                resolve(stateElements.map(stateEl => {
+                    const rulesConfig = txnFamilyPrefixToRulesConfig[stateEl.addressPrefix]
+                    return getProtoNameByRules(rulesConfig, stateEl)
+                }))
             })
         },
     }

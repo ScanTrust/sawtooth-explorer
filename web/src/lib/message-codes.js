@@ -25,4 +25,6 @@ export default {
     'modified_setting_successfully': 'Settings modified!',
     'user_modified_successfully': 'Account modified!',
     'added_account': 'Account added!',
+    'invalid_param_value': 'Invalid or missing field.',
+    'upserted_custom_menu_item': 'Upserted custom menu item!',
 }

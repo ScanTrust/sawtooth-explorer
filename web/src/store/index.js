@@ -10,8 +10,10 @@ import stateElements from './state-elements'
 import proto from './proto'
 import accounts from './accounts'
 import settings from './settings'
+import menu from './menu'
 
 import {
+    AUTH_NAMESPACE,
     SIGNERS_NAMESPACE,
     TXN_FAMILIES_NAMESPACE,
     BLOCKS_NAMESPACE,
@@ -19,6 +21,7 @@ import {
     TRANSACTIONS_NAMESPACE,
     PROTO_NAMESPACE,
     ACCOUNTS_NAMESPACE,
+    MENU_NAMESPACE,
     LOAD,
     FETCH_PROP_VALUE,
 } from './constants'
@@ -38,9 +41,10 @@ export default new Vuex.Store({
             dispatch(SIGNERS_NAMESPACE + LOAD)
             dispatch(TXN_FAMILIES_NAMESPACE + LOAD)
             dispatch(BLOCKS_NAMESPACE + LOAD)
-            if (getters['auth/isAdmin'])
+            if (getters[AUTH_NAMESPACE + 'isAdmin'])
                 dispatch(ACCOUNTS_NAMESPACE + LOAD)
-        },
+            dispatch(MENU_NAMESPACE + LOAD)
+            },
         [FETCH_PROP_VALUE] ({getters}, {searchedEntityStoreNameSpace, searchConfig, data}) {
             // Need to fetch prop-value from store
             // using this searchConfig and data
@@ -68,6 +72,7 @@ export default new Vuex.Store({
         proto,
         accounts,
         settings,
+        menu,
     }
 })
 

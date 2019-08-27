@@ -11,6 +11,8 @@ import TxnFamilies from '@/views/TxnFamilies.vue'
 import Settings from '@/views/Settings.vue'
 import ProtoSettings from '@/views/ProtoSettings.vue'
 import AccountsSettings from '@/views/AccountsSettings.vue'
+import MenuSettings from '@/views/MenuSettings.vue'
+import CustomEntities from '@/views/CustomEntities.vue'
 import store from '@/store'
 import { AUTH_NAMESPACE } from '@/store/constants'
 import {
@@ -22,8 +24,10 @@ import {
   TRANSACTIONS_PATH,
   STATE_PATH,
   SETTINGS_PATH,
-  PROTO_SETTINGS_PATH,
   ACCOUNTS_SETTINGS_PATH,
+  PROTO_SETTINGS_PATH,
+  MENU_SETTINGS_PATH,
+  CUSTOM_ENTITIES_PATH,
 } from './constants'
 
 Vue.use(Router)
@@ -59,29 +63,35 @@ export default new Router({
       children: [
         {
           path: BLOCKS_PATH,
-          component: Blocks
+          component: Blocks,
         }, {
           path: SIGNERS_PATH,
-          component: Signers
+          component: Signers,
         }, {
           path: TXN_FAMILIES_PATH,
-          component: TxnFamilies
+          component: TxnFamilies,
         }, {
           path: TRANSACTIONS_PATH,
-          component: Transactions
+          component: Transactions,
         }, {
           path: STATE_PATH,
-          component: StateElements
+          component: StateElements,
         }, {
           path: SETTINGS_PATH,
           component: Settings,
           children: [{
+            path: ACCOUNTS_SETTINGS_PATH,
+            component: AccountsSettings,
+          }, {
             path: PROTO_SETTINGS_PATH,
             component: ProtoSettings,
           }, {
-            path: ACCOUNTS_SETTINGS_PATH,
-            component: AccountsSettings,
-          }]
+            path: MENU_SETTINGS_PATH,
+            component: MenuSettings,
+          }, ]
+        }, {
+          path: `${CUSTOM_ENTITIES_PATH}/:customMenuItemId`,
+          component: CustomEntities,
         }
       ]
     }
