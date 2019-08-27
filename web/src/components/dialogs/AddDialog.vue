@@ -1,11 +1,10 @@
 <template>
-  <v-dialog v-model="shown" max-width="500px">
+  <v-dialog persistent v-model="shown" max-width="500px">
     <v-card>
       <v-card-title>
         <span class="headline">{{ title }}</span>
       </v-card-title>
       <v-card-text>
-        {{fields}}
         <v-container grid-list-md>
           <v-layout wrap>
             <v-flex xs12>
