@@ -16,7 +16,7 @@
     "express-fileupload": "^1.1.5",
     "express-validator": "^5.3.1",
     "http-errors": "~1.6.2",
-    "module-alias": "^2.2.0",
+    "module-alias": "^2.2.2",
     "mongoose": "^5.3.1",
     "mongoose-long": "^0.2.1",
     "morgan": "~1.9.0",
@@ -36,6 +36,6 @@
   },
   "devDependencies": {
     "http-proxy-middleware": "^0.19.1",
-    "nodemon": "^1.19.1"
+    "nodemon": "^1.19.4"
   }
 }
