@@ -14,7 +14,7 @@ import { getLSItemSafe } from './index'
 export default {
     namespaced: true,
     state: {
-        [SETTINGS]: getLSItemSafe(SETTINGS, {}),
+        [SETTINGS]: getLSItemSafe(SETTINGS, { isRegistrationPublic: true }),
     },
     getters: {
         [SETTINGS]: state => state[SETTINGS],
