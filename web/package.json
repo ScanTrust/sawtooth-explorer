@@ -13,7 +13,7 @@
     "core-js": "^2.6.5",
     "identicon.js": "^2.3.3",
     "moment": "^2.24.0",
-    "object-path": "^0.11.4",
+    "object-path": "^0.11.8",
     "protobufjs": "^6.8.8",
     "vue": "^2.6.10",
     "vue-json-viewer": "^2.2.0",
