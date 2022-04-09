@@ -12,7 +12,7 @@
     "cbor": "^4.1.5",
     "core-js": "^2.6.5",
     "identicon.js": "^2.3.3",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "object-path": "^0.11.4",
     "protobufjs": "^6.8.8",
     "vue": "^2.6.10",
