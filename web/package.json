@@ -14,7 +14,7 @@
     "identicon.js": "^2.3.3",
     "moment": "^2.24.0",
     "object-path": "^0.11.4",
-    "protobufjs": "^6.8.8",
+    "protobufjs": "^6.11.3",
     "vue": "^2.6.10",
     "vue-json-viewer": "^2.2.0",
     "vue-localstorage": "^0.6.2",
